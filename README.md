@@ -15,20 +15,20 @@ model.register()
 
 orca.run(['name'])
 
-# Additionally, models loaded from disk remain fully interactive objects that can be
+# If needed, the previously saved steps can be re-loaded into class instances that can be 
 # examined, copied, and edited.
 
 model2 = mm.get_model('name')
 ```
 
-Without ModelManager, the equivalent workflow would be to estimate a model, generate a config file for it, write a function in `models.py` to register it with Orca, and edit it by modifying the config file or creating a replacement.
+Prior to ModelManager, the equivalent workflow would be to (1) estimate a model, (2) generate a config file for it, (3) write a function in `models.py` to register it with Orca, and (4) edit it by modifying the config file or creating a replacement.
 
-ModelManager works directly with the current versions of [UrbanSim](https://github.com/udst/urbansim) and [Orca](https://github.com/udst/orca), and is fully interoperable with existing projects and model steps. 
+ModelManager works directly with the current versions of [UrbanSim](https://github.com/udst/urbansim) and [Orca](https://github.com/udst/orca), and is fully interoperable with existing UrbanSim projects and model steps. 
 
 
-### How it works
+## How it works
 
-ModelManager-compliant model step classes need to implement the following features:
+To work with ModelManager, model step classes need to implement the following features:
 
 1. Ability to save themselves to a dictionary (a `to_dict()` method)
 
@@ -38,26 +38,31 @@ ModelManager-compliant model step classes need to implement the following featur
 
 3. Ability to run themselves (e.g. a `run()` method)
 
-If you look in the `models` directory you'll see an OLS model step class called `RegressionStep` that adds these features to the existing UrbanSim regression model class. Similar code can be written for other kind of model steps!
+4. Ability to register themselves with ModelManager (a `register()` method), which is done through a combination of the first three features
 
-The `modelmanager.py` file implements centralized saving and loading of the dictionaries. 
+#### Where's the code?
 
-In an UrbanSim project directory, steps saved by ModelManager will show up in a file called `modelmanager_configs.yaml`.
+If you look in the [models](https://github.com/urbansim/modelmanager/tree/master/modelmanager/models) directory you'll see an OLS model step class called `RegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
+
+The [modelmanager.py](https://github.com/urbansim/modelmanager/blob/master/modelmanager/modelmanager.py) file handles centralized saving and loading of the dictionaries. 
+
+In an UrbanSim project directory, the steps saved by ModelManager will show up in a file called `modelmanager_configs.yaml`.
 
 
-### Installation
+## Installation
 
-```sh
+```
 git clone https://github.com/urbansim/modelmanager.git
-cd modelmanager; python setup.py develop
+cd modelmanager
+python setup.py develop
 ```
 
 
-### User's guide
+## User's guide
 
 Demo notebook: [REPM estimation.ipynb](https://github.com/urbansim/parcel_template_sandbox/blob/master/notebooks/REPM%20estimation.ipynb)
 
-Choose a directory for your project, ideally an existing UrbanSim project since ModelManager cannot yet load data into Orca on its own.
+Choose a directory to work in, ideally an existing UrbanSim project since ModelManager cannot yet load data into Orca on its own.
 
 For building and registering model steps, use: 
 
@@ -71,16 +76,35 @@ For loading or inspecting previously saved model steps, use:
 import modelmanager as mm
 ```
 
-For example, adding `import modelmanager` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in a given project directory.
+For example, adding `import modelmanager` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in the same project directory.
 
 Please refer to the ModelManager python files for details of the API. 
 
 
-### Developer's guide
+## Developer's guide
+
+Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, do the work there, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
 
 
-### Roadmap
+## Roadmap
 
-- tests
-- binary logit (Arezoo?)
-- multinomial logit (Max?)
+Here's a rough development wish list. See issues for more details, and feel free to claim an issue or open new ones.
+
+Infrastructure:
+- is there a sample data set following the parcel template schema guidelines, that we can use for testing and development?
+- integration with Jupyter Lab in the cloud
+- unit tests and continuous integration hooks
+- documentation, releases, distribution details (later on)
+
+Features:
+- `datamanager.py` to support loading data and generating computed columns using a similar workflow (Sam M) 
+- various TO DO items in the code
+- class for binary logit model steps (Arezoo?)
+- class for multinomial logit model steps (Max?)
+- class for network aggregation model steps
+- classes for transition steps and other loose ends
+- class for developer model if feasible
+
+Applications:
+- notebooks demonstrating how to set up each piece of a model
+
