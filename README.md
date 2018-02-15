@@ -28,23 +28,23 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 
 ## How it works
 
-To work with ModelManager, model step classes need to implement the following features:
+To work with ModelManager, a model step class needs to implement the following features:
 
-1. Ability to save themselves to a dictionary (a `to_dict()` method)
+1. Ability to save itself to a dictionary (a `to_dict()` method)
 
-2. Ability to rebuild themselves from a dictionary (a `from_dict()` [class method](http://stackabuse.com/pythons-classmethod-and-staticmethod-explained/))
+2. Ability to rebuild itself from a dictionary (a `from_dict()` [class method](http://stackabuse.com/pythons-classmethod-and-staticmethod-explained/))
 
 (ModelManager will handle conversion of the dictionaries to/from YAML or some other future storage format.)
 
-3. Ability to run themselves (e.g. a `run()` method)
+3. Ability to run itself (e.g. a `run()` method)
 
-4. Ability to register themselves with ModelManager (a `register()` method), which is done through a combination of the first three features
+4. Ability to register itself with ModelManager (a `register()` method) -- just a single line of code, implemented by combining the prior three capabilities
 
 #### Where's the code?
 
 If you look in the [models](https://github.com/urbansim/modelmanager/tree/master/modelmanager/models) directory you'll see an OLS model step class called `RegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
 
-The [modelmanager.py](https://github.com/urbansim/modelmanager/blob/master/modelmanager/modelmanager.py) file handles centralized saving and loading of the dictionaries. 
+The [modelmanager.py](https://github.com/urbansim/modelmanager/blob/master/modelmanager/modelmanager.py) file handles centralized saving and loading of the configs. 
 
 In an UrbanSim project directory, the steps saved by ModelManager will show up in a file called `modelmanager_configs.yaml`.
 
@@ -78,12 +78,12 @@ import modelmanager as mm
 
 For example, adding `import modelmanager` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in the same project directory.
 
-Please refer to the ModelManager python files for details of the API. 
+Please refer to the Python files for details of the current API. 
 
 
 ## Developer's guide
 
-Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, do the work there, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
+Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
 
 
 ## Roadmap
