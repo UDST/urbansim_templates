@@ -8,7 +8,7 @@ import orca
 from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
-from extensions import modelmanager as mm
+from .. import modelmanager as mm
 
 
 class RegressionStep(object):

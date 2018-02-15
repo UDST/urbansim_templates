@@ -90,13 +90,15 @@ Let's keep the master branch clean and runnable. To make fixes or add features, 
 
 Here's a rough development wish list. See issues for more details, and feel free to claim an issue or open new ones.
 
-Infrastructure:
+#### Infrastructure:
+
 - is there a sample data set following the parcel template schema guidelines, that we can use for testing and development?
 - integration with Jupyter Lab in the cloud
 - unit tests and continuous integration hooks
 - documentation, releases, distribution details (later on)
 
-Features:
+#### Features:
+
 - `datamanager.py` to support loading data and generating computed columns using a similar workflow (Sam M) 
 - various TO DO items in the code
 - class for binary logit model steps (Arezoo?)
@@ -105,6 +107,7 @@ Features:
 - classes for transition steps and other loose ends
 - class for developer model if feasible
 
-Applications:
+#### Applications:
+
 - notebooks demonstrating how to set up each piece of a model
 

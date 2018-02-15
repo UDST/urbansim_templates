@@ -3,7 +3,7 @@ from __future__ import print_function
 import orca
 from urbansim.utils import yamlio
 
-from models import RegressionStep
+from .models import RegressionStep
 
 
 _STEPS = {}  # master repository of steps
