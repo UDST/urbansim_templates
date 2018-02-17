@@ -30,7 +30,7 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 
 The goal with this is to make it easier to develop UrbanSim templates -- combinations of data schemas and model steps that we can use in multiple projects without requiring too much customization. 
 
-The ModelManager workflow will streamline rollout of a template: once the data is in place, we can estimate and validate model steps by walking through pre-filled Jupyter Notebooks. All the customizations will be saved into a managed YAML file, reducing the need for project-specific Python scripts.
+The ModelManager workflow will streamline rollout of a template: once the data is in place, we can estimate and validate model steps by walking through pre-filled Jupyter Notebooks. All the template customizations will be saved into a managed YAML file, reducing the need for project-specific Python scripts.
 
 There are side benefits as well: easier experimentation with model specifications, easier benchmarking and comparison of alternative model flows (including future hooks for auto-specification), and hopefully easier interoperability with GUI components.
 
