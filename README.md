@@ -26,6 +26,17 @@ Prior to ModelManager, the equivalent workflow would be to (1) estimate a model,
 ModelManager works directly with the current versions of [UrbanSim](https://github.com/udst/urbansim) and [Orca](https://github.com/udst/orca), and is fully interoperable with existing UrbanSim projects and model steps. 
 
 
+## Long-term vision
+
+The goal with this is to make it easier to develop UrbanSim templates -- combinations of data schemas and model steps that we can use in multiple projects without requiring too much customization. 
+
+The ModelManager workflow will streamline rollout of a template: once the data is in place, we can estimate and validate model steps by walking through pre-filled Jupyter Notebooks. All the customizations will be saved into a managed YAML file, reducing the need for project-specific Python scripts.
+
+There are side benefits as well: easier experimentation with model specifications, easier benchmarking and comparison of alternative model flows (including future hooks for auto-specification), and hopefully easier interoperability with GUI components.
+
+The tradeoff is that model steps from a template class will not be as flexible as general-purpose Orca steps. But since there is a lot of commonality among UrbanSim implementations, it should get us pretty far.
+
+
 ## How it works
 
 To work with ModelManager, a model step class needs to implement the following features:
@@ -45,6 +56,8 @@ To work with ModelManager, a model step class needs to implement the following f
 If you look in the [models](https://github.com/urbansim/modelmanager/tree/master/modelmanager/models) directory you'll see an OLS model step class called `RegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
 
 The [modelmanager.py](https://github.com/urbansim/modelmanager/blob/master/modelmanager/modelmanager.py) file handles centralized saving and loading of the configs. 
+
+#### Where are model steps saved to?
 
 In an UrbanSim project directory, the steps saved by ModelManager will show up in a file called `modelmanager_configs.yaml`.
 
