@@ -138,8 +138,8 @@ class RegressionStep(object):
         columns = self.model.columns_used()
         df = orca.merge_tables(target=tables[0], tables=tables, columns=columns)
         return df
-    
-    
+
+
     def fit(self):
         """
         Fit the model; save and report results.
