@@ -28,10 +28,15 @@ class MNLDiscreteChoiceStep(object):
     ----------
     model_expression : str
         Passed to urbansim.models.MNLDiscreteChoiceModel().
-    tables : str or list of str
-        Name(s) of Orca tables to draw data from. The first table is the primary one.
-        Any additional tables need to have merge relationships ("broadcasts") specified
-        so that they can be merged unambiguously onto the first table. 
+    sample_size : int
+        Number of alternatives to randomly sample from for each chooser.
+    choosers : str
+        Table describing the agents making choices, e.g. households.
+    alternatives : str or list of str
+        Table describing the things from which agents are choosing,
+            e.g. buildings, as well as any broadcast-able tables containing
+            relative attributes of the alternatives to be used in fitting
+            a choice model
     fit_filters : list of str, optional
         For estimation. Passed to urbansim.models.MNLDiscreteChoiceStep().
     out_fname : str, optional
@@ -166,7 +171,7 @@ class MNLDiscreteChoiceStep(object):
         results = self.model.fit(choosers, alternatives, current_choice)
         
         # TO DO: save the results table (as a string?) so we can display it again later
-        # print(results.summary())
+        print(self.model.report_fit())
         
         
     def run(self, choosers, alternatives):
