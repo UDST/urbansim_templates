@@ -4,6 +4,7 @@ import orca
 from urbansim.utils import yamlio
 
 from .models import RegressionStep
+from .models import MNLDiscreteChoiceStep
 
 
 _STEPS = {}  # master repository of steps
@@ -67,6 +68,12 @@ def add_step(d):
             return RegressionStep.run_from_dict(d)
     
         orca.add_step(d['name'], run_step)
+
+    if (d['type'] == 'MNLDiscreteChoiceStep'):
+        def run_step():
+            return MNLDiscreteChoiceStep.run_from_dict(d)
+    
+        orca.add_step(d['name'], run_step)
     
     
 def remove_step(name):
@@ -103,6 +110,8 @@ def get_step(name):
     """
     if (_STEPS[name]['type'] == 'RegressionStep'):
         return RegressionStep.from_dict(_STEPS[name])
+    elif (_STEPS[name]['type'] == 'MNLDiscreteChoiceStep'):
+        return MNLDiscreteChoiceStep.from_dict(_STEPS[name])
 
 
 def save_steps_to_disk():

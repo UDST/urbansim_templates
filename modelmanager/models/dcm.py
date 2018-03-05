@@ -5,16 +5,16 @@ import pandas as pd
 from datetime import datetime as dt
 
 import orca
-from urbansim.models import RegressionModel
+from urbansim.models import MNLDiscreteChoiceModel
 from urbansim.utils import yamlio
 
 from .. import modelmanager as mm
 
 
-class RegressionStep(object):
+class MNLDiscreteChoiceStep(object):
     """
-    A class for building regression model steps. This wraps urbansim.models.
-    RegressionModel() and adds a number of features:
+    A class for building discrete choice model steps. This wraps urbansim.models.
+    MNLDiscreteChoiceStep() and adds a number of features:
     
     1. Allows passing all parameters needed for the model step at once.
     2. Allows direct registration of the model step with Orca and the ModelManager.
@@ -27,41 +27,52 @@ class RegressionStep(object):
     Parameters
     ----------
     model_expression : str
-        Passed to urbansim.models.RegressionModel().
-    tables : str or list of str
-        Name(s) of Orca tables to draw data from. The first table is the primary one.
-        Any additional tables need to have merge relationships ("broadcasts") specified
-        so that they can be merged unambiguously onto the first table. 
+        Passed to urbansim.models.MNLDiscreteChoiceModel().
+    sample_size : int
+        Number of alternatives to randomly sample from for each chooser.
+    choosers : str
+        Table describing the agents making choices, e.g. households.
+    alternatives : str or list of str
+        Table describing the things from which agents are choosing,
+            e.g. buildings, as well as any broadcast-able tables containing
+            relative attributes of the alternatives to be used in fitting
+            a choice model
     fit_filters : list of str, optional
-        For estimation. Passed to urbansim.models.RegressionModel().
+        For estimation. Passed to urbansim.models.MNLDiscreteChoiceStep().
     out_fname : str, optional
         For prediction. Name of column to write fitted values to (in the primary table),
         if different from the dependent variable used for estimation.
     predict_filters : list of str, optional
-        For prediction. Passed to urbansim.models.RegressionModel().
+        For prediction. Passed to urbansim.models.MNLDiscreteChoiceStep().
     ytransform : callable, optional
-        For prediction. Passed to urbansim.models.RegressionModel().
+        For prediction. Passed to urbansim.models.MNLDiscreteChoiceStep().
     name : str, optional
         For ModelManager.
     tags : list of str, optional
         For ModelManager.
     
     """
-    def __init__(self, model_expression, tables, fit_filters=None, out_fname=None,    
-            predict_filters=None, ytransform=None, name=None, tags=[]):
+
+    def __init__(self, model_expression, sample_size, choosers, alternatives, 
+            alts_fit_filters=None, choosers_fit_filters=None, out_fname=None,
+            alts_predict_filters=None, choosers_predict_filters=None, name=None,
+            tags=[]):
         
         self.model_expression = model_expression
-        self.tables = tables
-        self.fit_filters = fit_filters
+        self.sample_size = sample_size
+        self.choosers = choosers
+        self.alternatives = alternatives
+        self.choosers_fit_filters = choosers_fit_filters
+        self.alts_fit_filters = alts_fit_filters
         self.out_fname = out_fname
-        self.predict_filters = predict_filters
-        self.ytransform = ytransform
+        self.choosers_predict_filters = choosers_predict_filters
+        self.alts_predict_filters = alts_predict_filters
 
-        # Placeholder for the RegressionModel object, which will be created either in the 
+        # Placeholder for the MNLDiscreteChoice object, which will be created either in the 
         # fit() method or in the from_dict() class method
         self.model = None
-        
-        self.type = 'RegressionStep'
+
+        self.type = 'MNLDiscreteChoiceStep'
         self.name = name
         self.tags = tags
         
@@ -75,11 +86,10 @@ class RegressionStep(object):
         # - Figure out what we can infer about requirements for the underlying data, and
         #   write an 'orca_test' assertion to confirm compliance.
 
-    
     @classmethod
     def from_dict(cls, d):
         """
-        Create a RegressionStep object from a saved dictionary representation. (The  
+        Create an MNLDiscreteChoiceStep object from a saved dictionary representation. (The  
         resulting object can run() but cannot be fit() again.)
         
         Parameters
@@ -88,20 +98,20 @@ class RegressionStep(object):
         
         Returns
         -------
-        RegressionStep
+        MNLDiscreteChoiceStep
         
         """
-        rs = cls(d['model_expression'], d['tables'], out_fname=d['out_fname'], 
-                name=d['name'], tags=d['tags'])
+        rs = cls(
+            d['model_expression'], sample_size=d['sample_size'], alternatives=d['alternatives'],
+            choosers=d['choosers'], out_fname=d['out_fname'], name=d['name'], tags=d['tags'])
         rs.type = d['type']
         
-        # Unpack the urbansim.models.RegressionModel() sub-object and resuscitate it
+        # Unpack the urbansim.models.MNLDiscreteChoiceModel() sub-object and resuscitate it
         model_config = yamlio.convert_to_yaml(d['model'], None)
-        rs.model = RegressionModel.from_yaml(model_config)
+        rs.model = MNLDiscreteChoiceModel.from_yaml(model_config)
         
         return rs
-        
-    
+
     def to_dict(self):
         """
         Create a dictionary representation of the object, for input/output.
@@ -116,13 +126,14 @@ class RegressionStep(object):
             'name': self.name,
             'tags': self.tags,
             'model_expression': self.model_expression,
-            'tables': self.tables,
+            'choosers': self.choosers,
+            'alternatives': self.alternatives,
+            'sample_size': self.sample_size,
             'out_fname': self.out_fname,
-            'model': self.model.to_dict()  # urbansim.models.RegressionModel() sub-object
+            'model': self.model.to_dict()  # urbansim.models.MNLDiscreteChoiceModel() sub-object
         }
         return d
-        
-        
+
     def get_data(self):
         """
         Generate a data table for estimation or prediction, from Orca table and column
@@ -134,28 +145,36 @@ class RegressionStep(object):
         
         """
         # TO DO: handle single table as well as list
-        tables = self.tables
+        tables = list(self.choosers) + self.alternatives
         columns = self.model.columns_used()
         df = orca.merge_tables(target=tables[0], tables=tables, columns=columns)
         return df
-
-
-    def fit(self):
+    
+    def fit(self, choosers, alternatives, current_choice):
         """
         Fit the model; save and report results.
-        
-        """
-        self.model = RegressionModel(model_expression=self.model_expression,
-                fit_filters=self.fit_filters, predict_filters=self.predict_filters,
-                ytransform=self.ytransform, name=self.name)
 
-        results = self.model.fit(self.get_data())
+        """
+        choosers = orca.get_table(choosers).to_frame()
+        alternatives = orca.merge_tables(
+            tables=alternatives, target=alternatives[0])
+
+        self.model = MNLDiscreteChoiceModel(
+            model_expression=self.model_expression,
+            sample_size=self.sample_size,
+            alts_fit_filters=self.alts_fit_filters,
+            choosers_fit_filters=self.choosers_fit_filters,
+            alts_predict_filters=self.alts_predict_filters,
+            choosers_predict_filters=self.choosers_predict_filters,
+            name=self.name)
+
+        results = self.model.fit(choosers, alternatives, current_choice)
         
         # TO DO: save the results table (as a string?) so we can display it again later
-        print(results.summary())
+        print(self.model.report_fit())
         
         
-    def run(self):
+    def run(self, choosers, alternatives):
         """
         Run the model step: calculate predicted values and use them to update a column.
         
@@ -165,25 +184,29 @@ class RegressionStep(object):
         #   write an 'orca_test' assertion to confirm compliance.
         # - If no destination column was specified, use name of dependent variable
 
-        values = self.model.predict(self.get_data())
+        choosers = orca.get_table(choosers).to_frame()
+        alternatives = orca.merge_tables(
+            tables=alternatives, target=alternatives[0])
+
+        values = self.model.predict(choosers, alternatives)
         print("Predicted " + str(len(values)) + " values")
         
-        dfw = orca.get_table(self.tables[0])
+        dfw = orca.get_table(self.choosers)
         dfw.update_col_from_series(self.out_fname, values, cast=True)
         
     
     @classmethod
     def run_from_dict(cls, d):
         """
-        Create and run a RegressionStep from a saved dictionary representation.
+        Create and run a MNLDiscreteChoiceStep from a saved dictionary representation.
         
         Parameters
         ----------
         d : dict
         
         """
-        rs = cls.from_dict(d)
-        rs.run()
+        rs = cls.from_dict(d=d)
+        rs.run(d['choosers'], d['alternatives'])
       
     
     def register(self):
@@ -194,8 +217,3 @@ class RegressionStep(object):
         """
         d = self.to_dict()
         mm.add_step(d)
-        
-        
-        
-        
-        
