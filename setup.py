@@ -16,6 +16,7 @@ setup(
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
+        'choicemodels >= 0.1.1'
         'orca >= 1.4',
         'urbansim >= 3.1.1'
     ]
