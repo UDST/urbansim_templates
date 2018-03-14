@@ -55,10 +55,27 @@ class TemplateStep(object):
         # Placeholder for the fitted model
         self.model = None
         
-        # It seems fine for users to access and change the above properties directly.
-        # If we want to test for acceptable values, a good way to do it would be with
-        # @property definitions.
 
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create an object instance from a saved dictionary representation. Child classes
+        will need to implement saving and loading of parameter esimates and any other
+        custom data. 
+        
+        Parameters
+        ----------
+        d : dict
+        
+        Returns
+        -------
+        TemplateStep or child class
+        
+        """
+        return cls(d['tables'], d['model_expression'], d['filters'], d['out_tables'],
+                d['cout_column'], d['out_transform'], d['out_filters'], d['name'],
+                d['tags'])
+    
     
     @property
     def tables(self):
@@ -108,8 +125,13 @@ class TemplateStep(object):
 
     def _get_data(self, task='fit'):
         """
-        Generate a data table for estimation or prediction, from Orca table and column
-        names. The results should not be stored, in case the data in Orca changes.
+        Generate a data table for estimation or prediction, relying on functionality from
+        Orca and UrbanSim.models.util. This should be performed immediately before 
+        estimation or prediction so that it reflects the current data state.
+        
+        The output includes only the necessary columns: those mentioned in the model
+        expression and filters, plus (it appears) the index of each merged table. Relevant 
+        filter queries are applied.
         
         Parameters
         ----------
@@ -127,9 +149,11 @@ class TemplateStep(object):
             tables = self.tables
             columns = util.columns_in_formula(self.model_expression) \
                     + util.columns_in_filters(self.filters)
+            
+            filters = self.filters
         
         elif (task == 'predict'):
-            if not (self.out_tables is None):
+            if self.out_tables is not None:
                 tables = self.out_tables
             else:
                 tables = self.tables
@@ -137,19 +161,41 @@ class TemplateStep(object):
             columns = util.columns_in_formula(self.model_expression) \
                     + util.columns_in_filters(self.out_filters)
             
-            if not (self.out_column is None):
+            if self.out_column is not None:
                 columns += [self.out_column]
+            
+            filters = self.out_filters
         
         if isinstance(tables, list):
             df = orca.merge_tables(target=tables[0], tables=tables, columns=columns)
         else:
             df = orca.get_table(tables).to_frame(columns)
             
+        df = util.apply_filter_query(df, filters)
         return df
 
 
+    def _generate_name(self):
+        """
+        Generate a name based on the class name and a timestamp.
+        
+        """
+        return self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
 
-
-
-
-
+    
+    def run(self):
+        """
+        Execute the model step. Child classes are required to implement this method.
+        
+        """
+        return
+        
+    
+    def register(self):
+        """
+        Register the model step with Orca and the ModelManager. This includes saving it
+        to disk so it will be automatically loaded in the future. 
+        
+        """
+        d = self.to_dict()
+        mm.add_step(d)
