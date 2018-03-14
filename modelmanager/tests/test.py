@@ -1,3 +1,5 @@
+# Run this from the root level of the repository
+
 from __future__ import print_function
 
 import numpy as np

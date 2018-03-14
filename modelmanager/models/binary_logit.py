@@ -37,11 +37,10 @@ class BinaryLogitStep(TemplateStep):
     
     """
     def __init__(self, tables, model_expression, filters=None, out_tables=None,
-                 out_column=None, out_transform=None, out_filters=None, name=None,
-                 tags=None):
+            out_column=None, out_transform=None, out_filters=None, name=None, tags=None):
         
-        TemplateStep.init(self, tables, model_expression, filters, out_tables, out_column,
-                          out_transform, out_filters, name, tags)
+        TemplateStep.__init__(self, tables, model_expression, filters, out_tables, 
+                out_column, out_transform, out_filters, name, tags)
         
         self.type = 'BinaryLogitStep'
         
