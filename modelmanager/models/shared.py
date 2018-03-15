@@ -51,17 +51,15 @@ class TemplateStep(object):
         self.tags = tags
         
         self.type = type(self).__name__  # class name
-        
-        # Placeholder for the fitted model
-        self.model = None
-        
+                
 
     @classmethod
     def from_dict(cls, d):
         """
-        Create an object instance from a saved dictionary representation. Child classes
-        will need to implement saving and loading of parameter esimates and any other
-        custom data. 
+        Create an object instance from a saved dictionary representation. 
+        
+        Child classes will need to override this method to implement loading of custom
+        parameters and estimation results. 
         
         Parameters
         ----------
@@ -69,12 +67,38 @@ class TemplateStep(object):
         
         Returns
         -------
-        TemplateStep or child class
+        TemplateStep
         
         """
         return cls(d['tables'], d['model_expression'], d['filters'], d['out_tables'],
-                d['cout_column'], d['out_transform'], d['out_filters'], d['name'],
+                d['out_column'], d['out_transform'], d['out_filters'], d['name'],
                 d['tags'])
+    
+    
+    def to_dict(self):
+        """
+        Create a dictionary representation of the object.
+        
+        Child classes will need to override this method to implement saving of custom
+        parameters and estimation results.
+        
+        Returns
+        -------
+        dict
+        
+        """
+        d = {
+            'type': self.type,
+            'name': self.name,
+            'tags': self.tags,
+            'tables': self.tables,
+            'model_expression': self.model_expression,
+            'filters': self.filters,
+            'out_tables': self.out_tables,
+            'out_column': self.out_column,
+            'out_transform': self.out_transform
+        }
+        return d
     
     
     @property
@@ -130,7 +154,7 @@ class TemplateStep(object):
         estimation or prediction so that it reflects the current data state.
         
         The output includes only the necessary columns: those mentioned in the model
-        expression and filters, plus (it appears) the index of each merged table. Relevant 
+        expression or filters, plus (it appears) the index of each merged table. Relevant 
         filter queries are applied.
         
         Parameters
@@ -175,9 +199,52 @@ class TemplateStep(object):
         return df
 
 
+    def _get_out_column(self):
+        """
+        Return name of the column to save data to. This is 'out_column' if it exsits,
+        otherwise the left-hand-side column name from the model expression.
+        
+        Returns
+        -------
+        str
+        
+        """
+        if self.out_column is not None:
+            return self.out_column
+        
+        else:
+            # TO DO - there must be a cleaner way to get LHS column name
+            return self.model_expression.split('~')[0].split(' ')[0]
+    
+    
+    def _get_out_table(self):
+        """
+        Return name of the table to save data to. This is 'out_tables' or its first 
+        element, if it exists, otherwise 'tables' or its first element.
+        
+        Returns
+        -------
+        str
+        
+        """
+        if self.out_tables is not None:
+            tables = self.out_tables
+        else:
+            tables = self.tables
+            
+        if isinstance(tables, str):
+            return tables
+        else:
+            return tables[0]
+        
+    
     def _generate_name(self):
         """
         Generate a name based on the class name and a timestamp.
+        
+        Returns
+        -------
+        str
         
         """
         return self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
