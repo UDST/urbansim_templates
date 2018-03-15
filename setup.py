@@ -1,12 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='modelmanager',
+    name='urbansim_templates',
     version='0.1.dev1',
     description='UrbanSim extension for managing model steps',
     author='UrbanSim Inc.',
     author_email='info@urbansim.com',
-    url='https://github.com/urbansim/modelmanager',
+    url='https://github.com/udst/urbansim_templates',
     classifiers=[
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
