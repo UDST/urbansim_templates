@@ -80,8 +80,8 @@ class BinaryLogitStep(TemplateStep):
         is 0 (int). Use keyword 'nothing' to leave values unchanged.
     
     name : str, optional
-        Name of the model step, passed to ModelManager. If none is provided, a name will
-        be generated based on when the `fit()` method is run.
+        Name of the model step, passed to ModelManager. If none is provided, a name is
+        generated each time the `fit()` method runs.
     
     tags : list of str, optional
         Tags, passed to ModelManager.
@@ -178,7 +178,8 @@ class BinaryLogitStep(TemplateStep):
 
         m = Logit.from_formula(data=self._get_data(), formula=self.model_expression)
         results = m.fit()
-        
+
+        self.name = self._generate_name()        
         self.summary_table = str(results.summary())
         print(self.summary_table)
         

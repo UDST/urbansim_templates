@@ -70,6 +70,7 @@ class TemplateStep(object):
         TemplateStep
         
         """
+        # Pass values from the dictionary to the __init__() method
         return cls(d['tables'], d['model_expression'], d['filters'], d['out_tables'],
                 d['out_column'], d['out_transform'], d['out_filters'], d['name'],
                 d['tags'])
@@ -240,14 +241,22 @@ class TemplateStep(object):
     
     def _generate_name(self):
         """
-        Generate a name based on the class name and a timestamp.
+        Generate a name for the class instance, based on its type and the current 
+        timestamp. But if a custom name has already been provided, return that instead. 
         
+        (We can't tell with certainty whether an existing name was auto-generated or
+        customized, and it doesn't seem worth keeping track. A name is judged to be custom
+        if it does not contain the class type.)
+                
         Returns
         -------
         str
         
         """
-        return self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
+        if (self.name is None) or (self.type in self.name):
+            return self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
+        else:
+            return self.name
 
     
     def run(self):
@@ -261,8 +270,12 @@ class TemplateStep(object):
     def register(self):
         """
         Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it will be automatically loaded in the future. 
+        to disk so it can be automatically loaded in the future. 
         
+        Registering a step will rewrite any previously saved step with the same name. 
+        (If a custom name has not been provided, one is generated each time the `fit()` 
+        method runs.)
+                
         """
         d = self.to_dict()
         mm.add_step(d)
