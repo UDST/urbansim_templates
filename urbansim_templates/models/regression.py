@@ -177,6 +177,8 @@ class RegressionStep(object):
         """
         Create and run a RegressionStep from a saved dictionary representation.
         
+        GET RID OF THIS? BETTER TO JUST DO THE TWO STEPS EXPLICITLY
+                        
         Parameters
         ----------
         d : dict

@@ -1,10 +1,10 @@
-# ModelManager
+# UrbanSim_Templates
 
 ModelManager is a small extension to UrbanSim that treats model steps as _objects you can interact with_, rather than just functions with inputs and outputs. This enables some nice workflows, such as registration of model steps without needing to add them to a `models.py` file:
 
 ```py
-import modelmanager as mm
-from modelmanager.models import RegressionStep
+from urbansim_templates import modelmanager as mm
+from urbansim_templates.models import RegressionStep
 
 model = RegressionStep('name', parameters)
 model.fit()
