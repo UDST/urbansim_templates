@@ -4,6 +4,7 @@ import orca
 from urbansim.utils import yamlio
 
 from .models import RegressionStep
+from .models import BinaryLogitStep
 from .models import MNLDiscreteChoiceStep
 
 
@@ -110,6 +111,8 @@ def get_step(name):
     """
     if (_STEPS[name]['type'] == 'RegressionStep'):
         return RegressionStep.from_dict(_STEPS[name])
+    elif (_STEPS[name]['type'] == 'BinaryLogitStep'):
+        return BinaryLogitStep.from_dict(_STEPS[name])
     elif (_STEPS[name]['type'] == 'MNLDiscreteChoiceStep'):
         return MNLDiscreteChoiceStep.from_dict(_STEPS[name])
 
