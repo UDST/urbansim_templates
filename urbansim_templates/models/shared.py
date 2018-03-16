@@ -97,7 +97,8 @@ class TemplateStep(object):
             'filters': self.filters,
             'out_tables': self.out_tables,
             'out_column': self.out_column,
-            'out_transform': self.out_transform
+            'out_transform': self.out_transform,
+            'out_filters': self.out_filters
         }
         return d
     

@@ -53,6 +53,17 @@ def add_step(d):
     d : dict
     
     """
+    # TO DO - A long-term architecture issue here is that in order to create a class
+    # object, we need to have already loaded the template definition. This is no problem
+    # as long as all the templates are defined within `urbansim_templates`, because we can 
+    # import them manually. But how should we handle it when we have arbitrary templates 
+    # defined elsewhere? One approach would be to include the template location as an 
+    # attribute in the yaml, and then import the necessary classes using `eval()`. But 
+    # this opens us up to arbitrary code execution, which may not be very safe for a web 
+    # service. Another approach would be to require users to import all the templates
+    # they'll be using, before importing `modelmanager`. Then we can look them up using
+    # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
+    
     if (d['name'] in _STEPS):
         remove_step(d['name'])
     
@@ -61,21 +72,13 @@ def add_step(d):
     if (len(_STARTUP_QUEUE) == 0):
         save_steps_to_disk()
 
-    # To register the model step with Orca, we need to pass it as a named callable. 
-    # This seems to be the way to do it, but it will need some careful testing.
-    
-    if (d['type'] == 'RegressionStep'):
-        def run_step():
-            return RegressionStep.run_from_dict(d)
-    
-        orca.add_step(d['name'], run_step)
-
-    if (d['type'] == 'MNLDiscreteChoiceStep'):
-        def run_step():
-            return MNLDiscreteChoiceStep.run_from_dict(d)
-    
-        orca.add_step(d['name'], run_step)
-    
+    # Create a callable that builds and runs the model step
+    def run_step():
+        return globals()[d['type']].from_dict(d).run()
+        
+    # Register it with Orca
+    orca.add_step(d['name'], run_step)
+        
     
 def remove_step(name):
     """

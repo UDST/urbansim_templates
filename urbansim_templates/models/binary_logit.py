@@ -58,7 +58,9 @@ class BinaryLogitStep(TemplateStep):
     
     out_tables : str or list of str, optional
         Name(s) of Orca tables to use for simulation. If not provided, the `tables` 
-        parameter will be used. Same guidance applies.
+        parameter will be used. Same guidance applies: the tables must be able to be 
+        merged unambiguously, and must include all columns used in the right-hand-side
+        of the model expression and in the `out_filters`.
     
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
@@ -94,7 +96,7 @@ class BinaryLogitStep(TemplateStep):
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=tables, model_expression=model_expression, 
                 filters=filters, out_tables=out_tables, out_column=out_column, 
-                out_filters=out_filters, name=name, tags=tags)
+                out_transform=None, out_filters=out_filters, name=name, tags=tags)
         
         # Custom parameters not in parent class
         self.out_value_true = out_value_true
