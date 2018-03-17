@@ -3,7 +3,7 @@ from __future__ import print_function
 import orca
 from urbansim.utils import yamlio
 
-from .models import RegressionStep
+from .models import OLSRegressionStep
 from .models import BinaryLogitStep
 from .models import MNLDiscreteChoiceStep
 
@@ -112,12 +112,7 @@ def get_step(name):
     RegressionStep or other
     
     """
-    if (_STEPS[name]['type'] == 'RegressionStep'):
-        return RegressionStep.from_dict(_STEPS[name])
-    elif (_STEPS[name]['type'] == 'BinaryLogitStep'):
-        return BinaryLogitStep.from_dict(_STEPS[name])
-    elif (_STEPS[name]['type'] == 'MNLDiscreteChoiceStep'):
-        return MNLDiscreteChoiceStep.from_dict(_STEPS[name])
+    return globals()[_STEPS[name]['type']].from_dict(_STEPS[name])
 
 
 def save_steps_to_disk():

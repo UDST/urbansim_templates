@@ -36,11 +36,13 @@ class TemplateStep(object):
 
     """
     def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
-            out_column=None, out_transform=None, out_filters=None, name=None, tags=None):
+            out_column=None, out_transform=None, out_filters=None, name=None, tags=[]):
         
         self.tables = tables
         self.model_expression = model_expression
         self.filters = filters
+        
+        # TO DO - out_transform might not belong here - is it only used for OLS?
         
         self.out_tables = out_tables
         self.out_column = out_column
