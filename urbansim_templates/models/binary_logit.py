@@ -14,8 +14,9 @@ from .. import modelmanager as mm
 
 class BinaryLogitStep(TemplateStep):
     """
-    A class for building binary logit model steps. The extends TemplateStep, where some
-    common functionality is defined.
+    A class for building binary logit model steps. This extends TemplateStep, where some
+    common functionality is defined. Estimation is handled by Statsmodels and simulation
+    is handled within this class.
     
     Expected usage:
     - create a model object
@@ -40,21 +41,19 @@ class BinaryLogitStep(TemplateStep):
         so that they can be merged unambiguously onto the first table. Among them, the 
         tables must contain all variables used in the model expression and filters. The
         left-hand-side variable should be in the primary table. The `tables` parameter is 
-        required to fit a model, but it does not have to be provided when the object is 
-        created.
+        required for fitting a model, but it does not have to be provided when the object 
+        is created.
 
     model_expression : str, optional
         Patsy formula containing both the left- and right-hand sides of the model
         expression: http://patsy.readthedocs.io/en/latest/formulas.html
-        This parameter is required to fit a model, but it does not have to be provided
-        when the object is created.
+        This parameter is required for fitting a model, but it does not have to be 
+        provided when the object is created.
 
     filters : str or list of str, optional
         Filters to apply to the data before fitting the model. These are passed to 
-        `pd.DataFrame.query()`:
-        https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.query.html
-        Filters are applied after any additional tables are merged onto the primary one.
-        Replaces the `fit_filters` argument in UrbanSim.
+        `pd.DataFrame.query()`. Filters are applied after any additional tables are merged 
+        onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
     
     out_tables : str or list of str, optional
         Name(s) of Orca tables to use for simulation. If not provided, the `tables` 
@@ -67,11 +66,12 @@ class BinaryLogitStep(TemplateStep):
         in the primary output table, it will be created. If not provided, the left-hand-
         side variable from the model expression will be used. Replaces the `out_fname` 
         argument in UrbanSim.
+        
+        # TO DO - auto-generation not yet working; column must exist in the primary table
     
     out_filters : str or list of str, optional
         Filters to apply to the data before simulation. If not provided, no filters will
-        be applied -- but use same guidance as for `filters`. Replace the 
-        `predict_filters` argument in UrbanSim.
+        be applied. Replaces the `predict_filters` argument in UrbanSim.
         
     out_value_true : numeric or str, optional
         Value to save to the output column corresponding to an affirmative choice. 
@@ -91,7 +91,7 @@ class BinaryLogitStep(TemplateStep):
     """
     def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
             out_column=None, out_filters=None, out_value_true=1, out_value_false=0, 
-            name=None, tags=None):
+            name=None, tags=[]):
         
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=tables, model_expression=model_expression, 
@@ -102,7 +102,7 @@ class BinaryLogitStep(TemplateStep):
         self.out_value_true = out_value_true
         self.out_value_false = out_value_false
         
-        # Placeholders for parameters generated in the fit() method
+        # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
         self.fitted_parameters = None
         
@@ -122,14 +122,16 @@ class BinaryLogitStep(TemplateStep):
         
         """
         # Pass values from the dictionary to the __init__() method
-        bls = cls(d['tables'], d['model_expression'], d['filters'], d['out_tables'],
-                d['out_column'], d['out_filters'], d['out_value_true'], 
-                d['out_value_false'], d['name'], d['tags'])
+        obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
+                filters=d['filters'], out_tables=d['out_tables'], 
+                out_column=d['out_column'], out_filters=d['out_filters'], 
+                out_value_true=d['out_value_true'], out_value_false=d['out_value_false'], 
+                name=d['name'], tags=d['tags'])
                 
-        bls.summary_table = d['summary_table']
-        bls.fitted_parameters = d['fitted_parameters']
+        obj.summary_table = d['summary_table']
+        obj.fitted_parameters = d['fitted_parameters']
         
-        return bls
+        return obj
     
     
     def to_dict(self):

@@ -4,9 +4,9 @@ ModelManager is a small extension to UrbanSim that treats model steps as _object
 
 ```py
 from urbansim_templates import modelmanager as mm
-from urbansim_templates.models import RegressionStep
+from urbansim_templates.models import OLSRegressionStep
 
-model = RegressionStep('name', parameters)
+model = OLSRegressionStep('name', parameters)
 model.fit()
 model.register()
 
@@ -53,9 +53,9 @@ To work with ModelManager, a model step class needs to implement the following f
 
 #### Where's the code?
 
-If you look in the [models](https://github.com/urbansim/modelmanager/tree/master/modelmanager/models) directory you'll see an OLS model step class called `RegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
+If you look in the [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models) directory you'll see an OLS model step class called `OLSRegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
 
-The [modelmanager.py](https://github.com/urbansim/modelmanager/blob/master/modelmanager/modelmanager.py) file handles centralized saving and loading of the configs. 
+The [modelmanager.py](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py) file handles centralized saving and loading of the configs. 
 
 #### Where are model steps saved to?
 
@@ -65,31 +65,31 @@ In an UrbanSim project directory, the steps saved by ModelManager will show up i
 ## Installation
 
 ```
-git clone https://github.com/urbansim/modelmanager.git
-cd modelmanager
+git clone https://github.com/udst/urbansim_templates.git
+cd urbansim_templates
 python setup.py develop
 ```
 
 
 ## User's guide
 
-Demo notebook: [REPM estimation.ipynb](https://github.com/urbansim/parcel_template_sandbox/blob/master/notebooks/REPM%20estimation.ipynb)
+Demo notebook: [Demo.ipynb](https://github.com/ual/urbansim_parcel_bayarea/blob/master/notebooks-sam/Demo.ipynb)
 
 Choose a directory to work in, ideally an existing UrbanSim project since ModelManager cannot yet load data into Orca on its own.
 
 For building and registering model steps, use: 
 
 ```py
-from modelmanager.models import RegressionStep
+from urbansim_templates.models import OLSRegressionStep
 ```
 
 For loading or inspecting previously saved model steps, use:
 
 ```py
-import modelmanager as mm
+from urbansim_templates import modelmanager as mm
 ```
 
-For example, adding `import modelmanager` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in the same project directory.
+For example, adding `import urbansim_templates` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in the same project directory.
 
 Please refer to the Python files for details of the current API. 
 
@@ -105,17 +105,14 @@ Here's a rough development wish list. See issues for more details, and feel free
 
 #### Infrastructure:
 
-- is there a sample data set following the parcel template schema guidelines, that we can use for testing and development?
 - integration with Jupyter Lab in the cloud
 - unit tests and continuous integration hooks
-- documentation, releases, distribution details (later on)
+- documentation, releases, distribution details
 
 #### Features:
 
 - `datamanager.py` to support loading data and generating computed columns using a similar workflow (Sam M) 
 - various TO DO items in the code
-- class for binary logit model steps (Arezoo?)
-- class for multinomial logit model steps (Max?)
 - class for network aggregation model steps
 - classes for transition steps and other loose ends
 - class for developer model if feasible
