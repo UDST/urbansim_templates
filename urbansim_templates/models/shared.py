@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 from datetime import datetime as dt
 
 import orca
@@ -170,14 +171,20 @@ class TemplateStep(object):
         DataFrame
         
         """
+        # TO DO - verify input data
         
-        # TO DO - verify tables and model_expression are not None
+        if isinstance(self.model_expression, str):
+            expr_cols = util.columns_in_formula(self.model_expression)
+        
+        # This is for PyLogit model expressions
+        elif isinstance(self.model_expression, OrderedDict):
+            # TO DO - check that this works in Python 2.7
+            expr_cols = [t[0] for t in list(self.model_expression.items()) \
+                         if t[0] is not 'intercept']
         
         if (task == 'fit'):
             tables = self.tables
-            columns = util.columns_in_formula(self.model_expression) \
-                    + util.columns_in_filters(self.filters)
-            
+            columns = expr_cols + util.columns_in_filters(self.filters)
             filters = self.filters
         
         elif (task == 'predict'):
@@ -186,9 +193,7 @@ class TemplateStep(object):
             else:
                 tables = self.tables
                 
-            columns = util.columns_in_formula(self.model_expression) \
-                    + util.columns_in_filters(self.out_filters)
-            
+            columns = expr_cols + util.columns_in_filters(self.out_filters)
             if self.out_column is not None:
                 columns += [self.out_column]
             
