@@ -181,6 +181,9 @@ class TemplateStep(object):
             # TO DO - check that this works in Python 2.7
             expr_cols = [t[0] for t in list(self.model_expression.items()) \
                          if t[0] is not 'intercept']
+            # TO DO - not very general, maybe we should just override the method
+            if self.choice_column is not None:
+                expr_cols += [self.choice_column]
         
         if (task == 'fit'):
             tables = self.tables
