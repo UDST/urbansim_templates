@@ -3,6 +3,7 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 
+from choicemodels import MultinomialLogit
 import orca
 
 from .shared import TemplateStep
@@ -41,13 +42,15 @@ class SmallMultinomialLogitStep(TemplateStep):
     Parameters
     ----------
     tables
+        index should be a unique id
+        reserved column names: '_obs_id', '_alt_id', '_chosen'
     model_expression : OrderedDict, optional
     model_labels : OrderedDict, optional
         NEW
-    choice_col : str
-        NEW
+    choice_column : str
+        NEW - should be ints
     initial_coefs : float, list, or 1D array, optional
-        NEW
+        NEW - needs to have length equal to number of parameters being estimated
     filters
     out_tables
     out_column
@@ -57,7 +60,7 @@ class SmallMultinomialLogitStep(TemplateStep):
     
     """
     def __init__(self, tables=None, model_expression=None, model_labels=None,
-            choice_col=None, initial_coefs=None, filters=None, out_tables=None,
+            choice_column=None, initial_coefs=None, filters=None, out_tables=None,
             out_column=None, out_filters=None, name=None, tags=[]):
         
         # Parent class can initialize the standard parameters
@@ -67,7 +70,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         
         # Custom parameters not in parent class
         self.model_labels = model_labels
-        self.choice_col = choice_col
+        self.choice_column = choice_column
         self.initial_coefs = initial_coefs
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
@@ -121,7 +124,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         # Add parameters not in parent class
         d.update({
             'model_labels': self.model_labels,
-            'choice_col': self.choice_col,
+            'choice_column': self.choice_column,
             'initial_coefs': self.initial_coefs,
             'summary_table': self.summary_table
         })
@@ -133,26 +136,58 @@ class SmallMultinomialLogitStep(TemplateStep):
     
     def fit(self):
         """
-        Fit the model; save an report results.
+        Fit the model; save and report results.
         
         """
-        # Get column names out of OrderedDict
-        
-        # Get data
-        
+        df = self._get_data()
+
+        # TO DO - add this conversion case to ChoiceModels; currently neither the PyLogit
+        # code nor the UrbanSim code can handle it
+       
         # Convert to long format
+        alts = df[self.choice_column].sort_values().unique().tolist()
+        obs = df.index.sort_values().unique().tolist()
+        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
+        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
+        long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
+        
+        # Add binary indicator of chosen rows
+        long_df['_chosen'] = 0
+        long_df.loc[long_df._alt_id == long_df[self.choice_column], '_chosen'] = 1
         
         # Pass to ChoiceModels
+        model = MultinomialLogit(data=long_df, observation_id_col='_obs_id',
+                                 choice_col='_chosen',
+                                 model_expression=self.model_expression,
+                                 model_labels=self.model_labels,
+                                 alternative_id_col='_alt_id',
+                                 initial_coefs=self.initial_coefs)
         
-        # Save the underlying model
+        results = model.fit()
+        print(results.report_fit())
+        self.model = results.get_raw_results()
 
 
     def run(self):
         """
         
         """
-        # Get predictions from underlying model
+        # TO DO - implement a local method overriding the parent class
+        df = self._get_data('predict')
+        # Convert to long format
+        alts = df[self.choice_column].sort_values().unique().tolist()
+        obs = df.index.sort_values().unique().tolist()
+        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
+        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
+        long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
+
+        # Get predictions from underlying model - this is an ndarray with the same length
+        # as the long-format df, representing choice probability for each alternative
+        probs = self.model.predict(long_df)
+        return probs
         
+        
+       
         # Save them to Orca
 
 
