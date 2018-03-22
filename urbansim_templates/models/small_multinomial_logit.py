@@ -32,18 +32,16 @@ class SmallMultinomialLogitStep(TemplateStep):
     - estimation and simulation use the ChoiceModels engine (formerly UrbanSim MNL)
     
     TO DO:
+    - Add support for specifying availability of alternatives
     - Add support for sampling weights
     - Add support for on-the-fly interaction calculations (e.g. distance)
-    - Add support for special columns in the choosers table for things like availability 
-      of alternatives or alternative-specific data values? Not sure we need this on top of
-      model expressions that vary by alternative. But we could implement it pretty easily
-      using PyLogit's `choicetools.convert_wide_to_long()`.
     
     Parameters
     ----------
     tables
         index should be a unique id
         reserved column names: '_obs_id', '_alt_id', '_chosen'
+        you can include alts table in the list and it should merge automatically
     model_expression : OrderedDict, optional
     model_labels : OrderedDict, optional
         NEW
@@ -134,28 +132,64 @@ class SmallMultinomialLogitStep(TemplateStep):
         # TO DO - store pickled version of the model
     
     
+    def _to_long(self, df, task='fit'):
+        """
+        Convert a data table from wide format to long format. Currently handles the case
+        where there are attributes of choosers but not of alternatives, and no 
+        availability or interaction terms. (This is not supported in the PyLogit 
+        conversion utility.)
+                
+        TO DO - for prediction, where do we get list of potential alternatives? Maybe 
+        model spec? And use this for estimation too, checking against data.
+        
+        TO DO - does this handle characteristics of alternatives?
+        
+        TO DO - move to ChoiceModels
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            One row per observation. The observation id should be in the index. Reserved 
+            column names: _obs_id, _alt_id, _chosen.
+        
+        task : 'fit' or 'predict', optional
+            If 'fit' (default), a column named '_chosen' is generated with binary 
+            indicator of observed choices.
+            
+        Returns
+        -------
+        pd.DataFrame
+            One row per alternative per observation. The observation is in '_obs_id'. The
+            alternative is in 'alt_id'. Table is sorted by observation and alternative.
+            If task is 'fit', a column named '_chosen' is generated with binary indicator
+            of observed choices. Remaining columns are retained from the input data.
+        
+        """
+        # Get lists of alts and obs
+        alts = df[self.choice_column].sort_values().unique().tolist()
+        obs = df.index.sort_values().unique().tolist()
+        
+        # Long df is cartesian product of alts and obs
+        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
+
+        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
+        long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
+        
+        if (task == 'fit'):
+            # Add binary indicator of chosen rows
+            long_df['_chosen'] = 0
+            long_df.loc[long_df._alt_id == long_df[self.choice_column], '_chosen'] = 1
+
+        return long_df    
+    
+    
     def fit(self):
         """
         Fit the model; save and report results.
         
         """
-        df = self._get_data()
-
-        # TO DO - add this conversion case to ChoiceModels; currently neither the PyLogit
-        # code nor the UrbanSim code can handle it
-       
-        # Convert to long format
-        alts = df[self.choice_column].sort_values().unique().tolist()
-        obs = df.index.sort_values().unique().tolist()
-        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
-        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
-        long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
+        long_df = self._to_long(self._get_data())
         
-        # Add binary indicator of chosen rows
-        long_df['_chosen'] = 0
-        long_df.loc[long_df._alt_id == long_df[self.choice_column], '_chosen'] = 1
-        
-        # Pass to ChoiceModels
         model = MultinomialLogit(data=long_df, observation_id_col='_obs_id',
                                  choice_col='_chosen',
                                  model_expression=self.model_expression,
