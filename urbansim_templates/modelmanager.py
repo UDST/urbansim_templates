@@ -11,6 +11,7 @@ from .models import MNLDiscreteChoiceStep
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
 
+# TO DO - does this work in Windows?
 DISK_STORE = 'configs/modelmanager_configs.yaml'
 
 
@@ -23,6 +24,23 @@ def main():
     if (len(_STEPS) == 0):
         load_steps_from_disk()
     
+
+def get_config_directory():
+    """
+    Return the config directory, for other services that need to interoperate.
+    
+    TO DO - better way to do this?
+    
+    Returns
+    -------
+    str
+        Includes a trailing backslash
+    
+    """
+    # TO DO - handle case where DISK_STORE is just a file name, no directory path
+    
+    return '/'.join(DISK_STORE.split('/')[:-1]) + '/'
+
 
 def list_steps():
     """
