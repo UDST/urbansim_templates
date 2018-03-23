@@ -139,12 +139,11 @@ class SmallMultinomialLogitStep(TemplateStep):
         availability or interaction terms. (This is not supported in the PyLogit 
         conversion utility.)
                 
-        TO DO - for prediction, where do we get list of potential alternatives? Maybe 
-        model spec? And use this for estimation too, checking against data.
-        
-        TO DO - does this handle characteristics of alternatives?
-        
-        TO DO - move to ChoiceModels
+        TO DO 
+        - for prediction, where do we get list of potential alternatives? Maybe 
+          model spec? And use this for estimation too, checking against data.
+        - does this handle characteristics of alternatives?
+        - move to ChoiceModels
         
         Parameters
         ----------
@@ -206,37 +205,41 @@ class SmallMultinomialLogitStep(TemplateStep):
     def run(self):
         """
         
-        """
-        # TO DO - replicate this in the notebook to figure out right code
+        Only alternatives included in the specification will be chosen among.
         
-        long_df = self._to_long(self._get_data('predict'), 'predict')
+        """
+        df = self._get_data('predict')
+        long_df = self._to_long(df, 'predict')
+        
+        # TO DO - how to get numalts?
+        # TO DO - do numbers need to be consecutive and begin from 0?
+                
+        num_obs = len(df)
+        num_alts = 4
         
         # Get predictions from underlying model - this is an ndarray with the same length
         # as the long-format df, representing choice probability for each alternative
         probs = self.model.predict(long_df)
         
-        # TO DO - how to get numalts?
-        
-        # Generate choices using an approach from UrbanSim MNL
+        # Generate choices by adapting an approach from UrbanSim MNL
         # https://github.com/UDST/choicemodels/blob/master/choicemodels/mnl.py#L578-L583
-        cumprobs = probs.cumsum()
-        rands = np.random.random(cumprobs.size() // 4)
-        choices = cumprobs.subtract(rands, inplace=True).firstpositive(axis=0)
+        cumprobs = probs.reshape((num_obs, num_alts)).cumsum(axis=1)
+        rands = np.random.random(num_obs)
+        diff = np.subtract(cumprobs.transpose(), rands).transpose()
         
-        # Save results to the class object
+        # The diff conversion replaces negative values with 0 and positive values with 1,
+        # so that argmax can return the position of the first positive value
+        choices = np.argmax((diff + 1.0).astype('i4'), axis=1)
+        
+        # Save results to the class object (via df to include indexes)
         long_df['_probability'] = probs
         self.probabilities = long_df[['_obs_id', '_alt_id', '_probability']]
-        long_df['_chosen'] = choices
-        self.choices = long_df[['_obs_id', '_alt_id', '_chosen']]
-        
-        
-        
+        df['_choices'] = choices
+        self.choices = df._choices
        
-        # Save them to Orca
-
-
-
-
-
+        # Save to Orca
+        colname = self._get_out_column()
+        tabname = self._get_out_table()
+        orca.get_table(tabname).update_col_from_series(colname, df._choices)
 
 
