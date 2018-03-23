@@ -132,6 +132,25 @@ class SmallMultinomialLogitStep(TemplateStep):
         # TO DO - store pickled version of the model
     
     
+    def _get_alts(self):
+        """
+        Get a unique, sorted list of alternative id's included in the model expression.
+        
+        Returns
+        -------
+        list
+        
+        """
+        ids = []
+        for k, v in self.model_expression.items():
+            if isinstance(v, list):
+                ids += v
+            else:
+                ids += [v]
+        
+        return np.unique(ids)
+    
+    
     def _to_long(self, df, task='fit'):
         """
         Convert a data table from wide format to long format. Currently handles the case
@@ -140,9 +159,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         conversion utility.)
                 
         TO DO 
-        - for prediction, where do we get list of potential alternatives? Maybe 
-          model spec? And use this for estimation too, checking against data.
-        - does this handle characteristics of alternatives?
+        - extend to handle characteristics of alternatives?
         - move to ChoiceModels
         
         Parameters
@@ -165,9 +182,9 @@ class SmallMultinomialLogitStep(TemplateStep):
             input data.
         
         """
-        # Get lists of alts and obs
-        alts = df[self.choice_column].sort_values().unique().tolist()
+        # Get lists of obs and alts
         obs = df.index.sort_values().unique().tolist()
+        alts = self._get_alts()
         
         # Long df is cartesian product of alts and obs
         obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
@@ -205,17 +222,14 @@ class SmallMultinomialLogitStep(TemplateStep):
     def run(self):
         """
         
-        Only alternatives included in the specification will be chosen among.
+        Only alternatives included in the specification can be chosen.
         
         """
         df = self._get_data('predict')
         long_df = self._to_long(df, 'predict')
         
-        # TO DO - how to get numalts?
-        # TO DO - do numbers need to be consecutive and begin from 0?
-                
         num_obs = len(df)
-        num_alts = 4
+        num_alts = len(self._get_alts())
         
         # Get predictions from underlying model - this is an ndarray with the same length
         # as the long-format df, representing choice probability for each alternative
@@ -229,8 +243,11 @@ class SmallMultinomialLogitStep(TemplateStep):
         
         # The diff conversion replaces negative values with 0 and positive values with 1,
         # so that argmax can return the position of the first positive value
-        choices = np.argmax((diff + 1.0).astype('i4'), axis=1)
+        choice_ix = np.argmax((diff + 1.0).astype('i4'), axis=1)
+        choice_ix_1d = choice_ix + (np.arange(num_obs) * num_alts)
         
+        choices = long_df._alt_id.values.take(choice_ix_1d)
+                
         # Save results to the class object (via df to include indexes)
         long_df['_probability'] = probs
         self.probabilities = long_df[['_obs_id', '_alt_id', '_probability']]
@@ -240,6 +257,6 @@ class SmallMultinomialLogitStep(TemplateStep):
         # Save to Orca
         colname = self._get_out_column()
         tabname = self._get_out_table()
-        orca.get_table(tabname).update_col_from_series(colname, df._choices)
+        orca.get_table(tabname).update_col_from_series(colname, df._choices, cast=True)
 
 

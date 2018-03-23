@@ -246,7 +246,7 @@ class BinaryLogitStep(TemplateStep):
         if self.out_value_false is not 'nothing':
             df.loc[df._choices==False, colname] = self.out_value_false
         
-        orca.get_table(tabname).update_col_from_series(colname, df[colname])
+        orca.get_table(tabname).update_col_from_series(colname, df[colname], cast=True)
         
         
         
