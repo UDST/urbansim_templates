@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+from collections import OrderedDict
+import pickle
+
 import numpy as np
 import pandas as pd
 
@@ -47,7 +50,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         NEW
     choice_column : str
         NEW - should be ints
-    initial_coefs : float, list, or 1D array, optional
+    initial_coefs : list of numerics, optional
         NEW - needs to have length equal to number of parameters being estimated
     filters
     out_tables
@@ -90,46 +93,83 @@ class SmallMultinomialLogitStep(TemplateStep):
         SmallMultinomialLogitStep
         
         """
-        # TO DO - FILL THIS IN
-        
         # Pass values from the dictionary to the __init__() method
-        obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
+        obj = cls(tables=d['tables'], model_expression=None, model_labels=None, 
+                choice_column=d['choice_column'], initial_coefs=d['initial_coefs'], 
                 filters=d['filters'], out_tables=d['out_tables'], 
-                out_column=d['out_column'], out_filters=d['out_filters'], 
-                out_value_true=d['out_value_true'], out_value_false=d['out_value_false'], 
-                name=d['name'], tags=d['tags'])
+                out_column=d['out_column'], out_filters=d['out_filters'], name=d['name'], 
+                tags=d['tags'])
+                
+        # Load non-strings and model fit parameters
+        # TO DO - handle non-existence cases more carefully than 'except pass'!
+        try:
+            k = d['model_expression_keys']
+            v = d['model_expression_values']
+            obj.model_expression = OrderedDict([(k[i], v[i]) for i in range(len(k))])
+        except:
+            pass
+
+        try:
+            k = d['model_label_keys']
+            v = d['model_label_values']
+            obj.model_labels = OrderedDict([(k[i], v[i]) for i in range(len(k))])
+        except:
+            pass
                 
         obj.summary_table = d['summary_table']
-        obj.fitted_parameters = d['fitted_parameters']
+        
+        try:
+            with open(mm.get_config_dir() + d['name'] + '.pkl', 'rb') as f:
+                obj.model = pickle.load(f)
+        except:
+            pass
         
         return obj
-        
-        # TO DO - check that this is re-creating OrderedDicts properly
-        # TO DO - read pickled version of the model
 
 
     def to_dict(self):
         """
         Create a dictionary representation of the object.
         
+        For the timebeing, this template class needs to store a pickled copy of a PyLogit
+        model to disk. This is performed whenever the `to_dict()` method is run.
+        
         Returns
         -------
         dict
         
         """
+        tmp_model_expression = self.model_expression
+        self.model_expression = None
+        
         d = TemplateStep.to_dict(self)
+        
+        # Can't store OrderedDicts in YAML, so convert them
+        if tmp_model_expression is not None:
+            d.update({
+                'model_expression_keys': [k for (k,v) in tmp_model_expression.items()],
+                'model_expression_values': [v for (k,v) in tmp_model_expression.items()],
+            })
+            
+        if self.model_labels is not None:
+            d.update({
+                'model_label_keys': [k for (k,v) in self.model_labels.items()],
+                'model_label_values': [v for (k,v) in self.model_labels.items()]
+            })
         
         # Add parameters not in parent class
         d.update({
-            'model_labels': self.model_labels,
+            'model_labels': None,
             'choice_column': self.choice_column,
             'initial_coefs': self.initial_coefs,
             'summary_table': self.summary_table
         })
-        return d
         
-        # TO DO - check that the OrderedDicts are stored properly
-        # TO DO - store pickled version of the model
+        # Store a pickled version of the PyLogit fitted model
+        if self.model is not None:
+            self.model.to_pickle(mm.get_config_dir() + self.name + '.pkl')
+        
+        return d
     
     
     def _get_alts(self):
@@ -143,12 +183,32 @@ class SmallMultinomialLogitStep(TemplateStep):
         """
         ids = []
         for k, v in self.model_expression.items():
-            if isinstance(v, list):
-                ids += v
-            else:
-                ids += [v]
+            # TO DO - check if PyLogit supports v being a non-list (single numeric) 
+            for elem in v:
+                if isinstance(elem, list):
+                    ids += elem
+                else:
+                    ids += [elem]
         
         return np.unique(ids)
+    
+    
+    def _get_param_count(self):
+        """
+        Count the number of parameters implied by the model expression.
+        
+        Returns
+        -------
+        int
+        
+        """
+        count = 0
+        for k, v in self.model_expression.items():
+            # TO DO - check if PyLogit supports v being a non-list (single numeric) 
+            for elem in v:
+                count += 1
+        
+        return count
     
     
     def _to_long(self, df, task='fit'):
@@ -207,6 +267,11 @@ class SmallMultinomialLogitStep(TemplateStep):
         """
         long_df = self._to_long(self._get_data())
         
+        # Set initial coefs to 0 if none provided
+        pc = self._get_param_count()
+        if (self.initial_coefs is None) or (len(self.initial_coefs) != pc):
+            self.initial_coefs = np.zeros(pc).tolist()
+
         model = MultinomialLogit(data=long_df, observation_id_col='_obs_id',
                                  choice_col='_chosen',
                                  model_expression=self.model_expression,
@@ -215,7 +280,12 @@ class SmallMultinomialLogitStep(TemplateStep):
                                  initial_coefs=self.initial_coefs)
         
         results = model.fit()
-        print(results.report_fit())
+
+        self.name = self._generate_name()        
+        self.summary_table = str(results.report_fit())
+        print(self.summary_table)
+
+        # We need the PyLogit fitted model object for prediction, so save it directly
         self.model = results.get_raw_results()
 
 

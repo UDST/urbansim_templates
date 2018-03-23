@@ -6,6 +6,7 @@ from urbansim.utils import yamlio
 from .models import OLSRegressionStep
 from .models import BinaryLogitStep
 from .models import MNLDiscreteChoiceStep
+from .models import SmallMultinomialLogitStep
 
 
 _STEPS = {}  # master repository of steps
@@ -25,7 +26,7 @@ def main():
         load_steps_from_disk()
     
 
-def get_config_directory():
+def get_config_dir():
     """
     Return the config directory, for other services that need to interoperate.
     
