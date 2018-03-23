@@ -229,7 +229,7 @@ class BinaryLogitStep(TemplateStep):
         rand = np.random.random(len(probs))
         choices = np.less(rand, probs)
         
-        # Save choices...
+        # Save results to the class object (via df to include index)
         df['_probs'] = probs
         self.probabilities = df._probs
         df['_choices'] = choices

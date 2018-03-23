@@ -150,7 +150,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         ----------
         df : pd.DataFrame
             One row per observation. The observation id should be in the index. Reserved 
-            column names: _obs_id, _alt_id, _chosen.
+            column names: '_obs_id', '_alt_id', '_chosen'.
         
         task : 'fit' or 'predict', optional
             If 'fit' (default), a column named '_chosen' is generated with binary 
@@ -159,10 +159,11 @@ class SmallMultinomialLogitStep(TemplateStep):
         Returns
         -------
         pd.DataFrame
-            One row per alternative per observation. The observation is in '_obs_id'. The
-            alternative is in 'alt_id'. Table is sorted by observation and alternative.
-            If task is 'fit', a column named '_chosen' is generated with binary indicator
-            of observed choices. Remaining columns are retained from the input data.
+            One row per combination of observation and alternative. The observation is in 
+            '_obs_id'. The alternative is in 'alt_id'. Table is sorted by observation and 
+            alternative. If task is 'fit', a column named '_chosen' is generated with 
+            binary indicator of observed choices. Remaining columns are retained from the 
+            input data.
         
         """
         # Get lists of alts and obs
@@ -206,19 +207,28 @@ class SmallMultinomialLogitStep(TemplateStep):
         """
         
         """
-        # TO DO - implement a local method overriding the parent class
-        df = self._get_data('predict')
-        # Convert to long format
-        alts = df[self.choice_column].sort_values().unique().tolist()
-        obs = df.index.sort_values().unique().tolist()
-        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
-        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
-        long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
-
+        # TO DO - replicate this in the notebook to figure out right code
+        
+        long_df = self._to_long(self._get_data('predict'), 'predict')
+        
         # Get predictions from underlying model - this is an ndarray with the same length
         # as the long-format df, representing choice probability for each alternative
         probs = self.model.predict(long_df)
-        return probs
+        
+        # TO DO - how to get numalts?
+        
+        # Generate choices using an approach from UrbanSim MNL
+        # https://github.com/UDST/choicemodels/blob/master/choicemodels/mnl.py#L578-L583
+        cumprobs = probs.cumsum()
+        rands = np.random.random(cumprobs.size() // 4)
+        choices = cumprobs.subtract(rands, inplace=True).firstpositive(axis=0)
+        
+        # Save results to the class object
+        long_df['_probability'] = probs
+        self.probabilities = long_df[['_obs_id', '_alt_id', '_probability']]
+        long_df['_chosen'] = choices
+        self.choices = long_df[['_obs_id', '_alt_id', '_chosen']]
+        
         
         
        
