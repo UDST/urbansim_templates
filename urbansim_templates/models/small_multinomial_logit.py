@@ -17,7 +17,7 @@ class SmallMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
     "small". Estimation is handled by ChoiceModels and PyLogit. Simulation is handled by
-    PyLogit and within this class. 
+    PyLogit (probabilities) and within this class (simulation draws). 
     
     Multinomial Logit models can involve a range of different specification and estimation
     mechanics. For now these are separated into two templates. What's the difference?
@@ -41,23 +41,61 @@ class SmallMultinomialLogitStep(TemplateStep):
     
     Parameters
     ----------
-    tables
-        index should be a unique id
-        reserved column names: '_obs_id', '_alt_id', '_chosen'
-        you can include alts table in the list and it should merge automatically
+    tables : str or list of str, optional
+        Name(s) of Orca tables to draw data from. The first table is the primary one. 
+        Any additional tables need to have merge relationships ("broadcasts") specified
+        so that they can be merged unambiguously onto the first table. Among them, the 
+        tables must contain all variables used in the model expression and filters. The
+        index of the primary table should be a unique ID. The `tables` parameter is 
+        required for fitting a model, but it does not have to be provided when the object 
+        is created. Reserved column names: '_obs_id', '_alt_id', '_chosen'.
+
     model_expression : OrderedDict, optional
+        PyLogit model expression. This parameter is required for fitting a model, but it 
+        does not have to be provided when the object is created.
+    
     model_labels : OrderedDict, optional
-        NEW
-    choice_column : str
-        NEW - should be ints
+        PyLogit model labels.
+        
+    choice_column : str, optional
+        Name of the column indicating observed choices, for model estimation. The column
+        should contain integers matching the alternatives in the model expression. This
+        parameter is required for fitting a model, but it does not have to be provided
+        when the object is created.
+        
     initial_coefs : list of numerics, optional
-        NEW - needs to have length equal to number of parameters being estimated
-    filters
-    out_tables
-    out_column
-    out_filters
-    name
-    tags
+        Starting values for the parameter estimation algorithm, passed to PyLogit. Length 
+        must be equal to the number of parameters being estimated. If this is not 
+        provided, zeros will be used.
+        
+    filters : str or list of str, optional
+        Filters to apply to the data before fitting the model. These are passed to 
+        `pd.DataFrame.query()`. Filters are applied after any additional tables are merged 
+        onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
+
+    out_tables : str or list of str, optional
+        Name(s) of Orca tables to use for simulation. If not provided, the `tables` 
+        parameter will be used. Same guidance applies: the tables must be able to be 
+        merged unambiguously, and must include all columns used in the model expression 
+        and in the `out_filters`.
+
+    out_column : str, optional
+        Name of the column to write simulated choices to. If it does not already exist
+        in the primary output table, it will be created. If not provided, the 
+        `choice_column` will be used. Replaces the `out_fname` argument in UrbanSim.
+        
+        # TO DO - auto-generation not yet working; column must exist in the primary table
+
+    out_filters : str or list of str, optional
+        Filters to apply to the data before simulation. If not provided, no filters will
+        be applied. Replaces the `predict_filters` argument in UrbanSim.
+        
+    name : str, optional
+        Name of the model step, passed to ModelManager. If none is provided, a name is
+        generated each time the `fit()` method runs.
+    
+    tags : list of str, optional
+        Tags, passed to ModelManager.
     
     """
     def __init__(self, tables=None, model_expression=None, model_labels=None,
@@ -262,7 +300,10 @@ class SmallMultinomialLogitStep(TemplateStep):
     
     def fit(self):
         """
-        Fit the model; save and report results.
+        Fit the model; save and report results. This uses PyLogit via ChoiceModels.
+        
+        The `fit()` method can be run as many times as desired. Results will not be saved 
+        with Orca or ModelManager until the `register()` method is run. 
         
         """
         long_df = self._to_long(self._get_data())
@@ -291,9 +332,19 @@ class SmallMultinomialLogitStep(TemplateStep):
 
     def run(self):
         """
+        Run the model step; calculate simulated choices and use them to update a column.
         
-        Only alternatives included in the specification can be chosen.
+        Alternatives that appear in the estimation data but not in the model expression
+        will not be available for simulation.
         
+        Predicted probabilities come from PyLogit. Monte Carlo simulation of choices is
+        performed directly. (This functionality will move to ChoiceModels.)
+        
+        The predicted probabilities and simulated choices are saved to the class object 
+        for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
+        type pd.Series) but are not persisted in the dictionary representation of the 
+        model step.
+                
         """
         df = self._get_data('predict')
         long_df = self._to_long(df, 'predict')
@@ -325,7 +376,11 @@ class SmallMultinomialLogitStep(TemplateStep):
         self.choices = df._choices
        
         # Save to Orca
-        colname = self._get_out_column()
+        if self.out_column is not None:
+            colname = self.out_column
+        else:
+            colname = self.choice_column
+
         tabname = self._get_out_table()
         orca.get_table(tabname).update_col_from_series(colname, df._choices, cast=True)
 
