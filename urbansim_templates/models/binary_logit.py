@@ -229,7 +229,7 @@ class BinaryLogitStep(TemplateStep):
         rand = np.random.random(len(probs))
         choices = np.less(rand, probs)
         
-        # Save choices...
+        # Save results to the class object (via df to include index)
         df['_probs'] = probs
         self.probabilities = df._probs
         df['_choices'] = choices
@@ -246,7 +246,7 @@ class BinaryLogitStep(TemplateStep):
         if self.out_value_false is not 'nothing':
             df.loc[df._choices==False, colname] = self.out_value_false
         
-        orca.get_table(tabname).update_col_from_series(colname, df[colname])
+        orca.get_table(tabname).update_col_from_series(colname, df[colname], cast=True)
         
         
         
