@@ -174,7 +174,7 @@ class MNLDiscreteChoiceStep(object):
         print(self.model.report_fit())
         
         
-    def run(self, choosers, alternatives):
+    def run(self):
         """
         Run the model step: calculate predicted values and use them to update a column.
         
@@ -184,9 +184,11 @@ class MNLDiscreteChoiceStep(object):
         #   write an 'orca_test' assertion to confirm compliance.
         # - If no destination column was specified, use name of dependent variable
 
-        choosers = orca.get_table(choosers).to_frame()
+        choosers = orca.get_table(self.choosers).to_frame()
+        
+        # TO DO - fix to work with single table of alternatives
         alternatives = orca.merge_tables(
-            tables=alternatives, target=alternatives[0])
+            tables=self.alternatives, target=self.alternatives[0])
 
         values = self.model.predict(choosers, alternatives)
         print("Predicted " + str(len(values)) + " values")
@@ -194,20 +196,6 @@ class MNLDiscreteChoiceStep(object):
         dfw = orca.get_table(self.choosers)
         dfw.update_col_from_series(self.out_fname, values, cast=True)
         
-    
-    @classmethod
-    def run_from_dict(cls, d):
-        """
-        Create and run a MNLDiscreteChoiceStep from a saved dictionary representation.
-        
-        Parameters
-        ----------
-        d : dict
-        
-        """
-        rs = cls.from_dict(d=d)
-        rs.run(d['choosers'], d['alternatives'])
-      
     
     def register(self):
         """
