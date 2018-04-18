@@ -8,10 +8,11 @@ import orca
 from urbansim.models import MNLDiscreteChoiceModel
 from urbansim.utils import yamlio
 
+from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
-class MNLDiscreteChoiceStep(object):
+class LargeMultinomialLogitStep(TemplateStep):
     """
     A class for building discrete choice model steps. This wraps urbansim.models.
     MNLDiscreteChoiceStep() and adds a number of features:
@@ -26,6 +27,22 @@ class MNLDiscreteChoiceStep(object):
     
     Parameters
     ----------
+    choosers - replaces tables
+    alternatives - replaces tables
+    model_expression
+    (NO model_labels)
+    choice_column
+    alt_sample_size - NEW
+    (NO initial_coefs)
+    filters
+    out_choosers - replaces out_tables 
+    out_alternatives - replaces out_tables
+    out_column
+    out_filters
+    name
+    tags
+    
+    
     model_expression : str
         Passed to urbansim.models.MNLDiscreteChoiceModel().
     sample_size : int
@@ -52,39 +69,27 @@ class MNLDiscreteChoiceStep(object):
         For ModelManager.
     
     """
-
-    def __init__(self, model_expression, sample_size, choosers, alternatives, 
-            alts_fit_filters=None, choosers_fit_filters=None, out_fname=None,
-            alts_predict_filters=None, choosers_predict_filters=None, name=None,
-            tags=[]):
+    def __init__(self, choosers=None, alternatives=None, model_expression=None, 
+            choice_column=None, alt_sample_size=None, filters=None, out_choosers=None,
+            out_alternatives=None, out_column=None, out_filters=None, name=None, tags=[]):
         
-        self.model_expression = model_expression
-        self.sample_size = sample_size
+        # Parent class can initialize the standard parameters
+        TemplateStep.__init__(self, tables=None, model_expression=model_expression, 
+                filters=filters, out_tables=out_tables, out_column=out_column, 
+                out_transform=None, out_filters=out_filters, name=name, tags=tags)
+
+        # Custom parameters not in parent class
         self.choosers = choosers
         self.alternatives = alternatives
-        self.choosers_fit_filters = choosers_fit_filters
-        self.alts_fit_filters = alts_fit_filters
-        self.out_fname = out_fname
-        self.choosers_predict_filters = choosers_predict_filters
-        self.alts_predict_filters = alts_predict_filters
-
-        # Placeholder for the MNLDiscreteChoice object, which will be created either in the 
-        # fit() method or in the from_dict() class method
+        self.choice_column = choice_column
+        self.alt_sample_size = alt_sample_size
+        self.out_choosers = out_choosers
+        self.out_alternatives = out_alternatives
+        
+        # Placeholders for model fit data, filled in by fit() or from_dict()
+        self.summary_table = None 
         self.model = None
 
-        self.type = 'MNLDiscreteChoiceStep'
-        self.name = name
-        self.tags = tags
-        
-        # Generate a name if none provided - TO DO: maybe this should be the time of 
-        # model fitting rather than the time the object is created, in order to be 
-        # consistent with the regression results that print?
-        if (self.name == None):
-            self.name = self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
-    
-        # TO DO: 
-        # - Figure out what we can infer about requirements for the underlying data, and
-        #   write an 'orca_test' assertion to confirm compliance.
 
     @classmethod
     def from_dict(cls, d):
