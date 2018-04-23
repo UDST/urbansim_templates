@@ -7,7 +7,7 @@ from datetime import datetime as dt
 import orca
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
-from urbansim.models import MNLDiscreteChoiceModel
+from urbansim.models import MNLDiscreteChoiceModel, util
 from urbansim.utils import yamlio
 
 from .shared import TemplateStep
@@ -36,11 +36,14 @@ class LargeMultinomialLogitStep(TemplateStep):
     choice_column
     alt_sample_size - NEW
     (NO initial_coefs)
-    filters
+    chooser_filters - replaces filters
+    alt_filters - replaces filters
+
     out_choosers - replaces out_tables 
     out_alternatives - replaces out_tables
     out_column
-    out_filters
+    out_chooser_filters - replace out_filters
+    out_alt_filters - replaces out_filters
     name
     tags
     
@@ -72,94 +75,146 @@ class LargeMultinomialLogitStep(TemplateStep):
     
     """
     def __init__(self, choosers=None, alternatives=None, model_expression=None, 
-            choice_column=None, alt_sample_size=None, filters=None, out_choosers=None,
-            out_alternatives=None, out_column=None, out_filters=None, name=None, tags=[]):
+            choice_column=None, alt_sample_size=None, chooser_filters=None, 
+            alt_filters=None, out_choosers=None, out_alternatives=None, out_column=None, 
+            out_chooser_filters=None, out_alt_filters=None, name=None, tags=[]):
         
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=None, model_expression=model_expression, 
-                filters=filters, out_tables=out_tables, out_column=out_column, 
-                out_transform=None, out_filters=out_filters, name=name, tags=tags)
+                filters=None, out_tables=None, out_column=out_column, out_transform=None, 
+                out_filters=None, name=name, tags=tags)
 
         # Custom parameters not in parent class
         self.choosers = choosers
         self.alternatives = alternatives
         self.choice_column = choice_column
         self.alt_sample_size = alt_sample_size
+        self.chooser_filters = chooser_filters
+        self.alt_filters = alt_filters
         self.out_choosers = out_choosers
         self.out_alternatives = out_alternatives
+        self.out_chooser_filters = out_chooser_filters
+        self.out_alt_filters = out_alt_filters
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
         self.model = None
 
 
-    @classmethod
-    def from_dict(cls, d):
-        """
-        Create an MNLDiscreteChoiceStep object from a saved dictionary representation. (The  
-        resulting object can run() but cannot be fit() again.)
-        
-        Parameters
-        ----------
-        d : dict
-        
-        Returns
-        -------
-        MNLDiscreteChoiceStep
-        
-        """
-        rs = cls(
-            d['model_expression'], sample_size=d['sample_size'], alternatives=d['alternatives'],
-            choosers=d['choosers'], out_fname=d['out_fname'], name=d['name'], tags=d['tags'])
-        rs.type = d['type']
-        
-        # Unpack the urbansim.models.MNLDiscreteChoiceModel() sub-object and resuscitate it
-        model_config = yamlio.convert_to_yaml(d['model'], None)
-        rs.model = MNLDiscreteChoiceModel.from_yaml(model_config)
-        
-        return rs
-
-    def to_dict(self):
-        """
-        Create a dictionary representation of the object, for input/output.
-        
-        Returns
-        -------
-        dictionary
-        
-        """
-        d = {
-            'type': self.type,
-            'name': self.name,
-            'tags': self.tags,
-            'model_expression': self.model_expression,
-            'choosers': self.choosers,
-            'alternatives': self.alternatives,
-            'sample_size': self.sample_size,
-            'out_fname': self.out_fname,
-            'model': self.model.to_dict()  # urbansim.models.MNLDiscreteChoiceModel() sub-object
-        }
-        return d
+#     @classmethod
+#     def from_dict(cls, d):
+#         """
+#         Create an MNLDiscreteChoiceStep object from a saved dictionary representation. (The  
+#         resulting object can run() but cannot be fit() again.)
+#         
+#         Parameters
+#         ----------
+#         d : dict
+#         
+#         Returns
+#         -------
+#         MNLDiscreteChoiceStep
+#         
+#         """
+#         rs = cls(
+#             d['model_expression'], sample_size=d['sample_size'], alternatives=d['alternatives'],
+#             choosers=d['choosers'], out_fname=d['out_fname'], name=d['name'], tags=d['tags'])
+#         rs.type = d['type']
+#         
+#         # Unpack the urbansim.models.MNLDiscreteChoiceModel() sub-object and resuscitate it
+#         model_config = yamlio.convert_to_yaml(d['model'], None)
+#         rs.model = MNLDiscreteChoiceModel.from_yaml(model_config)
+#         
+#         return rs
+# 
+#     def to_dict(self):
+#         """
+#         Create a dictionary representation of the object, for input/output.
+#         
+#         Returns
+#         -------
+#         dictionary
+#         
+#         """
+#         d = {
+#             'type': self.type,
+#             'name': self.name,
+#             'tags': self.tags,
+#             'model_expression': self.model_expression,
+#             'choosers': self.choosers,
+#             'alternatives': self.alternatives,
+#             'sample_size': self.sample_size,
+#             'out_fname': self.out_fname,
+#             'model': self.model.to_dict()  # urbansim.models.MNLDiscreteChoiceModel() sub-object
+#         }
+#         return d
 
     
-    def get_choosers_data(self):
+    # TO DO - same thing for out_choosers, out_alternatives
+    @property
+    def choosers(self):
+        return self.__choosers
+        
+
+    @choosers.setter
+    def choosers(self, choosers):
         """
-        Return the 
+        Normalize storage of the 'choosers' property. TO DO - add type validation?
+        
+        """
+        self.__choosers = choosers
+        
+        if isinstance(choosers, list):
+            # Normalize [] to None
+            if len(choosers) == 0:
+                self.__choosers = None
+            
+            # Normalize [str] to str
+            if len(choosers) == 1:
+                self.__choosers = choosers[0]
+            
+    
+    @property
+    def alternatives(self):
+        return self.__alternatives
+        
+
+    @alternatives.setter
+    def alternatives(self, alternatives):
+        """
+        Normalize storage of the 'alternatives' property. TO DO - add type validation?
+        
+        """
+        self.__alternatives = alternatives
+        
+        if isinstance(alternatives, list):
+            # Normalize [] to None
+            if len(alternatives) == 0:
+                self.__alternatives = None
+            
+            # Normalize [str] to str
+            if len(alternatives) == 1:
+                self.__alternatives = alternatives[0]
+            
+    
+    def _get_choosers_data(self):
+        """
+        Return the ..
         
         """
         # TO DO - filter for just the columns we need
-        
+
         if isinstance(self.choosers, list):
             df = orca.merge_tables(target=self.choosers[0], tables=self.choosers)
         else:
             df = orca.get_table(self.choosers).to_frame()
         
-        df = util.apply_filter_query(df, self.filters)
+        df = util.apply_filter_query(df, self.chooser_filters)
         return df
         
     
     
-    def get_alternatives_data(self):
+    def _get_alternatives_data(self):
         """
         Return the 
         
@@ -171,11 +226,11 @@ class LargeMultinomialLogitStep(TemplateStep):
         else:
             df = orca.get_table(self.alternatives).to_frame()
         
-        df = util.apply_filter_query(df, self.filters)
+        df = util.apply_filter_query(df, self.alt_filters)
         return df
         
     
-    def get_alt_sample_size(self):
+    def _get_alt_sample_size(self):
         """
         Return the sample size for alternatives. If none specified, use one less than the
         number of alternatives. (TO DO - this is because the table-merging codebase
@@ -198,11 +253,11 @@ class LargeMultinomialLogitStep(TemplateStep):
         # Put together data
         
         # TO DO - update choicemodels to accept a column name for chosen alts
-        alternatives = self._get_alternatives_data()
-        chosen = alternatives[self.chosen_alternatives]
+        observations = self._get_choosers_data()
+        chosen = observations[self.choice_column]
         
-        merged = MergedChoiceTable(observations = self._get_choosers_data(),
-                                   alternatives = alternatives,
+        merged = MergedChoiceTable(observations = observations,
+                                   alternatives = self._get_alternatives_data(),
                                    chosen_alternatives = chosen,
                                    sample_size = self._get_alt_sample_size())
         
@@ -217,28 +272,28 @@ class LargeMultinomialLogitStep(TemplateStep):
         
     
     
-    def fit(self, choosers, alternatives, current_choice):
-        """
-        Fit the model; save and report results.
-
-        """
-        choosers = orca.get_table(choosers).to_frame()
-        alternatives = orca.merge_tables(
-            tables=alternatives, target=alternatives[0])
-
-        self.model = MNLDiscreteChoiceModel(
-            model_expression=self.model_expression,
-            sample_size=self.sample_size,
-            alts_fit_filters=self.alts_fit_filters,
-            choosers_fit_filters=self.choosers_fit_filters,
-            alts_predict_filters=self.alts_predict_filters,
-            choosers_predict_filters=self.choosers_predict_filters,
-            name=self.name)
-
-        results = self.model.fit(choosers, alternatives, current_choice)
-        
-        # TO DO: save the results table (as a string?) so we can display it again later
-        print(self.model.report_fit())
+#     def fit(self, choosers, alternatives, current_choice):
+#         """
+#         Fit the model; save and report results.
+# 
+#         """
+#         choosers = orca.get_table(choosers).to_frame()
+#         alternatives = orca.merge_tables(
+#             tables=alternatives, target=alternatives[0])
+# 
+#         self.model = MNLDiscreteChoiceModel(
+#             model_expression=self.model_expression,
+#             sample_size=self.sample_size,
+#             alts_fit_filters=self.alts_fit_filters,
+#             choosers_fit_filters=self.choosers_fit_filters,
+#             alts_predict_filters=self.alts_predict_filters,
+#             choosers_predict_filters=self.choosers_predict_filters,
+#             name=self.name)
+# 
+#         results = self.model.fit(choosers, alternatives, current_choice)
+#         
+#         # TO DO: save the results table (as a string?) so we can display it again later
+#         print(self.model.report_fit())
         
         
     def run(self):

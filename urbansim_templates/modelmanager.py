@@ -5,7 +5,7 @@ from urbansim.utils import yamlio
 
 from .models import OLSRegressionStep
 from .models import BinaryLogitStep
-from .models import MNLDiscreteChoiceStep
+from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
 
