@@ -98,58 +98,70 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
-        self.model = None
+        self.fitted_parameters = None
 
 
-#     @classmethod
-#     def from_dict(cls, d):
-#         """
-#         Create an MNLDiscreteChoiceStep object from a saved dictionary representation. (The  
-#         resulting object can run() but cannot be fit() again.)
-#         
-#         Parameters
-#         ----------
-#         d : dict
-#         
-#         Returns
-#         -------
-#         MNLDiscreteChoiceStep
-#         
-#         """
-#         rs = cls(
-#             d['model_expression'], sample_size=d['sample_size'], alternatives=d['alternatives'],
-#             choosers=d['choosers'], out_fname=d['out_fname'], name=d['name'], tags=d['tags'])
-#         rs.type = d['type']
-#         
-#         # Unpack the urbansim.models.MNLDiscreteChoiceModel() sub-object and resuscitate it
-#         model_config = yamlio.convert_to_yaml(d['model'], None)
-#         rs.model = MNLDiscreteChoiceModel.from_yaml(model_config)
-#         
-#         return rs
-# 
-#     def to_dict(self):
-#         """
-#         Create a dictionary representation of the object, for input/output.
-#         
-#         Returns
-#         -------
-#         dictionary
-#         
-#         """
-#         d = {
-#             'type': self.type,
-#             'name': self.name,
-#             'tags': self.tags,
-#             'model_expression': self.model_expression,
-#             'choosers': self.choosers,
-#             'alternatives': self.alternatives,
-#             'sample_size': self.sample_size,
-#             'out_fname': self.out_fname,
-#             'model': self.model.to_dict()  # urbansim.models.MNLDiscreteChoiceModel() sub-object
-#         }
-#         return d
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create an object instance from a saved dictionary representation.
+        
+        Parameters
+        ----------
+        d : dict
+        
+        Returns
+        -------
+        LargeMultinomialLogitStep
+        
+        """
+        # Pass values from the dictionary to the __init__() method
+        obj = cls(choosers=d['choosers'], alternatives=d['alternatives'], 
+            model_expression=d['model_expression'], choice_column=d['choice_column'], 
+            alt_sample_size=d['alt_sample_size'], chooser_filters=d['chooser_filters'], 
+            alt_filters=d['alt_filters'], out_choosers=d['out_choosers'], 
+            out_alternatives=d['out_alternatives'], out_column=d['out_column'], 
+            out_chooser_filters=d['out_chooser_filters'], 
+            out_alt_filters=d['out_alt_filters'], name=d['name'], tags=d['tags'])
 
-    
+        # Load model fit data
+        obj.summary_table = d['summary_table']
+        obj.fitted_parameters = d['fitted_parameters']
+        
+        return obj
+
+
+    def to_dict(self):
+        """
+        Create a dictionary representation of the object.
+        
+        Returns
+        -------
+        dict
+        
+        """
+        d = {
+            'type': self.type,
+            'name': self.name,
+            'tags': self.tags,
+            'choosers': self.choosers,
+            'alternatives': self.alternatives,
+            'model_expression': self.model_expression,
+            'choice_column': self.choice_column,
+            'alt_sample_size': self.alt_sample_size,
+            'chooser_filters': self.chooser_filters,
+            'alt_filters': self.alt_filters,
+            'out_choosers': self.out_choosers,
+            'out_alternatives': self.out_alternatives,
+            'out_column': self.out_column,
+            'out_chooser_filters': self.out_chooser_filters,
+            'out_alt_filters': self.out_alt_filters,
+            'summary_table': self.summary_table,
+            'fitted_parameters': self.fitted_parameters,
+        }
+        return d
+
+
     # TO DO - same thing for out_choosers, out_alternatives
     @property
     def choosers(self):
@@ -197,7 +209,7 @@ class LargeMultinomialLogitStep(TemplateStep):
                 self.__alternatives = alternatives[0]
             
     
-    def _get_choosers_data(self):
+    def _get_choosers_df(self):
         """
         Return the ..
         
@@ -214,7 +226,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         
     
     
-    def _get_alternatives_data(self):
+    def _get_alternatives_df(self):
         """
         Return the 
         
@@ -247,55 +259,37 @@ class LargeMultinomialLogitStep(TemplateStep):
     
     def fit(self):
         """
+        Fit the model; save and report results. This uses the ChoiceModels estimation 
+        engine.
         
+        The `fit()` method can be run as many times as desired. Results will not be saved
+        with Orca or ModelManager until the `register()` method is run.
         
         """
-        # Put together data
-        
         # TO DO - update choicemodels to accept a column name for chosen alts
-        observations = self._get_choosers_data()
+        observations = self._get_choosers_df()
         chosen = observations[self.choice_column]
         
-        merged = MergedChoiceTable(observations = observations,
-                                   alternatives = self._get_alternatives_data(),
-                                   chosen_alternatives = chosen,
-                                   sample_size = self._get_alt_sample_size())
+        data = MergedChoiceTable(observations = observations,
+                                 alternatives = self._get_alternatives_df(),
+                                 chosen_alternatives = chosen,
+                                 sample_size = self._get_alt_sample_size())
         
-        # Run model
-        model = MultinomialLogit(data = merged.to_frame(),
-                                 observation_id_col = merged.observation_id_col, 
-                                 choice_col = merged.choice_col,
-                                 model_expression = self.model_expression)
-        
+        model = MultinomialLogit(data = data.to_frame(),
+                                 observation_id_col = data.observation_id_col, 
+                                 choice_col = data.choice_col,
+                                 model_expression = self.model_expression)        
         results = model.fit()
-        print(results)
         
+        self.name = self._generate_name()
+        self.summary_table = str(results)
+        print(self.summary_table)
+        
+        # For now, just save the summary table and fitted parameters
+        coefs = results.get_raw_results()['fit_parameters']['Coefficient']
+        self.fitted_parameters = coefs.tolist()
+            
     
-    
-#     def fit(self, choosers, alternatives, current_choice):
-#         """
-#         Fit the model; save and report results.
-# 
-#         """
-#         choosers = orca.get_table(choosers).to_frame()
-#         alternatives = orca.merge_tables(
-#             tables=alternatives, target=alternatives[0])
-# 
-#         self.model = MNLDiscreteChoiceModel(
-#             model_expression=self.model_expression,
-#             sample_size=self.sample_size,
-#             alts_fit_filters=self.alts_fit_filters,
-#             choosers_fit_filters=self.choosers_fit_filters,
-#             alts_predict_filters=self.alts_predict_filters,
-#             choosers_predict_filters=self.choosers_predict_filters,
-#             name=self.name)
-# 
-#         results = self.model.fit(choosers, alternatives, current_choice)
-#         
-#         # TO DO: save the results table (as a string?) so we can display it again later
-#         print(self.model.report_fit())
-        
-        
     def run(self):
         """
         Run the model step: calculate predicted values and use them to update a column.
@@ -319,11 +313,3 @@ class LargeMultinomialLogitStep(TemplateStep):
         dfw.update_col_from_series(self.out_fname, values, cast=True)
         
     
-    def register(self):
-        """
-        Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it will be automatically loaded in the future. 
-        
-        """
-        d = self.to_dict()
-        mm.add_step(d)
