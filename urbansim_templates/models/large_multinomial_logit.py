@@ -5,6 +5,8 @@ import pandas as pd
 from datetime import datetime as dt
 
 import orca
+from choicemodels import MultinomialLogit
+from choicemodels.tools import MergedChoiceTable
 from urbansim.models import MNLDiscreteChoiceModel
 from urbansim.utils import yamlio
 
@@ -139,21 +141,81 @@ class LargeMultinomialLogitStep(TemplateStep):
         }
         return d
 
-    def get_data(self):
+    
+    def get_choosers_data(self):
         """
-        Generate a data table for estimation or prediction, from Orca table and column
-        names. The results should not be stored, in case the data in Orca changes.
-        
-        Returns
-        -------
-        DataFrame
+        Return the 
         
         """
-        # TO DO: handle single table as well as list
-        tables = list(self.choosers) + self.alternatives
-        columns = self.model.columns_used()
-        df = orca.merge_tables(target=tables[0], tables=tables, columns=columns)
+        # TO DO - filter for just the columns we need
+        
+        if isinstance(self.choosers, list):
+            df = orca.merge_tables(target=self.choosers[0], tables=self.choosers)
+        else:
+            df = orca.get_table(self.choosers).to_frame()
+        
+        df = util.apply_filter_query(df, self.filters)
         return df
+        
+    
+    
+    def get_alternatives_data(self):
+        """
+        Return the 
+        
+        """
+        # TO DO - filter for just the columns we need
+        
+        if isinstance(self.alternatives, list):
+            df = orca.merge_tables(target=self.alternatives[0], tables=self.alternatives)
+        else:
+            df = orca.get_table(self.alternatives).to_frame()
+        
+        df = util.apply_filter_query(df, self.filters)
+        return df
+        
+    
+    def get_alt_sample_size(self):
+        """
+        Return the sample size for alternatives. If none specified, use one less than the
+        number of alternatives. (TO DO - this is because the table-merging codebase
+        doesn't currently support a case without sampling, which needs to be fixed.)
+        
+        """
+        if self.alt_sample_size is not None:
+            return self.alt_sample_size
+        
+        else:
+            n_minus_1 = len(self._get_alternatives_data()) - 1
+            return n_minus_1
+    
+    
+    def fit(self):
+        """
+        
+        
+        """
+        # Put together data
+        
+        # TO DO - update choicemodels to accept a column name for chosen alts
+        alternatives = self._get_alternatives_data()
+        chosen = alternatives[self.chosen_alternatives]
+        
+        merged = MergedChoiceTable(observations = self._get_choosers_data(),
+                                   alternatives = alternatives,
+                                   chosen_alternatives = chosen,
+                                   sample_size = self._get_alt_sample_size())
+        
+        # Run model
+        model = MultinomialLogit(data = merged.to_frame(),
+                                 observation_id_col = merged.observation_id_col, 
+                                 choice_col = merged.choice_col,
+                                 model_expression = self.model_expression)
+        
+        results = model.fit()
+        print(results)
+        
+    
     
     def fit(self, choosers, alternatives, current_choice):
         """
