@@ -212,6 +212,14 @@ class TemplateStep(object):
         return df
 
 
+    def _get_filter_columns(self):
+        """
+        Return list of column names referenced in the filters.
+        
+        """
+        return
+    
+    
     def _get_out_column(self):
         """
         Return name of the column to save data to. This is 'out_column' if it exsits,
