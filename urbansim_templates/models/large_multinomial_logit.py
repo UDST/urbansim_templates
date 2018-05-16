@@ -2,9 +2,11 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
+import patsy
 from datetime import datetime as dt
 
 import orca
+from choicemodels import mnl
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
 
@@ -297,6 +299,38 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = coefs.tolist()
             
     
+    def _get_chosen_ids(ids, positions):
+        """
+        Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
+        rather than id. This function converts them. It should move to ChoiceModels.
+        
+        We observe N choice scenarios. In each, one of J alternatives is chosen.
+        We have a long (len N * J) list of the available alternatives. We have a 
+        list (len N) of which alternatives were chosen, but it identifies them 
+        by POSITION and we want their ID.    
+    
+        Parameters
+        ----------
+        ids : list or list-like
+            List of alternative ID's (len N * J).
+        
+        positions : list or list-like
+            List of chosen alternatives by position (len N), where each entry is
+            an int in range [0, J)
+    
+        Returns
+        -------
+        chosen_ids : list
+            List of chosen alternatives by ID (len N)
+    
+        """
+        N = len(positions)
+        J = len(ids) // N
+    
+        ids_by_obs = np.reshape(ids, (N,J))
+        return [ids_by_obs[i][positions[i]] for i in range(N)]
+
+    
     def run(self):
         """
         Run the model step: calculate simulated choices and use them to update a column.
@@ -311,12 +345,32 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         """
         # Get data
+        observations = self._get_df(tables=self.out_choosers,
+                                    fallback_tables = self.choosers, 
+                                    filters=self.out_chooser_filters)
         
-        # Convert to format that underlying functions want
+        alternatives = self._get_df(tables = self.out_alternatives, 
+                                    fallback_tables = self.alternatives,
+                                    filters = self.out_alt_filters)
         
-        # Get probabilities and choices (or only choices if more efficient?)
+        numalts = self._get_alt_sample_size()
+        
+        data = MergedChoiceTable(observations = observations,
+                                 alternatives = alternatives,
+                                 sample_size = numalts)
+        
+        # Convert to format that underlying functions want - the data columns need to 
+        # align with the coefficients, which we can do with Patsy
+        dm = patsy.dmatrix(self.model_expression, data=data, return_type='dataframe')
+        
+        # Get choices (TO DO - get probabilities too)
+        choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+                                            numalts = numalts, returnprobs=False)
+        
+        choices = self._get_chosen_ids(dm.index.tolist(), choice_positions)
         
         # Save results to the class object
+        self.choices = choices
         
         # Update Orca    
     
