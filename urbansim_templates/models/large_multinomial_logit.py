@@ -17,11 +17,6 @@ class LargeMultinomialLogitStep(TemplateStep):
     A class for building multinomial logit model steps where the number of alternatives is
     "large". Estimation is performed using choicemodels.MultinomialLogit(). 
     
-    (Note that the majority of code for this template is setting up the infrastructure for 
-    working with dual sets of data tables -- i.e. setter functions, normaliation, and 
-    helper functions for 'choosers' and 'alternatives'. If other templates will also use 
-    this, we could move the functionality to a shared location.)
-    
     Multinomial Logit models can involve a range of different specification and estimation
     mechanics. For now these are separated into two templates. What's the difference?
     
@@ -240,56 +235,27 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.__out_alternatives = self._normalize_table_param(out_alternatives)            
     
             
-    
-    def _get_choosers_df(self):
-        """
-        Return a single dataframe representing the filtered choosers data.
-        
-        """
-        # TO DO - filter for just the columns we need for model expression and chooser
-        #   filters (can't use standard method because columns could be either here or in
-        #   the other set of tables)
-
-        if isinstance(self.choosers, list):
-            df = orca.merge_tables(target=self.choosers[0], tables=self.choosers)
-        else:
-            df = orca.get_table(self.choosers).to_frame()
-        
-        df = util.apply_filter_query(df, self.chooser_filters)
-        return df
-        
-    
-    
-    def _get_alternatives_df(self):
-        """
-        Return a single dataframe representing the filtered alternatives data.
-        
-        """
-        # TO DO - filter for just the columns we need
-        
-        if isinstance(self.alternatives, list):
-            df = orca.merge_tables(target=self.alternatives[0], tables=self.alternatives)
-        else:
-            df = orca.get_table(self.alternatives).to_frame()
-        
-        df = util.apply_filter_query(df, self.alt_filters)
-        return df
-        
-    
     def _get_alt_sample_size(self):
         """
         Return the number of alternatives to sample. If none is specified, use one less 
-        than the number of alternatives
+        than the number of alternatives. 
         
-        TO DO: The table-merging codebase in ChoiceModels (originally from UrbanSim MNL) 
-        currently *requires* sampling of alternatives. We should make it optional.
+        (This is a temporary solution to the problem that the table-merging codebase in 
+        ChoiceModels currently _requires_ sampling of alternatives. We should make it 
+        optional.)
+        
+        TO DO: What if `out_alternatives` is smaller than `alternatives`? What if it's
+        smaller than `alt_sample_size`?
 
         """
         if self.alt_sample_size is not None:
             return self.alt_sample_size
         
         else:
-            n_minus_1 = len(self._get_alternatives_data()) - 1
+            alternatives = self._get_df(tables = self.alternatives, 
+                                        filters = self.alternative_filters)
+            
+            n_minus_1 = len(alternatives) - 1
             return n_minus_1
     
     
@@ -303,11 +269,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         """
         # TO DO - update choicemodels to accept a column name for chosen alts
-        observations = self._get_choosers_df()
+        observations = self._get_df(tables=self.choosers, 
+                                    filters=self.chooser_filters)
+        
         chosen = observations[self.choice_column]
         
+        alternatives = self._get_df(tables = self.alternatives, 
+                                    filters = self.alternative_filters)
+        
         data = MergedChoiceTable(observations = observations,
-                                 alternatives = self._get_alternatives_df(),
+                                 alternatives = alternatives,
                                  chosen_alternatives = chosen,
                                  sample_size = self._get_alt_sample_size())
         
