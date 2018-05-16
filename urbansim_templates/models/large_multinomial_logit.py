@@ -7,8 +7,6 @@ from datetime import datetime as dt
 import orca
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
-#from urbansim.models import MNLDiscreteChoiceModel, util
-#from urbansim.utils import yamlio
 
 from .shared import TemplateStep
 from .. import modelmanager as mm
@@ -18,6 +16,11 @@ class LargeMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
     "large". Estimation is performed using choicemodels.MultinomialLogit(). 
+    
+    (Note that the majority of code for this template is setting up the infrastructure for 
+    working with dual sets of data tables -- i.e. setter functions, normaliation, and 
+    helper functions for 'choosers' and 'alternatives'. If other templates will also use 
+    this, we could move the functionality to a shared location.)
     
     Multinomial Logit models can involve a range of different specification and estimation
     mechanics. For now these are separated into two templates. What's the difference?
@@ -43,7 +46,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: <TO DO - fill in>.
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
     
     alternatives : str or list of str, optional
         Name(s) of Orca tables containing data about alternatives. The first table is the
@@ -52,12 +55,12 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: <TO DO - fill in>.
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
     
     model_expression : str, optional
         Patsy-style right-hand-side model expression representing the utility of a
         single alternative. Passed to `choicemodels.MultinomialLogit()`. This parameter
-        is required for fitting a model, but does not have to be provided when the obect
+        is required for fitting a model, but does not have to be provided when the object
         is created.
         
     choice_column : str, optional
@@ -70,7 +73,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         Numer of alternatives to sample for each choice scenario. For now, only random 
         sampling is supported. If this parameter is not provided, we will use a sample
         size of one less than the total number of alternatives. (ChoiceModels codebase
-        currently requires sampling.)
+        currently requires sampling.) The same sample size is used for estimation and
+        prediction.
 
     chooser_filters : str or list of str, optional
         Filters to apply to the chooser data before fitting the model. These are passed to 
@@ -84,11 +88,13 @@ class LargeMultinomialLogitStep(TemplateStep):
 
     out_choosers : str or list of str, optional
         Name(s) of Orca tables to draw choice scenario data from, for simulation. If not 
-        provided, the `choosers` parameter will be used. Same guidance applies.
+        provided, the `choosers` parameter will be used. Same guidance applies. Reserved 
+        column names: 'chosen', 'join_index', 'observation_id'.
 
     out_alternatives : str or list of str, optional
         Name(s) of Orca tables containing data about alternatives, for simulation. If not 
-        provided, the `alternatives` parameter will be used. Same guidance applies.
+        provided, the `alternatives` parameter will be used. Same guidance applies. 
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
 
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
@@ -201,53 +207,38 @@ class LargeMultinomialLogitStep(TemplateStep):
         return d
 
 
-    # TO DO - same thing for out_choosers, out_alternatives
     @property
     def choosers(self):
         return self.__choosers
-        
 
     @choosers.setter
     def choosers(self, choosers):
-        """
-        Normalize storage of the 'choosers' property, which is the name of one or more
-        tables that contain data about the choice scenarios (replaces 'tables').
-        
-        """
-        self.__choosers = choosers
-        
-        if isinstance(choosers, list):
-            # Normalize [] to None
-            if len(choosers) == 0:
-                self.__choosers = None
+        self.__choosers = self._normalize_table_param(choosers)
             
-            # Normalize [str] to str
-            if len(choosers) == 1:
-                self.__choosers = choosers[0]
-            
-    
     @property
     def alternatives(self):
         return self.__alternatives
-        
 
     @alternatives.setter
     def alternatives(self, alternatives):
-        """
-        Normalize storage of the 'alternatives' property, whis is the name of one or more
-        tables that contain data about the alternatives (replaces 'tables').
-        
-        """
-        self.__alternatives = alternatives
-        
-        if isinstance(alternatives, list):
-            # Normalize [] to None
-            if len(alternatives) == 0:
-                self.__alternatives = None
+        self.__alternatives = self._normalize_table_param(alternatives)            
+    
+    @property
+    def out_choosers(self):
+        return self.__out_choosers
+
+    @out_choosers.setter
+    def out_choosers(self, out_choosers):
+        self.__out_choosers = self._normalize_table_param(out_choosers)
             
-            # Normalize [str] to str
-            if len(alternatives) == 1:
-                self.__alternatives = alternatives[0]
+    @property
+    def out_alternatives(self):
+        return self.__out_alternatives
+
+    @out_alternatives.setter
+    def out_alternatives(self, out_alternatives):
+        self.__out_alternatives = self._normalize_table_param(out_alternatives)            
+    
             
     
     def _get_choosers_df(self):
@@ -255,7 +246,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         Return a single dataframe representing the filtered choosers data.
         
         """
-        # TO DO - filter for just the columns we need
+        # TO DO - filter for just the columns we need for model expression and chooser
+        #   filters (can't use standard method because columns could be either here or in
+        #   the other set of tables)
 
         if isinstance(self.choosers, list):
             df = orca.merge_tables(target=self.choosers[0], tables=self.choosers)
@@ -334,6 +327,30 @@ class LargeMultinomialLogitStep(TemplateStep):
             
     
     def run(self):
+        """
+        Run the model step: calculate simulated choices and use them to update a column.
+        
+        Predicted probabilities and choices come from ChoiceModels (currently we use
+        the UrbanSim MNL functions directly).
+        
+        The predicted probabilities and simulated choices are saved to the class object 
+        for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
+        type pd.Series) but are not persisted in the dictionary representation of the 
+        model step.
+
+        """
+        # Get data
+        
+        # Convert to format that underlying functions want
+        
+        # Get probabilities and choices (or only choices if more efficient?)
+        
+        # Save results to the class object
+        
+        # Update Orca    
+    
+
+    def run_deprecated(self):
         """
         THIS METHOD DOES NOT WORK YET.
                 
