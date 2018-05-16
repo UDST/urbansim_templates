@@ -106,7 +106,7 @@ class TemplateStep(object):
         return d
     
     
-    def _normalize_table_param(tables):
+    def _normalize_table_param(self, tables):
         """
         Normalize table parameter input. TO DO - add more type validation
         
@@ -140,7 +140,7 @@ class TemplateStep(object):
         self.__out_tables = self._normalize_table_param(out_tables)
 
 
-    def _get_df(self, tables=self.tables, fallback_tables=None, filters=self.filters,
+    def _get_df(self, tables='unset', fallback_tables=None, filters='unset',
             model_expression=None):
         """
         Generate a data table for estimation or prediction, relying on functionality from
@@ -177,8 +177,14 @@ class TemplateStep(object):
         DataFrame
         
         """
+        if tables == 'unset':
+            tables = self.tables
+        
         if tables is None:
             tables = fallback_tables
+            
+        if filters == 'unset':
+            filters = self.filters
         
         if isinstance(tables, list):
             df = orca.merge_tables(target=tables[0], tables=tables)

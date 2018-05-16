@@ -255,7 +255,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         else:
             alternatives = self._get_df(tables = self.alternatives, 
-                                        filters = self.alternative_filters)
+                                        filters = self.alt_filters)
             
             n_minus_1 = len(alternatives) - 1
             return n_minus_1
@@ -277,7 +277,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         chosen = observations[self.choice_column]
         
         alternatives = self._get_df(tables = self.alternatives, 
-                                    filters = self.alternative_filters)
+                                    filters = self.alt_filters)
         
         data = MergedChoiceTable(observations = observations,
                                  alternatives = alternatives,
@@ -304,10 +304,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
         rather than id. This function converts them. It should move to ChoiceModels.
         
-        We observe N choice scenarios. In each, one of J alternatives is chosen.
-        We have a long (len N * J) list of the available alternatives. We have a 
-        list (len N) of which alternatives were chosen, but it identifies them 
-        by POSITION and we want their ID.    
+        We observe N choice scenarios. In each, one of J alternatives is chosen. We have a 
+        long (len N * J) list of the available alternatives. We have a list (len N) of 
+        which alternatives were chosen, but it identifies them by POSITION and we want 
+        their ID.    
     
         Parameters
         ----------
@@ -316,12 +316,12 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         positions : list or list-like
             List of chosen alternatives by position (len N), where each entry is
-            an int in range [0, J)
+            an int in range [0, J).
     
         Returns
         -------
         chosen_ids : list
-            List of chosen alternatives by ID (len N)
+            List of chosen alternatives by ID (len N).
     
         """
         N = len(positions)
@@ -335,8 +335,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: calculate simulated choices and use them to update a column.
         
-        Predicted probabilities and choices come from ChoiceModels (currently we use
-        the UrbanSim MNL functions directly).
+        Predicted probabilities and simulated choices come from ChoiceModels.
         
         The predicted probabilities and simulated choices are saved to the class object 
         for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
@@ -369,8 +368,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         choices = self._get_chosen_ids(dm.index.tolist(), choice_positions)
         
-        # Save results to the class object
-        self.choices = choices
+        # Save results to the class object (via df to include indexes)
+        dm['_choices'] = choices
+        self.choices = dm._choices
         
         # Update Orca    
     
