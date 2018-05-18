@@ -299,7 +299,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = coefs.tolist()
             
     
-    def _get_chosen_ids(ids, positions):
+    def _get_chosen_ids(self, ids, positions):
         """
         Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
         rather than id. This function converts them. It should move to ChoiceModels.
@@ -343,7 +343,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         model step.
 
         """
-        # Get data
         observations = self._get_df(tables=self.out_choosers,
                                     fallback_tables = self.choosers, 
                                     filters=self.out_chooser_filters)
@@ -358,26 +357,29 @@ class LargeMultinomialLogitStep(TemplateStep):
                                  alternatives = alternatives,
                                  sample_size = numalts)
         
-        # Convert to format that underlying functions want - the data columns need to 
-        # align with the coefficients, which we can do with Patsy
-        dm = patsy.dmatrix(self.model_expression, data=data, return_type='dataframe')
+        # Data columns need to align with the coefficients
+        dm = patsy.dmatrix(self.model_expression, data=data.to_frame(), 
+                           return_type='dataframe')
         
         # Get choices (TO DO - get probabilities too)
         choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
                                             numalts = numalts, returnprobs=False)
         
-        choices = self._get_chosen_ids(dm.index.tolist(), choice_positions)
+        print(data.alternative_id_col)
+        ids = data.to_frame()[data.alternative_id_col].tolist()
+        print(ids[:20])
+        choices = self._get_chosen_ids(ids, choice_positions)
         
         # Save results to the class object (via df to include indexes)
-        dm['_choices'] = choices
-        self.choices = dm._choices
+        observations['_choices'] = choices
+        self.choices = observations._choices
         
         # Update Orca    
     
 
     def run_deprecated(self):
         """
-        THIS METHOD DOES NOT WORK YET.
+        THIS METHOD IS DEPRECATED.
                 
         Run the model step: calculate predicted values and use them to update a column.
         
