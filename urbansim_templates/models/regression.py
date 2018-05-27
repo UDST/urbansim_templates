@@ -12,6 +12,8 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
+TEMPLATE_VERSION = '0.1'
+
 class OLSRegressionStep(TemplateStep):
     """
     A class for building OLS (ordinary least squares) regression model steps. This extends 

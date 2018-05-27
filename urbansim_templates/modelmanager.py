@@ -9,6 +9,8 @@ from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
 
+MODELMANAGER_VERSION = '0.1dev5'
+
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
 
@@ -63,9 +65,9 @@ def list_steps():
 
 def add_step(d):
     """
-    Register a model step from a dictionary representation conforming to UrbanSim 
-    YAML spec v0.2. This will override any previously registered step with the same 
-    name. The step will be registered with Orca and written to persistent storage.
+    Register a model step from a dictionary representation. This will override any 
+    previously registered step with the same name. The step will be registered with Orca 
+    and written to persistent storage.
     
     Parameters
     ----------
@@ -82,6 +84,10 @@ def add_step(d):
     # service. Another approach would be to require users to import all the templates
     # they'll be using, before importing `modelmanager`. Then we can look them up using
     # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
+    
+    reserved_names = ['modelmanager_version']
+    if (d['name'] in reserved_names):
+        raise ValueError('cannot be registered with ModelManager because "%s" is a reserved name' % (d['name']))
     
     if (d['name'] in _STEPS):
         remove_step(d['name'])
@@ -139,7 +145,9 @@ def save_steps_to_disk():
     Save current representation of model steps to disk, over-writing the previous file.
     
     """
-    yamlio.convert_to_yaml(_STEPS, DISK_STORE)
+    content = {'modelmanager_version': MODELMANAGER_VERSION}.update(_STEPS)
+    
+    yamlio.convert_to_yaml(content, DISK_STORE)
     
     
 def load_steps_from_disk():
