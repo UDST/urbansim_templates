@@ -12,7 +12,7 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
-TEMPLATE_VERSION = '0.1'
+TEMPLATE_VERSION = '0.1dev1'
 
 class OLSRegressionStep(TemplateStep):
     """
@@ -96,6 +96,8 @@ class OLSRegressionStep(TemplateStep):
                 filters=filters, out_tables=out_tables, out_column=out_column, 
                 out_transform=out_transform, out_filters=out_filters, name=name, 
                 tags=tags)
+        
+        self.version = TEMPLATE_VERSION
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 

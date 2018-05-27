@@ -87,7 +87,7 @@ def add_step(d):
     
     reserved_names = ['modelmanager_version']
     if (d['name'] in reserved_names):
-        raise ValueError('cannot be registered with ModelManager because "%s" is a reserved name' % (d['name']))
+        raise ValueError('Step cannot be registered with ModelManager because "%s" is a reserved name' % (d['name']))
     
     if (d['name'] in _STEPS):
         remove_step(d['name'])
@@ -145,7 +145,11 @@ def save_steps_to_disk():
     Save current representation of model steps to disk, over-writing the previous file.
     
     """
-    content = {'modelmanager_version': MODELMANAGER_VERSION}.update(_STEPS)
+    headers = {'modelmanager_version': MODELMANAGER_VERSION}
+    body = _STEPS
+    
+    content = headers
+    content.update(body)
     
     yamlio.convert_to_yaml(content, DISK_STORE)
     
@@ -159,10 +163,12 @@ def load_steps_from_disk():
     # are finished before saving back to disk. Is there a better approach?
     
     _STARTUP_QUEUE = yamlio.yaml_to_dict(str_or_buffer=DISK_STORE)
+    reserved_names = ['modelmanager_version']
     
     while (len(_STARTUP_QUEUE) > 0):
         key, value = _STARTUP_QUEUE.popitem()
-        add_step(value)
+        if (key not in reserved_names):
+            add_step(value)
     
 
 main()
