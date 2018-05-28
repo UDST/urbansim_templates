@@ -14,6 +14,8 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
+TEMPLATE_VERSION = '0.1dev1'
+
 class LargeMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
@@ -123,6 +125,8 @@ class LargeMultinomialLogitStep(TemplateStep):
                 filters=None, out_tables=None, out_column=out_column, out_transform=None, 
                 out_filters=None, name=name, tags=tags)
 
+        self.version = TEMPLATE_VERSION
+        
         # Custom parameters not in parent class
         self.choosers = choosers
         self.alternatives = alternatives
@@ -358,3 +362,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         dfw.update_col_from_series(self.out_fname, values, cast=True)
         
     
+    def register(self):
+        """
+        Register the model step with Orca and the ModelManager. This includes saving it
+        to disk so it can be automatically loaded in the future. 
+        
+        Registering a step will rewrite any previously saved step with the same name. 
+        (If a custom name has not been provided, one is generated each time the `fit()` 
+        method runs.)
+                
+        """
+        d = self.to_dict()
+        mm.add_step(d)
+
