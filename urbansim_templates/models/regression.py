@@ -12,6 +12,8 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
+TEMPLATE_VERSION = '0.1dev1'
+
 class OLSRegressionStep(TemplateStep):
     """
     A class for building OLS (ordinary least squares) regression model steps. This extends 
@@ -94,6 +96,8 @@ class OLSRegressionStep(TemplateStep):
                 filters=filters, out_tables=out_tables, out_column=out_column, 
                 out_transform=out_transform, out_filters=out_filters, name=name, 
                 tags=tags)
+        
+        self.version = TEMPLATE_VERSION
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
@@ -194,5 +198,18 @@ class OLSRegressionStep(TemplateStep):
 
         orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
         
+
+    def register(self):
+        """
+        Register the model step with Orca and the ModelManager. This includes saving it
+        to disk so it can be automatically loaded in the future. 
+        
+        Registering a step will rewrite any previously saved step with the same name. 
+        (If a custom name has not been provided, one is generated each time the `fit()` 
+        method runs.)
+                
+        """
+        d = self.to_dict()
+        mm.add_step(d)
             
         

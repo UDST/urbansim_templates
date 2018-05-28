@@ -93,6 +93,7 @@ class TemplateStep(object):
         """
         d = {
             'type': self.type,
+            'version': self.version,
             'name': self.name,
             'tags': self.tags,
             'tables': self.tables,
@@ -323,24 +324,3 @@ class TemplateStep(object):
         else:
             return self.name
 
-    
-    def run(self):
-        """
-        Execute the model step. Child classes are required to implement this method.
-        
-        """
-        return
-        
-    
-    def register(self):
-        """
-        Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it can be automatically loaded in the future. 
-        
-        Registering a step will rewrite any previously saved step with the same name. 
-        (If a custom name has not been provided, one is generated each time the `fit()` 
-        method runs.)
-                
-        """
-        d = self.to_dict()
-        mm.add_step(d)
