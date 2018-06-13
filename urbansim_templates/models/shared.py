@@ -198,6 +198,8 @@ class TemplateStep(object):
     
     def _get_data(self, task='fit'):
         """
+        DEPRECATED - this should be replaced by the more general _get_df()
+        
         Generate a data table for estimation or prediction, relying on functionality from
         Orca and UrbanSim.models.util. This should be performed immediately before 
         estimation or prediction so that it reflects the current data state.
