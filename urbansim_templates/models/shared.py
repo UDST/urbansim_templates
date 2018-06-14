@@ -107,54 +107,99 @@ class TemplateStep(object):
         return d
     
     
+    def _normalize_table_param(self, tables):
+        """
+        Normalize table parameter input. TO DO - add more type validation
+        
+        """
+        if isinstance(tables, list):
+            # Normalize [] to None
+            if len(tables) == 0:
+                return None
+        
+            # Normalize [str] to str
+            if len(tables) == 1:
+                return tables[0]
+                
+        return tables
+    
+    
     @property
     def tables(self):
         return self.__tables
         
-
     @tables.setter
     def tables(self, tables):
-        """
-        Normalize storage of the 'tables' property. TO DO - add type validation?
-        
-        """
-        self.__tables = tables
-        
-        if isinstance(tables, list):
-            # Normalize [] to None
-            if len(tables) == 0:
-                self.__tables = None
+        self.__tables = self._normalize_table_param(tables)
             
-            # Normalize [str] to str
-            if len(tables) == 1:
-                self.__tables = tables[0]
-            
-    
     @property
     def out_tables(self):
         return self.__out_tables
         
-
     @out_tables.setter
     def out_tables(self, out_tables):
+        self.__out_tables = self._normalize_table_param(out_tables)
+
+
+    def _get_df(self, tables='unset', fallback_tables=None, filters='unset',
+            model_expression=None):
         """
-        Normalize storage of the 'out_tables' property. TO DO - add type validation?
+        Generate a data table for estimation or prediction, relying on functionality from
+        Orca and `urbansim.models.util`. This should be performed immediately before
+        estimation or prediction so that it reflects the current data state.
         
-        """
-        self.__out_tables = out_tables
+        The output includes only the necessary columns: those mentioned in the model 
+        expression or filters, plus (it appears) the index of each merged table. Relevant
+        row filters are also applied.
         
-        if isinstance(out_tables, list):
-            # Normalize [] to None
-            if len(out_tables) == 0:
-                self.__out_tables = None
+        TO DO - this method is a generalization of _get_data(), and should replace it, 
+        but does not currently support column filtering or PyLogit model expressions.
+        
+        Parameters
+        ----------
+        tables : str or list of str, optional
+            Name of table or tables. If not provided, `self.tables` will be used.
+        
+        fallback_tables : str or list of str, optional
+            Table(s) to use if first argument evaluates to `None`.
             
-            # Normalize [str] to str
-            if len(out_tables) == 1:
-                self.__out_tables = out_tables[0]
-
-
+        filters : str or list of str, optional
+            Filter(s) to apply. If not provided, `self.filters` will be used.
+            
+        model_expression : NOT YET IMPLEMENTED
+            Model expression, for determining which columns are needed. If not provided,
+            `self.model_expression` will be used.
+            
+            TO DO - this needs to handle the large MNL case where there are two sets of
+            data tables, so we can't use urbansim.models.util.columns_in_formula()
+        
+        Returns
+        -------
+        DataFrame
+        
+        """
+        if tables == 'unset':
+            tables = self.tables
+        
+        if tables is None:
+            tables = fallback_tables
+            
+        if filters == 'unset':
+            filters = self.filters
+        
+        if isinstance(tables, list):
+            df = orca.merge_tables(target=tables[0], tables=tables)
+        else:
+            df = orca.get_table(tables).to_frame()
+        
+        df = util.apply_filter_query(df, filters)
+        return df
+        
+    
     def _get_data(self, task='fit'):
         """
+        DEPRECATED - this should be replaced by the more general _get_df()
+        
         Generate a data table for estimation or prediction, relying on functionality from
         Orca and UrbanSim.models.util. This should be performed immediately before 
         estimation or prediction so that it reflects the current data state.
@@ -215,6 +260,8 @@ class TemplateStep(object):
 
     def _get_filter_columns(self):
         """
+        THIS METHOD DOES NOT WORK YET.   
+        
         Return list of column names referenced in the filters.
         
         """

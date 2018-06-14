@@ -2,13 +2,13 @@ from __future__ import print_function
 
 import numpy as np
 import pandas as pd
+import patsy
 from datetime import datetime as dt
 
 import orca
+from choicemodels import mnl
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
-#from urbansim.models import MNLDiscreteChoiceModel, util
-#from urbansim.utils import yamlio
 
 from .shared import TemplateStep
 from .. import modelmanager as mm
@@ -45,7 +45,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: <TO DO - fill in>.
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
     
     alternatives : str or list of str, optional
         Name(s) of Orca tables containing data about alternatives. The first table is the
@@ -54,12 +54,12 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: <TO DO - fill in>.
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
     
     model_expression : str, optional
         Patsy-style right-hand-side model expression representing the utility of a
         single alternative. Passed to `choicemodels.MultinomialLogit()`. This parameter
-        is required for fitting a model, but does not have to be provided when the obect
+        is required for fitting a model, but does not have to be provided when the object
         is created.
         
     choice_column : str, optional
@@ -72,7 +72,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         Numer of alternatives to sample for each choice scenario. For now, only random 
         sampling is supported. If this parameter is not provided, we will use a sample
         size of one less than the total number of alternatives. (ChoiceModels codebase
-        currently requires sampling.)
+        currently requires sampling.) The same sample size is used for estimation and
+        prediction.
 
     chooser_filters : str or list of str, optional
         Filters to apply to the chooser data before fitting the model. These are passed to 
@@ -86,11 +87,13 @@ class LargeMultinomialLogitStep(TemplateStep):
 
     out_choosers : str or list of str, optional
         Name(s) of Orca tables to draw choice scenario data from, for simulation. If not 
-        provided, the `choosers` parameter will be used. Same guidance applies.
+        provided, the `choosers` parameter will be used. Same guidance applies. Reserved 
+        column names: 'chosen', 'join_index', 'observation_id'.
 
     out_alternatives : str or list of str, optional
         Name(s) of Orca tables containing data about alternatives, for simulation. If not 
-        provided, the `alternatives` parameter will be used. Same guidance applies.
+        provided, the `alternatives` parameter will be used. Same guidance applies. 
+        Reserved column names: 'chosen', 'join_index', 'observation_id'.
 
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
@@ -205,102 +208,60 @@ class LargeMultinomialLogitStep(TemplateStep):
         return d
 
 
-    # TO DO - same thing for out_choosers, out_alternatives
     @property
     def choosers(self):
         return self.__choosers
-        
 
     @choosers.setter
     def choosers(self, choosers):
-        """
-        Normalize storage of the 'choosers' property, which is the name of one or more
-        tables that contain data about the choice scenarios (replaces 'tables').
-        
-        """
-        self.__choosers = choosers
-        
-        if isinstance(choosers, list):
-            # Normalize [] to None
-            if len(choosers) == 0:
-                self.__choosers = None
+        self.__choosers = self._normalize_table_param(choosers)
             
-            # Normalize [str] to str
-            if len(choosers) == 1:
-                self.__choosers = choosers[0]
-            
-    
     @property
     def alternatives(self):
         return self.__alternatives
-        
 
     @alternatives.setter
     def alternatives(self, alternatives):
-        """
-        Normalize storage of the 'alternatives' property, whis is the name of one or more
-        tables that contain data about the alternatives (replaces 'tables').
-        
-        """
-        self.__alternatives = alternatives
-        
-        if isinstance(alternatives, list):
-            # Normalize [] to None
-            if len(alternatives) == 0:
-                self.__alternatives = None
-            
-            # Normalize [str] to str
-            if len(alternatives) == 1:
-                self.__alternatives = alternatives[0]
-            
+        self.__alternatives = self._normalize_table_param(alternatives)            
     
-    def _get_choosers_df(self):
-        """
-        Return a single dataframe representing the filtered choosers data.
-        
-        """
-        # TO DO - filter for just the columns we need
+    @property
+    def out_choosers(self):
+        return self.__out_choosers
 
-        if isinstance(self.choosers, list):
-            df = orca.merge_tables(target=self.choosers[0], tables=self.choosers)
-        else:
-            df = orca.get_table(self.choosers).to_frame()
-        
-        df = util.apply_filter_query(df, self.chooser_filters)
-        return df
-        
+    @out_choosers.setter
+    def out_choosers(self, out_choosers):
+        self.__out_choosers = self._normalize_table_param(out_choosers)
+            
+    @property
+    def out_alternatives(self):
+        return self.__out_alternatives
+
+    @out_alternatives.setter
+    def out_alternatives(self, out_alternatives):
+        self.__out_alternatives = self._normalize_table_param(out_alternatives)            
     
-    
-    def _get_alternatives_df(self):
-        """
-        Return a single dataframe representing the filtered alternatives data.
-        
-        """
-        # TO DO - filter for just the columns we need
-        
-        if isinstance(self.alternatives, list):
-            df = orca.merge_tables(target=self.alternatives[0], tables=self.alternatives)
-        else:
-            df = orca.get_table(self.alternatives).to_frame()
-        
-        df = util.apply_filter_query(df, self.alt_filters)
-        return df
-        
-    
+            
     def _get_alt_sample_size(self):
         """
         Return the number of alternatives to sample. If none is specified, use one less 
-        than the number of alternatives
+        than the number of alternatives. 
         
-        TO DO: The table-merging codebase in ChoiceModels (originally from UrbanSim MNL) 
-        currently *requires* sampling of alternatives. We should make it optional.
+        (This is a temporary solution to the problem that the table-merging codebase in 
+        ChoiceModels currently _requires_ sampling of alternatives. We should make it 
+        optional.)
+        
+        TO DO: What if `out_alternatives` is smaller than `alternatives`? What if it's
+        smaller than `alt_sample_size`?
 
         """
         if self.alt_sample_size is not None:
             return self.alt_sample_size
         
         else:
-            n_minus_1 = len(self._get_alternatives_data()) - 1
+            alternatives = self._get_df(tables = self.alternatives, 
+                                        filters = self.alt_filters)
+            
+            n_minus_1 = len(alternatives) - 1
             return n_minus_1
     
     
@@ -314,11 +275,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         """
         # TO DO - update choicemodels to accept a column name for chosen alts
-        observations = self._get_choosers_df()
+        observations = self._get_df(tables=self.choosers, 
+                                    filters=self.chooser_filters)
+        
         chosen = observations[self.choice_column]
         
+        alternatives = self._get_df(tables = self.alternatives, 
+                                    filters = self.alt_filters)
+        
         data = MergedChoiceTable(observations = observations,
-                                 alternatives = self._get_alternatives_df(),
+                                 alternatives = alternatives,
                                  chosen_alternatives = chosen,
                                  sample_size = self._get_alt_sample_size())
         
@@ -337,31 +303,106 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = coefs.tolist()
             
     
+    def _get_chosen_ids(self, ids, positions):
+        """
+        Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
+        rather than id. This function converts them. It should move to ChoiceModels.
+        
+        We observe N choice scenarios. In each, one of J alternatives is chosen. We have a 
+        long (len N * J) list of the available alternatives. We have a list (len N) of 
+        which alternatives were chosen, but it identifies them by POSITION and we want 
+        their ID.    
+    
+        Parameters
+        ----------
+        ids : list or list-like
+            List of alternative ID's (len N * J).
+        
+        positions : list or list-like
+            List of chosen alternatives by position (len N), where each entry is
+            an int in range [0, J).
+    
+        Returns
+        -------
+        chosen_ids : list
+            List of chosen alternatives by ID (len N).
+    
+        """
+        N = len(positions)
+        J = len(ids) // N
+    
+        ids_by_obs = np.reshape(ids, (N,J))
+        return [ids_by_obs[i][positions[i]] for i in range(N)]
+
+    
     def run(self):
         """
-        THIS METHOD DOES NOT WORK YET.
-                
-        Run the model step: calculate predicted values and use them to update a column.
+        Run the model step: calculate simulated choices and use them to update a column.
         
+        Predicted probabilities and simulated choices come from ChoiceModels. For now, 
+        the choices are unconstrained (any number of choosers can select the same 
+        alternative).
+        
+        The predicted probabilities and simulated choices are saved to the class object 
+        for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
+        type pd.Series) but are not persisted in the dictionary representation of the 
+        model step.
+
         """
-        # TO DO: 
-        # - Figure out what we can infer about requirements for the underlying data, and
-        #   write an 'orca_test' assertion to confirm compliance.
-        # - If no destination column was specified, use name of dependent variable
+        observations = self._get_df(tables=self.out_choosers,
+                                    fallback_tables = self.choosers, 
+                                    filters=self.out_chooser_filters)
+        
+        alternatives = self._get_df(tables = self.out_alternatives, 
+                                    fallback_tables = self.alternatives,
+                                    filters = self.out_alt_filters)
+        
+        numalts = self._get_alt_sample_size()
+        
+        mct = MergedChoiceTable(observations = observations,
+                                alternatives = alternatives,
+                                sample_size = numalts)
+        mct_df = mct.to_frame()
+        
+        # Data columns need to align with the coefficients
+        dm = patsy.dmatrix(self.model_expression, data=mct_df, return_type='dataframe')
+        
+        # Get probabilities and choices
+        probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+                                 numalts = numalts, returnprobs=True)
 
-        choosers = orca.get_table(self.choosers).to_frame()
+        # TO DO - this ends up recalculating the probabilities because there's not 
+        # currently a code path to get both at once - fix this)
+        choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+                                            numalts = numalts, returnprobs=False)
         
-        # TO DO - fix to work with single table of alternatives
-        alternatives = orca.merge_tables(
-            tables=self.alternatives, target=self.alternatives[0])
-
-        values = self.model.predict(choosers, alternatives)
-        print("Predicted " + str(len(values)) + " values")
+        ids = mct_df[mct.alternative_id_col].tolist()
+        choices = self._get_chosen_ids(ids, choice_positions)
         
-        dfw = orca.get_table(self.choosers)
-        dfw.update_col_from_series(self.out_fname, values, cast=True)
+        # Save results to the class object (via df to include indexes)
+        mct_df['probability'] = np.reshape(probs, (probs.size, 1))
+        self.probabilities = mct_df[[mct.observation_id_col, 
+                                     mct.alternative_id_col, 'probability']]
+        observations['choice'] = choices
+        self.choices = observations.choice
         
+        # Update Orca
+        if self.out_choosers is not None:
+            table = orca.get_table(self.out_choosers)
+        else:
+            table = orca.get_table(self.choosers)
+        
+        if self.out_column is not None:
+            column = self.out_column
+        else:
+            column = self.choice_column
+        
+        table.update_col_from_series(column, observations.choice, cast=True)
+        
+        # Print a message about limited usage
+        print("Warning: choices are unconstrained; additional functionality in progress")
     
+
     def register(self):
         """
         Register the model step with Orca and the ModelManager. This includes saving it

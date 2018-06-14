@@ -336,7 +336,7 @@ class SmallMultinomialLogitStep(TemplateStep):
 
     def run(self):
         """
-        Run the model step; calculate simulated choices and use them to update a column.
+        Run the model step: calculate simulated choices and use them to update a column.
         
         Alternatives that appear in the estimation data but not in the model expression
         will not be available for simulation.
@@ -348,7 +348,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
         type pd.Series) but are not persisted in the dictionary representation of the 
         model step.
-                
+        
         """
         df = self._get_data('predict')
         long_df = self._to_long(df, 'predict')
