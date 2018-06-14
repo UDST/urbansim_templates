@@ -339,7 +339,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: calculate simulated choices and use them to update a column.
         
-        Predicted probabilities and simulated choices come from ChoiceModels.
+        Predicted probabilities and simulated choices come from ChoiceModels. For now, 
+        the choices are unconstrained (any number of choosers can select the same 
+        alternative).
         
         The predicted probabilities and simulated choices are saved to the class object 
         for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
@@ -401,31 +403,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         print("Warning: choices are unconstrained; additional functionality in progress")
     
 
-    def run_deprecated(self):
-        """
-        THIS METHOD IS DEPRECATED.
-                
-        Run the model step: calculate predicted values and use them to update a column.
-        
-        """
-        # TO DO: 
-        # - Figure out what we can infer about requirements for the underlying data, and
-        #   write an 'orca_test' assertion to confirm compliance.
-        # - If no destination column was specified, use name of dependent variable
-
-        choosers = orca.get_table(self.choosers).to_frame()
-        
-        # TO DO - fix to work with single table of alternatives
-        alternatives = orca.merge_tables(
-            tables=self.alternatives, target=self.alternatives[0])
-
-        values = self.model.predict(choosers, alternatives)
-        print("Predicted " + str(len(values)) + " values")
-        
-        dfw = orca.get_table(self.choosers)
-        dfw.update_col_from_series(self.out_fname, values, cast=True)
-        
-    
     def register(self):
         """
         Register the model step with Orca and the ModelManager. This includes saving it
