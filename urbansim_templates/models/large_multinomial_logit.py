@@ -365,20 +365,26 @@ class LargeMultinomialLogitStep(TemplateStep):
         dm = patsy.dmatrix(self.model_expression, data=data.to_frame(), 
                            return_type='dataframe')
         
-        # Get choices (TO DO - get probabilities too)
+        # Get probabilities and choices
+        probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+                                            numalts = numalts, returnprobs=True)
+
+        # TO DO - this has to recalculate the probabilities because there's not currently 
+        # a code path to get both at once! - fix this)
         choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
                                             numalts = numalts, returnprobs=False)
         
-        print(data.alternative_id_col)
         ids = data.to_frame()[data.alternative_id_col].tolist()
-        print(ids[:20])
         choices = self._get_chosen_ids(ids, choice_positions)
         
         # Save results to the class object (via df to include indexes)
+        self.probabilities = probs
         observations['_choices'] = choices
         self.choices = observations._choices
         
-        # Update Orca    
+        # Update Orca
+        
+        # Print a message about limited usage
     
 
     def run_deprecated(self):
