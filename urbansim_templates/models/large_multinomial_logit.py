@@ -7,8 +7,8 @@ from datetime import datetime as dt
 import orca
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
-#from urbansim.models import MNLDiscreteChoiceModel, util
-#from urbansim.utils import yamlio
+from urbansim.models import MNLDiscreteChoiceModel, util
+from urbansim.utils import yamlio
 
 from .shared import TemplateStep
 from .. import modelmanager as mm
