@@ -357,34 +357,48 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         numalts = self._get_alt_sample_size()
         
-        data = MergedChoiceTable(observations = observations,
-                                 alternatives = alternatives,
-                                 sample_size = numalts)
+        mct = MergedChoiceTable(observations = observations,
+                                alternatives = alternatives,
+                                sample_size = numalts)
+        mct_df = mct.to_frame()
         
         # Data columns need to align with the coefficients
-        dm = patsy.dmatrix(self.model_expression, data=data.to_frame(), 
-                           return_type='dataframe')
+        dm = patsy.dmatrix(self.model_expression, data=mct_df, return_type='dataframe')
         
         # Get probabilities and choices
         probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
-                                            numalts = numalts, returnprobs=True)
+                                 numalts = numalts, returnprobs=True)
 
-        # TO DO - this has to recalculate the probabilities because there's not currently 
-        # a code path to get both at once! - fix this)
+        # TO DO - this ends up recalculating the probabilities because there's not 
+        # currently a code path to get both at once - fix this)
         choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
                                             numalts = numalts, returnprobs=False)
         
-        ids = data.to_frame()[data.alternative_id_col].tolist()
+        ids = mct_df[mct.alternative_id_col].tolist()
         choices = self._get_chosen_ids(ids, choice_positions)
         
         # Save results to the class object (via df to include indexes)
-        self.probabilities = probs
-        observations['_choices'] = choices
-        self.choices = observations._choices
+        mct_df['probability'] = np.reshape(probs, (probs.size, 1))
+        self.probabilities = mct_df[[mct.observation_id_col, 
+                                     mct.alternative_id_col, 'probability']]
+        observations['choice'] = choices
+        self.choices = observations.choice
         
         # Update Orca
+        if self.out_choosers is not None:
+            table = orca.get_table(self.out_choosers)
+        else:
+            table = orca.get_table(self.choosers)
+        
+        if self.out_column is not None:
+            column = self.out_column
+        else:
+            column = self.choice_column
+        
+        table.update_col_from_series(column, observations.choice, cast=True)
         
         # Print a message about limited usage
+        print("Warning: choices are unconstrained; additional functionality in progress")
     
 
     def run_deprecated(self):
