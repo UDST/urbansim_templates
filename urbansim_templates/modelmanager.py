@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from collections import OrderedDict
+
 import orca
 from urbansim.utils import yamlio
 
@@ -9,7 +11,7 @@ from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
 
-MODELMANAGER_VERSION = '0.1dev5'
+MODELMANAGER_VERSION = '0.1.dev6'
 
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
@@ -23,9 +25,7 @@ def main():
     Load steps from disk when the script is first imported.
     
     """
-    # TO DO: is there a better way to handle this?
-    if (len(_STEPS) == 0):
-        load_steps_from_disk()
+    load_steps_from_disk()
     
 
 def get_config_dir():
@@ -51,14 +51,12 @@ def list_steps():
     
     Returns
     -------
-    list of dicts
+    list of dicts, ordered by name
     
     """
-    # TO DO: does this dictionary iteration work in Python 2?
-
-    l = [{'name': d['name'],
-          'type': d['type'],
-          'tags': d['tags']} for d in list(_STEPS.values())]
+    l = [{'name': _STEPS[k]['name'],
+          'type': _STEPS[k]['type'],
+          'tags': _STEPS[k]['tags']} for k in sorted(_STEPS.keys())]
     
     return l
 
@@ -117,11 +115,7 @@ def remove_step(name):
     
     """
     del _STEPS[name]
-    
-    # TO DO: the re-saving isn't working when the list of model steps is empty
-
-    if (len(_STARTUP_QUEUE) == 0):
-        save_steps_to_disk()
+    save_steps_to_disk()
     
 
 def get_step(name):
@@ -146,10 +140,10 @@ def save_steps_to_disk():
     
     """
     headers = {'modelmanager_version': MODELMANAGER_VERSION}
-    body = _STEPS
     
-    content = headers
-    content.update(body)
+    content = OrderedDict(headers)
+    for k in sorted(_STEPS.keys()):
+        content.update({k: _STEPS[k]})
     
     yamlio.convert_to_yaml(content, DISK_STORE)
     
@@ -159,9 +153,6 @@ def load_steps_from_disk():
     Load all model steps from disk and register them with Orca.
     
     """
-    # I'm doing this using a queue so that we can wait until all the pending registrations
-    # are finished before saving back to disk. Is there a better approach?
-    
     _STARTUP_QUEUE = yamlio.yaml_to_dict(str_or_buffer=DISK_STORE)
     reserved_names = ['modelmanager_version']
     
