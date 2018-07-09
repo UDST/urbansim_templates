@@ -12,7 +12,7 @@ from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
 
-MODELMANAGER_VERSION = '0.1.dev7'
+MODELMANAGER_VERSION = '0.1.dev8'
 
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
