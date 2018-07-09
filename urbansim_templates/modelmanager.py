@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 from collections import OrderedDict
 
 import orca
@@ -11,13 +12,13 @@ from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
 
-MODELMANAGER_VERSION = '0.1.dev6'
+MODELMANAGER_VERSION = '0.1.dev7'
 
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
 
 # TO DO - does this work in Windows?
-DISK_STORE = 'configs/modelmanager_configs.yaml'
+_DISK_STORE = 'configs/modelmanager_configs.yaml'
 
 
 def main():
@@ -27,6 +28,21 @@ def main():
     """
     load_steps_from_disk()
     
+
+def initialize(path=_DISK_STORE):
+    """
+    Load saved model steps from disk, and use the specified file as the location for 
+    saving subsequently registered steps. If the specified file is missing or empty, set 
+    it up.
+    
+    Parameters
+    ----------
+    path : str
+        Path to disk store, either absolute or relative to the Python working directory
+    
+    """
+    
+
 
 def get_config_dir():
     """
@@ -42,7 +58,7 @@ def get_config_dir():
     """
     # TO DO - handle case where DISK_STORE is just a file name, no directory path
     
-    return '/'.join(DISK_STORE.split('/')[:-1]) + '/'
+    return '/'.join(_DISK_STORE.split('/')[:-1]) + '/'
 
 
 def list_steps():
@@ -145,7 +161,7 @@ def save_steps_to_disk():
     for k in sorted(_STEPS.keys()):
         content.update({k: _STEPS[k]})
     
-    yamlio.convert_to_yaml(content, DISK_STORE)
+    yamlio.convert_to_yaml(content, _DISK_STORE)
     
     
 def load_steps_from_disk():
@@ -153,7 +169,11 @@ def load_steps_from_disk():
     Load all model steps from disk and register them with Orca.
     
     """
-    _STARTUP_QUEUE = yamlio.yaml_to_dict(str_or_buffer=DISK_STORE)
+    if not os.path.exists(_DISK_STORE):
+        # TO DO - currently modelmanager can initialize in this case but not save steps
+        return
+    
+    _STARTUP_QUEUE = yamlio.yaml_to_dict(str_or_buffer=_DISK_STORE)
     reserved_names = ['modelmanager_version']
     
     while (len(_STARTUP_QUEUE) > 0):
