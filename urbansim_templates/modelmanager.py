@@ -37,6 +37,7 @@ def initialize(path='configs'):
         # TO DO - automatically create directory if run again after warning?
         return
         
+    global _STEPS, _DISK_STORE
     _STEPS = {}  # clear memory
     _DISK_STORE = path  # save initialization path
     
@@ -62,7 +63,7 @@ def initialize(path='configs'):
     
     for d in steps:
         # TO DO - check for this key, to be safe
-        _add_step(d['saved_object'], save_to_disk=False)    
+        add_step(d['saved_object'], save_to_disk=False)    
 
 
 def get_config_dir():
@@ -98,15 +99,15 @@ def list_steps():
     return l
 
 
-def _add_step(d, save_to_disk=True):
+def add_step(d, save_to_disk=True):
     """
     Register a model step from a dictionary representation. This will override any 
     previously registered step with the same name. The step will be registered with Orca 
     and (if save_to_disk==True) written to persistent storage.
     
-    Note: This function is for internal use. In a model building workflow, it's better to
-    use an object's `register()` method to register it with ModelManager and save it to 
-    disk at the same time.
+    Note: This function is intended for internal use. In a model building workflow, it's 
+    better to use an object's `register()` method to register it with ModelManager and 
+    save it to disk at the same time.
     
     Parameters
     ----------
@@ -126,13 +127,10 @@ def _add_step(d, save_to_disk=True):
     # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
     
     if save_to_disk:
-        _save_step(d)
+        save_step(d)
     
     print("Loading model step '{}'".format(d['name']))
     
-    if d['name'] in _STEPS:
-        remove_step(d['name'])
-        
     _STEPS[d['name']] = d
     
     # Create a callable that builds and runs the model step
@@ -143,7 +141,7 @@ def _add_step(d, save_to_disk=True):
     orca.add_step(d['name'], run_step)
         
     
-def _save_step(d):
+def save_step(d):
     """
     Save a model step to disk, over-writing the previous file. The file will be named
     'model-name.yaml' and will be saved to the initialization directory.
@@ -153,7 +151,7 @@ def _save_step(d):
     disk at the same time.
     
     """
-    if not _DISK_STORE:
+    if _DISK_STORE is None:
         print("Please run 'mm.initialize()' before registering new model steps")
         return
     
@@ -165,7 +163,7 @@ def _save_step(d):
     content = OrderedDict(headers)
     content.update({'saved_object': d})
     
-    yamlio.convert_to_yaml(content, _DISK_STORE)
+    yamlio.convert_to_yaml(content, os.path.join(_DISK_STORE, d['name']+'.yaml'))
     
 
 def get_step(name):
