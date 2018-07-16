@@ -17,31 +17,50 @@ MODELMANAGER_VERSION = '0.1.dev8'
 _STEPS = {}  # master repository of steps
 _STARTUP_QUEUE = {}  # steps waiting to be registered
 
-# TO DO - does this work in Windows?
-_DISK_STORE = 'configs/modelmanager_configs.yaml'
+_DISK_STORE = None  # path to saved steps on disk
 
 
-def main():
+def initialize(path='configs'):
     """
-    Load steps from disk when the script is first imported.
-    
-    """
-    load_steps_from_disk()
-    
-
-def initialize(path=_DISK_STORE):
-    """
-    Load saved model steps from disk, and use the specified file as the location for 
-    saving subsequently registered steps. If the specified file is missing or empty, set 
-    it up.
+    Load saved model steps from disk. Each file in the directory will be checked for 
+    compliance with the ModelManager YAML format, and then loaded into memory.
     
     Parameters
     ----------
     path : str
-        Path to disk store, either absolute or relative to the Python working directory
+        Path to config directory, either absolute or relative to the Python working 
+        directory
     
     """
+    if not os.path.exists(path):
+        print("Path '{}' not found".format(path))
+        # TO DO - automatically create directory if run again after warning?
+        return
+        
+    _DISK_STORE = path
     
+    files = []
+    for f in os.listdir(path):
+        if f[-5:] == '.yaml':
+            files.append(os.path.join(path, f))
+    
+    if len(files) == 0:
+        print("No yaml files found in path '{}'".format(path))
+        
+    steps = []
+    for f in files:
+        d = yamlio.yaml_to_dict(str_or_buffer=f)
+        if 'modelmanager_version' in d:
+            # TO DO - fix to work with future versions too
+            if d['modelmanager_version'] == '0.1.dev8':
+                steps.append(d)            
+    
+    if len(steps) == 0:
+        print("No files from ModelManager 0.1.dev8 or later found in path '{}'"\
+                .format(path))
+    
+    for d in steps:
+        add_step(d)    
 
 
 def get_config_dir():
@@ -77,7 +96,7 @@ def list_steps():
     return l
 
 
-def add_step(d):
+def add_step(d, save_to_disk=True):
     """
     Register a model step from a dictionary representation. This will override any 
     previously registered step with the same name. The step will be registered with Orca 
@@ -182,4 +201,3 @@ def load_steps_from_disk():
             add_step(value)
     
 
-main()
