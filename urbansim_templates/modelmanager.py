@@ -14,16 +14,16 @@ from .models import SmallMultinomialLogitStep
 
 MODELMANAGER_VERSION = '0.1.dev8'
 
-_STEPS = {}  # master repository of steps
-_STARTUP_QUEUE = {}  # steps waiting to be registered
-
+_STEPS = {}  # master dictionary of steps in memory
 _DISK_STORE = None  # path to saved steps on disk
 
 
 def initialize(path='configs'):
     """
     Load saved model steps from disk. Each file in the directory will be checked for 
-    compliance with the ModelManager YAML format, and then loaded into memory.
+    compliance with the ModelManager YAML format and then loaded into memory.
+    
+    If run multiple times, steps will be cleared from memory and re-loaded.
     
     Parameters
     ----------
@@ -33,11 +33,12 @@ def initialize(path='configs'):
     
     """
     if not os.path.exists(path):
-        print("Path '{}' not found".format(path))
+        print("Path not found: {}".format(os.path.join(os.getcwd(), path)))
         # TO DO - automatically create directory if run again after warning?
         return
         
-    _DISK_STORE = path
+    _STEPS = {}  # clear memory
+    _DISK_STORE = path  # save initialization path
     
     files = []
     for f in os.listdir(path):
@@ -60,7 +61,8 @@ def initialize(path='configs'):
                 .format(path))
     
     for d in steps:
-        add_step(d)    
+        # TO DO - check for this key, to be safe
+        _add_step(d['saved_object'], save_to_disk=False)    
 
 
 def get_config_dir():
@@ -96,15 +98,20 @@ def list_steps():
     return l
 
 
-def add_step(d, save_to_disk=True):
+def _add_step(d, save_to_disk=True):
     """
     Register a model step from a dictionary representation. This will override any 
     previously registered step with the same name. The step will be registered with Orca 
-    and written to persistent storage.
+    and (if save_to_disk==True) written to persistent storage.
+    
+    Note: This function is for internal use. In a model building workflow, it's better to
+    use an object's `register()` method to register it with ModelManager and save it to 
+    disk at the same time.
     
     Parameters
     ----------
     d : dict
+    save_to_disk : bool
     
     """
     # TO DO - A long-term architecture issue here is that in order to create a class
@@ -118,18 +125,16 @@ def add_step(d, save_to_disk=True):
     # they'll be using, before importing `modelmanager`. Then we can look them up using
     # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
     
-    reserved_names = ['modelmanager_version']
-    if (d['name'] in reserved_names):
-        raise ValueError('Step cannot be registered with ModelManager because "%s" is a reserved name' % (d['name']))
+    if save_to_disk:
+        _save_step(d)
     
-    if (d['name'] in _STEPS):
+    print("Loading model step '{}'".format(d['name']))
+    
+    if d['name'] in _STEPS:
         remove_step(d['name'])
-    
+        
     _STEPS[d['name']] = d
     
-    if (len(_STARTUP_QUEUE) == 0):
-        save_steps_to_disk()
-
     # Create a callable that builds and runs the model step
     def run_step():
         return globals()[d['type']].from_dict(d).run()
@@ -138,19 +143,29 @@ def add_step(d, save_to_disk=True):
     orca.add_step(d['name'], run_step)
         
     
-def remove_step(name):
+def _save_step(d):
     """
-    Remove a model step, by name. It will immediately be removed from ModelManager and 
-    from persistent storage, but will remain registered in Orca until the current 
-    Python process terminates.
+    Save a model step to disk, over-writing the previous file. The file will be named
+    'model-name.yaml' and will be saved to the initialization directory.
     
-    Parameters
-    ----------
-    name : str
+    Note: This function is for internal use. In a model building workflow, it's better to
+    use an object's `register()` method to register it with ModelManager and save it to 
+    disk at the same time.
     
     """
-    del _STEPS[name]
-    save_steps_to_disk()
+    if not _DISK_STORE:
+        print("Please run 'mm.initialize()' before registering new model steps")
+        return
+    
+    print("Saving '{}.yaml': {}".format(d['name'], 
+            os.path.join(os.getcwd(), _DISK_STORE)))
+    
+    headers = {'modelmanager_version': MODELMANAGER_VERSION}
+
+    content = OrderedDict(headers)
+    content.update({'saved_object': d})
+    
+    yamlio.convert_to_yaml(content, _DISK_STORE)
     
 
 def get_step(name):
@@ -166,38 +181,23 @@ def get_step(name):
     RegressionStep or other
     
     """
-    return globals()[_STEPS[name]['type']].from_dict(_STEPS[name])
+    return globals()[_STEPS[name]['type']].from_dict(_STEPS[name])    
 
 
-def save_steps_to_disk():
+def remove_step(name):
     """
-    Save current representation of model steps to disk, over-writing the previous file.
+    Remove a model step, by name. It will immediately be removed from ModelManager and 
+    from disk, but will remain registered in Orca until the current Python process 
+    terminates.
     
-    """
-    headers = {'modelmanager_version': MODELMANAGER_VERSION}
-    
-    content = OrderedDict(headers)
-    for k in sorted(_STEPS.keys()):
-        content.update({k: _STEPS[k]})
-    
-    yamlio.convert_to_yaml(content, _DISK_STORE)
-    
-    
-def load_steps_from_disk():
-    """
-    Load all model steps from disk and register them with Orca.
+    Parameters
+    ----------
+    name : str
     
     """
-    if not os.path.exists(_DISK_STORE):
-        # TO DO - currently modelmanager can initialize in this case but not save steps
-        return
-    
-    _STARTUP_QUEUE = yamlio.yaml_to_dict(str_or_buffer=_DISK_STORE)
-    reserved_names = ['modelmanager_version']
-    
-    while (len(_STARTUP_QUEUE) > 0):
-        key, value = _STARTUP_QUEUE.popitem()
-        if (key not in reserved_names):
-            add_step(value)
-    
+    print("Removing '{}' and '{}.yaml'".format(name, name))
 
+    del _STEPS[name]
+    
+    os.remove(os.path.join(_DISK_STORE, name+'.yaml'))
+    
