@@ -68,23 +68,6 @@ def initialize(path='configs'):
         add_step(d['saved_object'], save_to_disk=False)    
 
 
-def get_config_dir():
-    """
-    Return the config directory, for other services that need to interoperate.
-    
-    TO DO - better way to do this?
-    
-    Returns
-    -------
-    str
-        Includes a trailing backslash
-    
-    """
-    # TO DO - handle case where DISK_STORE is just a file name, no directory path
-    
-    return '/'.join(_DISK_STORE.split('/')[:-1]) + '/'
-
-
 def list_steps():
     """
     Return a list of registered steps, with name, type, and tags for each.
@@ -201,3 +184,15 @@ def remove_step(name):
     
     os.remove(os.path.join(_DISK_STORE, name+'.yaml'))
     
+
+def get_config_dir():
+    """
+    Return the config directory, for other services that need to interoperate.
+    
+    Returns
+    -------
+    str
+    
+    """
+    return _DISK_STORE
+

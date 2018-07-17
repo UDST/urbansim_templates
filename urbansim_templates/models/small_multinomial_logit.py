@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from collections import OrderedDict
+import os
 import pickle
 
 import numpy as np
@@ -209,7 +210,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         
         # Store a pickled version of the PyLogit fitted model
         if self.model is not None:
-            self.model.to_pickle(mm.get_config_dir() + self.name + '.pkl')
+            self.model.to_pickle(os.path.join(mm.get_config_dir(), self.name+'.pkl'))
         
         return d
     
