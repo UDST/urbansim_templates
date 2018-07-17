@@ -53,7 +53,9 @@ def initialize(path='configs'):
     for f in files:
         d = yamlio.yaml_to_dict(str_or_buffer=f)
         if 'modelmanager_version' in d:
-            # TO DO - fix to work with future versions too
+            # TO DO 
+            # - fix to work with future versions too
+            # - check that file name matches object name in the file (and warn if not?)
             if d['modelmanager_version'] == '0.1.dev8':
                 steps.append(d)            
     
