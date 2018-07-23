@@ -273,6 +273,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         The `fit()` method can be run as many times as desired. Results will not be saved
         with Orca or ModelManager until the `register()` method is run.
         
+        After sampling alternatives for each chooser, the merged choice table is saved to 
+        the class object for diagnostic use (`mergedchoicetable` with type
+        choicemodels.tools.MergedChoiceTable).
+        
         """
         # TO DO - update choicemodels to accept a column name for chosen alts
         observations = self._get_df(tables=self.choosers, 
@@ -301,6 +305,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         # For now, just save the summary table and fitted parameters
         coefs = results.get_raw_results()['fit_parameters']['Coefficient']
         self.fitted_parameters = coefs.tolist()
+        
+        # Save merged choice table to the class object for diagnostic use
+        self.mergedchoicetable = data
             
     
     def _get_chosen_ids(self, ids, positions):
