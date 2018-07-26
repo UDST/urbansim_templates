@@ -4,7 +4,7 @@ UrbanSim Templates defines a common structure for new model steps and provides a
 
 The library has two main components. `urbansim_templates.modelmanager` serves as an extension to Orca, handling saving, loading, and registration of template-based model steps. `urbansim_templates.models` contains class definitions for a core set of pre-defined templates.
 
-UrbanSim Templates is currently in pre-release. API documentation is in the docstrings ([modelmanager](), [models]()). There's additional discussion in the [issues]() and in recently merged [pull requests](). Usage examples coming soon. Please feel free to reach out by email or by opening an issue, if you have questions or bug reports!
+UrbanSim Templates is currently in pre-release. API documentation is in the docstrings ([modelmanager](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py), [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models)). There's additional discussion in the [issues](https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue) and in recently merged [pull requests](https://github.com/UDST/urbansim_templates/pulls?utf8=✓&q=is%3Apr). Usage examples coming soon. Please feel free to reach out by email or by opening an issue, if you have questions or bug reports!
 
 Lead developer: Sam Maurer, maurer@berkeley.edu
 
