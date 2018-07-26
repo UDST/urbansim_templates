@@ -1,12 +1,25 @@
-# UrbanSim_Templates
+# UrbanSim Templates
 
-ModelManager is a small extension to UrbanSim that treats model steps as _objects you can interact with_, rather than just functions with inputs and outputs. This enables some nice workflows, such as registration of model steps without needing to add them to a `models.py` file:
+UrbanSim Templates defines a common structure for new model steps and provides a core set of flexible templates and related tools. The goal is to enable smoother model setup, easier code reuse, and improvements to task orchestration. 
+
+The library has two main components. `urbansim_templates.modelmanager` serves as an extension to Orca, handling saving, loading, and registration of template-based model steps. `urbansim_templates.models` contains class definitions for a core set of pre-defined templates.
+
+UrbanSim Templates is currently in pre-release. API documentation is in the docstrings ([modelmanager](), [models]()). There's additional discussion in the [issues]() and in recently merged [pull requests](). Usage examples coming soon. Please feel free to reach out by email or by opening an issue, if you have questions or bug reports!
+
+Lead developer: Sam Maurer, maurer@berkeley.edu
+
+
+## Workflow overview
+
+UrbanSim Templates treats model steps as _objects you can interact with_, rather than just functions with inputs and outputs. This enables some nice workflows, such as registration of model steps without needing to add them to a `models.py` file:
 
 ```py
 from urbansim_templates import modelmanager as mm
 from urbansim_templates.models import OLSRegressionStep
 
-model = OLSRegressionStep('name', parameters)
+mm.initialize()
+
+model = OLSRegressionStep(<parameters>)
 model.fit()
 model.register()
 
@@ -51,16 +64,6 @@ To work with ModelManager, a model step class needs to implement the following f
 
 4. Ability to register itself with ModelManager (a `register()` method) -- just a single line of code, implemented by combining the prior three capabilities
 
-#### Where's the code?
-
-If you look in the [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models) directory you'll see an OLS model step class called `OLSRegressionStep` that implements these features on top of an existing UrbanSim regression model class. 
-
-The [modelmanager.py](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py) file handles centralized saving and loading of the configs. 
-
-#### Where are model steps saved to?
-
-In an UrbanSim project directory, the steps saved by ModelManager will show up in a file called `modelmanager_configs.yaml`.
-
 
 ## Installation
 
@@ -71,53 +74,8 @@ python setup.py develop
 ```
 
 
-## User's guide
-
-Demo notebook: [Demo.ipynb](https://github.com/ual/urbansim_parcel_bayarea/blob/master/notebooks-sam/Demo.ipynb)
-
-Choose a directory to work in, ideally an existing UrbanSim project since ModelManager cannot yet load data into Orca on its own.
-
-For building and registering model steps, use: 
-
-```py
-from urbansim_templates.models import OLSRegressionStep
-```
-
-For loading or inspecting previously saved model steps, use:
-
-```py
-from urbansim_templates import modelmanager as mm
-```
-
-For example, adding `import urbansim_templates` to the top of a file like `simulation.py` will automatically give Orca access to all previously saved steps in the same project directory.
-
-Please refer to the Python files for details of the current API. 
-
-
-## Developer's guide
+## Developer guide
 
 Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
 
-
-## Roadmap
-
-Here's a rough development wish list. See issues for more details, and feel free to claim an issue or open new ones.
-
-#### Infrastructure:
-
-- integration with Jupyter Lab in the cloud
-- unit tests and continuous integration hooks
-- documentation, releases, distribution details
-
-#### Features:
-
-- `datamanager.py` to support loading data and generating computed columns using a similar workflow (Sam M) 
-- various TO DO items in the code
-- class for network aggregation model steps
-- classes for transition steps and other loose ends
-- class for developer model if feasible
-
-#### Applications:
-
-- notebooks demonstrating how to set up each piece of a model
 
