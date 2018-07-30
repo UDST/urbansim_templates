@@ -84,6 +84,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         Filters to apply to the alternatives data before fitting the model. These are 
         passed to `pd.DataFrame.query()`. Filters are applied after any additional tables 
         are merged onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
+        Choosers whose chosen alternative is removed by these filters will not be included
+        in the model estimation.
 
     out_choosers : str or list of str, optional
         Name(s) of Orca tables to draw choice scenario data from, for simulation. If not 

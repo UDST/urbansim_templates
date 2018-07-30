@@ -159,6 +159,14 @@ class OLSRegressionStep(TemplateStep):
         """
         Fit the model; save and report results.
         
+        This currently uses the `RegressionModel` class from core UrbanSim. We save the 
+        model object for prediction and interactive use (`model`, with type
+        `urbansim.models.regression.RegressionModel`).
+        
+        For example, you can use this to get a latex version of the summary table using
+        `m.model.model_fit.summary().as_latex()`. This may change in the future if we 
+        refactor the template to use StatsModels directly.
+        
         """
         self.model = RegressionModel(model_expression=self.model_expression,
                 fit_filters=self.filters, predict_filters=self.out_filters,
