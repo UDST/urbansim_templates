@@ -14,7 +14,7 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
-TEMPLATE_VERSION = '0.1dev1'
+TEMPLATE_VERSION = '0.1dev2'
 
 class LargeMultinomialLogitStep(TemplateStep):
     """

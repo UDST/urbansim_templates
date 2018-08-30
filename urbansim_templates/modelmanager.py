@@ -14,7 +14,7 @@ from .models import SmallMultinomialLogitStep
 from .utils import version_greater_or_equal
 
 
-MODELMANAGER_VERSION = '0.1.dev8'
+MODELMANAGER_VERSION = '0.1.dev9'
 
 _STEPS = {}  # master dictionary of steps in memory
 _DISK_STORE = None  # path to saved steps on disk
