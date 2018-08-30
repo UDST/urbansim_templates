@@ -11,8 +11,10 @@ from .models import BinaryLogitStep
 from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
+from .utils import version_greater_or_equal
 
-MODELMANAGER_VERSION = '0.1.dev8'
+
+MODELMANAGER_VERSION = '0.1.dev9'
 
 _STEPS = {}  # master dictionary of steps in memory
 _DISK_STORE = None  # path to saved steps on disk
@@ -53,10 +55,10 @@ def initialize(path='configs'):
     for f in files:
         d = yamlio.yaml_to_dict(str_or_buffer=f)
         if 'modelmanager_version' in d:
-            # TO DO 
-            # - fix to work with future versions too
-            # - check that file name matches object name in the file (and warn if not?)
-            if d['modelmanager_version'] == '0.1.dev8':
+            # TO DO - check that file name matches object name in the file?
+            if version_greater_or_equal(d['modelmanager_version'], '0.1.dev8'):
+                # This is the version that switched from a single file to multiple files
+                # with one object stored in each
                 steps.append(d)            
     
     if len(steps) == 0:

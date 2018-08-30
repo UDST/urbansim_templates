@@ -14,7 +14,7 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
-TEMPLATE_VERSION = '0.1dev1'
+TEMPLATE_VERSION = '0.1dev2'
 
 class LargeMultinomialLogitStep(TemplateStep):
     """
@@ -267,7 +267,7 @@ class LargeMultinomialLogitStep(TemplateStep):
             return n_minus_1
     
     
-    def fit(self):
+    def fit(self, mct=None):
         """
         Fit the model; save and report results. This uses the ChoiceModels estimation 
         engine (originally from UrbanSim MNL).
@@ -279,20 +279,36 @@ class LargeMultinomialLogitStep(TemplateStep):
         the class object for diagnostic use (`mergedchoicetable` with type
         choicemodels.tools.MergedChoiceTable).
         
+        Parameters
+        ----------
+        mct : choicemodels.tools.MergedChoiceTable
+            This parameter is a temporary backdoor allowing us to pass in a more 
+            complicated merged choice table than can be generated within the template, for
+            example including sampling weights or interaction terms. This will work for 
+            model estimation, but is not yet hooked up to the prediction functionality.
+        
+        Returns
+        -------
+        None
+        
         """
-        # TO DO - update choicemodels to accept a column name for chosen alts
-        observations = self._get_df(tables=self.choosers, 
-                                    filters=self.chooser_filters)
+        if (mct is not None):
+            data = mct
+            
+        else:        
+            # TO DO - update choicemodels to accept a column name for chosen alts
+            observations = self._get_df(tables=self.choosers, 
+                                        filters=self.chooser_filters)
         
-        chosen = observations[self.choice_column]
+            chosen = observations[self.choice_column]
         
-        alternatives = self._get_df(tables = self.alternatives, 
-                                    filters = self.alt_filters)
+            alternatives = self._get_df(tables = self.alternatives, 
+                                        filters = self.alt_filters)
         
-        data = MergedChoiceTable(observations = observations,
-                                 alternatives = alternatives,
-                                 chosen_alternatives = chosen,
-                                 sample_size = self._get_alt_sample_size())
+            data = MergedChoiceTable(observations = observations,
+                                     alternatives = alternatives,
+                                     chosen_alternatives = chosen,
+                                     sample_size = self._get_alt_sample_size())
         
         model = MultinomialLogit(data = data.to_frame(),
                                  observation_id_col = data.observation_id_col, 
