@@ -74,8 +74,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
 
     chooser_sample_size : int, optional
-        Number of choosers to sample, for performance improvement when fitting the model. 
-        Sampling is random and may vary between model runs.
+        Number of choosers to sample, for faster model fitting. Sampling is random and may 
+        vary between model runs.
 
     alt_filters : str or list of str, optional
         Filters to apply to the alternatives data before fitting the model. These are 
