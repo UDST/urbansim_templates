@@ -22,6 +22,8 @@ orca.add_table('alts', alts)
 
 
 def test_observation_sampling():
+    mm.initialize()
+
     m = LargeMultinomialLogitStep()
     m.choosers = 'obs'
     m.alternatives = 'alts'
@@ -34,3 +36,12 @@ def test_observation_sampling():
     m.chooser_sample_size = 5
     m.fit()
     assert(len(m.mergedchoicetable.to_frame()) == 95)  # 100 after fixing alt sampling
+    
+    m.name = 'mnl-test'
+    m.register()
+    
+    mm.initialize()
+    m = mm.get_step('mnl-test')
+    assert(m.chooser_sample_size == 5)
+    
+    mm.remove_step('mnl-test')
