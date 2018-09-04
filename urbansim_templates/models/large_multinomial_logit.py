@@ -308,6 +308,9 @@ class LargeMultinomialLogitStep(TemplateStep):
             observations = self._get_df(tables=self.choosers, 
                                         filters=self.chooser_filters)
         
+            if (self.chooser_sample_size is not None):
+                observations = observations.sample(self.chooser_sample_size)
+            
             chosen = observations[self.choice_column]
         
             alternatives = self._get_df(tables = self.alternatives, 
