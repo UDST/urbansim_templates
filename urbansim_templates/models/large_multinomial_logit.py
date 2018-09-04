@@ -14,7 +14,7 @@ from .shared import TemplateStep
 from .. import modelmanager as mm
 
 
-TEMPLATE_VERSION = '0.1dev2'
+TEMPLATE_VERSION = '0.1.dev3'
 
 class LargeMultinomialLogitStep(TemplateStep):
     """
@@ -68,17 +68,14 @@ class LargeMultinomialLogitStep(TemplateStep):
         parameter is required for fitting a model, but it does not have to be provided
         when the object is created. Not required for simulation.
         
-    alt_sample_size : int, optional
-        Numer of alternatives to sample for each choice scenario. For now, only random 
-        sampling is supported. If this parameter is not provided, we will use a sample
-        size of one less than the total number of alternatives. (ChoiceModels codebase
-        currently requires sampling.) The same sample size is used for estimation and
-        prediction.
-
     chooser_filters : str or list of str, optional
         Filters to apply to the chooser data before fitting the model. These are passed to 
         `pd.DataFrame.query()`. Filters are applied after any additional tables are merged 
         onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
+
+    chooser_sample_size : int, optional
+        Number of choosers to sample, for faster model fitting. Sampling is random and may 
+        vary between model runs.
 
     alt_filters : str or list of str, optional
         Filters to apply to the alternatives data before fitting the model. These are 
@@ -86,6 +83,13 @@ class LargeMultinomialLogitStep(TemplateStep):
         are merged onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
         Choosers whose chosen alternative is removed by these filters will not be included
         in the model estimation.
+
+    alt_sample_size : int, optional
+        Numer of alternatives to sample for each choice scenario. For now, only random 
+        sampling is supported. If this parameter is not provided, we will use a sample
+        size of one less than the total number of alternatives. (ChoiceModels codebase
+        currently requires sampling.) The same sample size is used for estimation and
+        prediction.
 
     out_choosers : str or list of str, optional
         Name(s) of Orca tables to draw choice scenario data from, for simulation. If not 
@@ -121,9 +125,10 @@ class LargeMultinomialLogitStep(TemplateStep):
     
     """
     def __init__(self, choosers=None, alternatives=None, model_expression=None, 
-            choice_column=None, alt_sample_size=None, chooser_filters=None, 
-            alt_filters=None, out_choosers=None, out_alternatives=None, out_column=None, 
-            out_chooser_filters=None, out_alt_filters=None, name=None, tags=[]):
+            choice_column=None, chooser_filters=None, chooser_sample_size=None,
+            alt_filters=None, alt_sample_size=None, out_choosers=None, 
+            out_alternatives=None, out_column=None, out_chooser_filters=None, 
+            out_alt_filters=None, name=None, tags=[]):
         
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=None, model_expression=model_expression, 
@@ -136,9 +141,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.choosers = choosers
         self.alternatives = alternatives
         self.choice_column = choice_column
-        self.alt_sample_size = alt_sample_size
         self.chooser_filters = chooser_filters
+        self.chooser_sample_size = chooser_sample_size
         self.alt_filters = alt_filters
+        self.alt_sample_size = alt_sample_size
         self.out_choosers = out_choosers
         self.out_alternatives = out_alternatives
         self.out_chooser_filters = out_chooser_filters
@@ -166,10 +172,11 @@ class LargeMultinomialLogitStep(TemplateStep):
         # Pass values from the dictionary to the __init__() method
         obj = cls(choosers=d['choosers'], alternatives=d['alternatives'], 
             model_expression=d['model_expression'], choice_column=d['choice_column'], 
-            alt_sample_size=d['alt_sample_size'], chooser_filters=d['chooser_filters'], 
-            alt_filters=d['alt_filters'], out_choosers=d['out_choosers'], 
-            out_alternatives=d['out_alternatives'], out_column=d['out_column'], 
-            out_chooser_filters=d['out_chooser_filters'], 
+            chooser_filters=d['chooser_filters'], 
+            chooser_sample_size=d['chooser_sample_size'],
+            alt_filters=d['alt_filters'], alt_sample_size=d['alt_sample_size'], 
+            out_choosers=d['out_choosers'], out_alternatives=d['out_alternatives'], 
+            out_column=d['out_column'], out_chooser_filters=d['out_chooser_filters'], 
             out_alt_filters=d['out_alt_filters'], name=d['name'], tags=d['tags'])
 
         # Load model fit data
@@ -196,9 +203,10 @@ class LargeMultinomialLogitStep(TemplateStep):
             'alternatives': self.alternatives,
             'model_expression': self.model_expression,
             'choice_column': self.choice_column,
-            'alt_sample_size': self.alt_sample_size,
             'chooser_filters': self.chooser_filters,
+            'chooser_sample_size': self.chooser_sample_size,
             'alt_filters': self.alt_filters,
+            'alt_sample_size': self.alt_sample_size,
             'out_choosers': self.out_choosers,
             'out_alternatives': self.out_alternatives,
             'out_column': self.out_column,
@@ -300,6 +308,9 @@ class LargeMultinomialLogitStep(TemplateStep):
             observations = self._get_df(tables=self.choosers, 
                                         filters=self.chooser_filters)
         
+            if (self.chooser_sample_size is not None):
+                observations = observations.sample(self.chooser_sample_size)
+            
             chosen = observations[self.choice_column]
         
             alternatives = self._get_df(tables = self.alternatives, 

@@ -1,0 +1,1 @@
+This folder stores configs that are temporarily generated during tests.
