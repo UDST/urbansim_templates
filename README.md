@@ -7,7 +7,7 @@ The library has two main components. `urbansim_templates.modelmanager` serves as
 UrbanSim Templates is currently in pre-release. API documentation is in the Python code ([modelmanager](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py), [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models)). There's additional discussion in the [issues](https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue) and in recently merged [pull requests](https://github.com/UDST/urbansim_templates/pulls?utf8=✓&q=is%3Apr). 
 
 
-### Installation
+## Installation
 
 You can follow the setup instructions in [UAL/urbansim_parcel_bayarea](https://github.com/ual/urbansim_parcel_bayarea) to create a conda environment with everything you need for working in the UrbanSim Templates ecosystem.
 
@@ -20,12 +20,12 @@ python setup.py develop
 ```
 
 
-### Bug reports
+## Bug reports
 
 Open an issue, or contact Sam (maurer@urbansim.com).
 
 
-### Usage overview
+## Usage overview
 
 [Initialization-demo.ipynb](https://github.com/ual/urbansim_parcel_bayarea/blob/master/general-notebooks/Initialization-demo.ipynb)
 
@@ -57,9 +57,9 @@ Prior to ModelManager, the equivalent workflow would be to (1) estimate a model,
 ModelManager works directly with the current versions of [UrbanSim](https://github.com/udst/urbansim) and [Orca](https://github.com/udst/orca), and is fully interoperable with existing UrbanSim projects and model steps. 
 
 
-### Design patterns for template development
+## Design patterns for template development
 
-- Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
+- Let's keep the master branch of this library clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible. There's a writeup of our general Git workflow [over here](https://github.com/ual/urbansim_parcel_bayarea/wiki/Git-workflows-and-tips).
 
 - Each substantive PR should increment the developer build number of the library, e.g. `0.1.dev0` -> `0.1.dev1`. The production release at the end of this sequence would be `0.1`, which would be followed by `0.2.dev0`. The library version number is saved in any yaml files a user creates, for troubleshooting and managing format changes.
 
@@ -103,4 +103,4 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 
 - Each new template class needs to be imported by name into `modelmanager.py`, for now. See discussion [here](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py#L105-L114).
 
-- We don't have design patterns yet for templates whose final output is to _generate_ DataFrames or Series, rather than modifying existing ones, but this is a high priority.
+- We don't have design patterns yet for templates whose final output is to _generate_ DataFrames or Series, rather than modifying existing ones, but we're working on it.
