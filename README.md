@@ -4,12 +4,30 @@ UrbanSim Templates defines a common structure for new model steps and provides a
 
 The library has two main components. `urbansim_templates.modelmanager` serves as an extension to Orca, handling saving, loading, and registration of template-based model steps. `urbansim_templates.models` contains class definitions for a core set of pre-defined templates.
 
-UrbanSim Templates is currently in pre-release. API documentation is in the docstrings ([modelmanager](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py), [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models)). There's additional discussion in the [issues](https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue) and in recently merged [pull requests](https://github.com/UDST/urbansim_templates/pulls?utf8=✓&q=is%3Apr). Usage examples coming soon. Please feel free to reach out by email or by opening an issue, if you have questions or bug reports!
+UrbanSim Templates is currently in pre-release. API documentation is in the docstrings ([modelmanager](https://github.com/UDST/urbansim_templates/blob/master/urbansim_templates/modelmanager.py), [models](https://github.com/UDST/urbansim_templates/tree/master/urbansim_templates/models)). There's additional discussion in the [issues](https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue) and in recently merged [pull requests](https://github.com/UDST/urbansim_templates/pulls?utf8=✓&q=is%3Apr). 
 
-Lead developer: Sam Maurer, maurer@berkeley.edu
+Basic usage: [Initialization-demo.ipynb](https://github.com/ual/urbansim_parcel_bayarea/blob/master/general-notebooks/Initialization-demo.ipynb)
 
 
-## Workflow overview
+### Installation
+
+You can follow the setup instructions in [UAL/urbansim_parcel_bayarea](https://github.com/ual/urbansim_parcel_bayarea) to create a conda environment with everything you need for working in the UrbanSim Templates ecosystem.
+
+If you already have most of it installed, this should be sufficient:
+
+```
+git clone https://github.com/udst/urbansim_templates.git
+cd urbansim_templates
+python setup.py develop
+```
+
+
+### Bug reports
+
+Open an issue, or contact Sam.
+
+
+### Workflow overview
 
 UrbanSim Templates treats model steps as _objects you can interact with_, rather than just functions with inputs and outputs. This enables some nice workflows, such as registration of model steps without needing to add them to a `models.py` file:
 
@@ -39,7 +57,7 @@ Prior to ModelManager, the equivalent workflow would be to (1) estimate a model,
 ModelManager works directly with the current versions of [UrbanSim](https://github.com/udst/urbansim) and [Orca](https://github.com/udst/orca), and is fully interoperable with existing UrbanSim projects and model steps. 
 
 
-## Long-term vision
+### Long-term vision
 
 The goal with this is to make it easier to develop UrbanSim templates -- combinations of data schemas and model steps that we can use in multiple projects without requiring too much customization. 
 
@@ -50,7 +68,7 @@ There are side benefits as well: easier experimentation with model specification
 The tradeoff is that model steps from a template class will not be as flexible as general-purpose Orca steps. But since there is a lot of commonality among UrbanSim implementations, it should get us pretty far.
 
 
-## How it works
+### How it works
 
 To work with ModelManager, a model step class needs to implement the following features:
 
@@ -65,17 +83,14 @@ To work with ModelManager, a model step class needs to implement the following f
 4. Ability to register itself with ModelManager (a `register()` method) -- just a single line of code, implemented by combining the prior three capabilities
 
 
-## Installation
 
-```
-git clone https://github.com/udst/urbansim_templates.git
-cd urbansim_templates
-python setup.py develop
-```
-
-
-## Developer guide
+### Developer guide
 
 Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
 
+
+### Design patterns
+
+
+#### Shared code
 
