@@ -61,5 +61,15 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 
 - Let's keep the master branch clean and runnable. To make fixes or add features, create a new branch, and open a pull request when you're ready to merge code into master. Have someone else review it before merging, if possible.
 
-- A template should be a Python class that can (a) save itself to a dict, (b) rebuild itself from a dict using a method named `from_dict()`, (c) run itself using a method named `run()`, and (d) register itself with `modelmanager` using a method named `register()`.
+- A template is a Python class that conforms to the following spec:
 
+   1. can save itself to a dict  
+   2. can rebuild itself from a dict using a method named `from_dict()`  
+   3. can run itself using a method named `run()`  
+   4. can register itself with `modelmanager` using a method named `register()`
+
+- ModelManager (`/urbansim_templates/modelmanager.py`) handles saving and reloading of template instances, aka model steps. It also registers them as Orca objects. 
+
+- Each substantive PR should increment the developer build number of the library, e.g. `0.1.dev0` -> `0.1.dev1`. The production release at the end of this sequence would be `0.1`, which would be followed by `0.2.dev0`. The library version number is saved in yaml files, for troubleshooting and managing format changes.
+
+   The version number needs to be updated in both `/setup.py` and `/urbansim_templates/__init__.py`. See further discussion in [issue #35](https://github.com/UDST/urbansim_templates/issues/35).
