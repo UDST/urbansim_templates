@@ -94,7 +94,7 @@ class TemplateStep(object):
         
         """
         d = {
-            'template': self.type,
+            'template': self.template,
             'template_version': self.template_version,
             'name': self.name,
             'tags': self.tags,
