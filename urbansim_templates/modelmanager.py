@@ -11,7 +11,7 @@ from .models import BinaryLogitStep
 from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
-from __init__ import __version__
+from .__init__ import __version__
 from .utils import version_greater_or_equal
 
 
@@ -166,7 +166,7 @@ def get_step(name):
     RegressionStep or other
     
     """
-    return globals()[_STEPS[name]['type']].from_dict(_STEPS[name])    
+    return globals()[_STEPS[name]['template']].from_dict(_STEPS[name])    
 
 
 def remove_step(name):

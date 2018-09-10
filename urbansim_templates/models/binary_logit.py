@@ -8,8 +8,10 @@ from statsmodels.api import Logit
 
 import orca
 
-from .shared import TemplateStep
+from ..__init__ import __version__
 from .. import modelmanager as mm
+
+from .shared import TemplateStep
 
 
 TEMPLATE_VERSION = '0.1dev1'
