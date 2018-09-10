@@ -9,6 +9,7 @@ import orca
 from urbansim.models import util
 
 from .. import modelmanager as mm
+from ..__init__ import __version__
 
 
 class TemplateStep(object):
@@ -53,7 +54,8 @@ class TemplateStep(object):
         self.name = name
         self.tags = tags
         
-        self.type = type(self).__name__  # class name
+        self.template = type(self).__name__  # class name
+        self.template_version = __version__
                 
 
     @classmethod
@@ -92,8 +94,8 @@ class TemplateStep(object):
         
         """
         d = {
-            'type': self.type,
-            'version': self.version,
+            'template': self.template,
+            'template_version': self.template_version,
             'name': self.name,
             'tags': self.tags,
             'tables': self.tables,
@@ -321,8 +323,8 @@ class TemplateStep(object):
         str
         
         """
-        if (self.name is None) or (self.type in self.name):
-            return self.type + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
+        if (self.name is None) or (self.template in self.name):
+            return self.template + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
         else:
             return self.name
 
