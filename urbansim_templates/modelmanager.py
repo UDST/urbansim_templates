@@ -11,10 +11,9 @@ from .models import BinaryLogitStep
 from .models import LargeMultinomialLogitStep
 from .models import SmallMultinomialLogitStep
 
+from __init__ import __version__
 from .utils import version_greater_or_equal
 
-
-MODELMANAGER_VERSION = '0.1.dev10'
 
 _STEPS = {}  # master dictionary of steps in memory
 _DISK_STORE = None  # path to saved steps on disk
@@ -50,6 +49,7 @@ def initialize(path='configs'):
     
     if len(files) == 0:
         print("No yaml files found in path '{}'".format(path))
+        return
         
     steps = []
     for f in files:
@@ -145,7 +145,7 @@ def save_step(d):
     print("Saving '{}.yaml': {}".format(d['name'], 
             os.path.join(os.getcwd(), _DISK_STORE)))
     
-    headers = {'modelmanager_version': MODELMANAGER_VERSION}
+    headers = {'modelmanager_version': __version__}
 
     content = OrderedDict(headers)
     content.update({'saved_object': d})
