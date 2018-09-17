@@ -203,13 +203,29 @@ class SmallMultinomialLogitStep(TemplateStep):
             'summary_table': self.summary_table
         })
         
-        # Store a pickled version of the PyLogit fitted model
-        # TO DO - a method called to_dict() should not be writing to the filesystem
-        if self.model is not None:
-            self.model.to_pickle(os.path.join(mm.get_config_dir(), self.name+'.pkl'))
-        
         return d
     
+    
+    def get_extra_payloads(self):
+        """
+        Returns additional payloads beyond the dictionary representation of the object,
+        for storage by ModelManager or other purposes. 
+        
+        Each item is returned as a tuple whose contents are an object, the payload type,
+        and an indication of whether storing the item is required or optional.
+        
+        Returns
+        -------
+        list of tuples with format (object, str, bool)
+        
+        """
+        payloads = []
+        
+        if self.model is not None:
+            payloads.append(self.model, 'pickle', True)  # PyLogit fitted model
+        
+        return payloads
+        
     
     def _get_alts(self):
         """
