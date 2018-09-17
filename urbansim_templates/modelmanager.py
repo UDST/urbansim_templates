@@ -86,15 +86,25 @@ def list_steps():
     return l
 
 
+def register(step):
+    """
+    Register a model step with ModelManager and Orca. This includes saving it to disk so
+    it can be automatically loaded in the future.
+    
+    Registering a step will overwrite any previously loaded step with the same name.
+    
+    Parameters
+    ----------
+    step : ModelManager-compliant object with a `to_dict()` method.
+    
+    """
+    add_step(step.to_dict())
+
+
 def add_step(d, save_to_disk=True):
     """
-    Register a model step from a dictionary representation. This will override any 
-    previously registered step with the same name. The step will be registered with Orca 
-    and (if save_to_disk==True) written to persistent storage.
-    
-    Note: This function is intended for internal use. In a model building workflow, it's 
-    better to use an object's `register()` method to register it with ModelManager and 
-    save it to disk at the same time.
+    Internal function for adding a model step from a dictionary representation, and 
+    optionally saving it to disk.
     
     Parameters
     ----------

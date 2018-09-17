@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from urbansim_templates import modelmanager as mm
+from urbansim_templates import modelmanager
 from urbansim_templates.models import BinaryLogitStep
 
 
@@ -19,7 +19,7 @@ def test_binary_logit():
     For now this just tests that the code runs.
     
     """
-    mm.initialize()
+    modelmanager.initialize()
 
     m = BinaryLogitStep()
     m.tables = 'obs'
@@ -28,9 +28,9 @@ def test_binary_logit():
     m.fit()
     
     m.name = 'binary-test'
-    m.register()
+    modelmanager.register(m)
     
-    mm.initialize()
-    m = mm.get_step('binary-test')
+    modelmanager.initialize()
+    m = modelmanager.get_step('binary-test')
     
-    mm.remove_step('binary-test')
+    modelmanager.remove_step('binary-test')

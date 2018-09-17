@@ -9,7 +9,6 @@ from statsmodels.api import Logit
 import orca
 
 from .shared import TemplateStep
-from .. import modelmanager as mm
 
 
 class BinaryLogitStep(TemplateStep):
@@ -249,17 +248,3 @@ class BinaryLogitStep(TemplateStep):
         orca.get_table(tabname).update_col_from_series(colname, df[colname], cast=True)
         
         
-    def register(self):
-        """
-        Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it can be automatically loaded in the future. 
-        
-        Registering a step will rewrite any previously saved step with the same name. 
-        (If a custom name has not been provided, one is generated each time the `fit()` 
-        method runs.)
-                
-        """
-        d = self.to_dict()
-        mm.add_step(d)
-
-     
