@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from collections import OrderedDict
 
-from urbansim_templates import modelmanager as mm
+from urbansim_templates import modelmanager
 from urbansim_templates.models import SmallMultinomialLogitStep
 
 
@@ -21,7 +21,7 @@ def test_small_mnl():
     For now this just tests that the code runs.
     
     """
-    mm.initialize()
+    modelmanager.initialize()
 
     m = SmallMultinomialLogitStep()
     m.tables = 'obs'
@@ -32,9 +32,9 @@ def test_small_mnl():
     m.fit()
     
     m.name = 'small-mnl-test'
-    m.register()
+    modelmanager.register(m)
     
-    mm.initialize()
-    m = mm.get_step('small-mnl-test')
+    modelmanager.initialize()
+    m = modelmanager.get_step('small-mnl-test')
     
-    mm.remove_step('small-mnl-test')
+    modelmanager.remove_step('small-mnl-test')

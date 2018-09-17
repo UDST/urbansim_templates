@@ -11,7 +11,6 @@ from choicemodels import MultinomialLogit
 import orca
 
 from .shared import TemplateStep
-from .. import modelmanager as mm
 
 
 class SmallMultinomialLogitStep(TemplateStep):
@@ -205,6 +204,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         })
         
         # Store a pickled version of the PyLogit fitted model
+        # TO DO - a method called to_dict() should not be writing to the filesystem
         if self.model is not None:
             self.model.to_pickle(os.path.join(mm.get_config_dir(), self.name+'.pkl'))
         
@@ -384,18 +384,4 @@ class SmallMultinomialLogitStep(TemplateStep):
 
         tabname = self._get_out_table()
         orca.get_table(tabname).update_col_from_series(colname, df._choices, cast=True)
-
-
-    def register(self):
-        """
-        Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it can be automatically loaded in the future. 
-        
-        Registering a step will rewrite any previously saved step with the same name. 
-        (If a custom name has not been provided, one is generated each time the `fit()` 
-        method runs.)
-                
-        """
-        d = self.to_dict()
-        mm.add_step(d)
 

@@ -8,7 +8,6 @@ from datetime import datetime as dt
 import orca
 from urbansim.models import util
 
-from .. import modelmanager as mm
 from ..__init__ import __version__
 
 

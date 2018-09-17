@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from urbansim_templates import modelmanager as mm
+from urbansim_templates import modelmanager
 from urbansim_templates.models import LargeMultinomialLogitStep
 
 
@@ -22,7 +22,7 @@ orca.add_table('alts', alts)
 
 
 def test_observation_sampling():
-    mm.initialize()
+    modelmanager.initialize()
 
     m = LargeMultinomialLogitStep()
     m.choosers = 'obs'
@@ -38,10 +38,10 @@ def test_observation_sampling():
     assert(len(m.mergedchoicetable.to_frame()) == 95)  # 100 after fixing alt sampling
     
     m.name = 'mnl-test'
-    m.register()
+    modelmanager.register(m)
     
-    mm.initialize()
-    m = mm.get_step('mnl-test')
+    modelmanager.initialize()
+    m = modelmanager.get_step('mnl-test')
     assert(m.chooser_sample_size == 5)
     
-    mm.remove_step('mnl-test')
+    modelmanager.remove_step('mnl-test')
