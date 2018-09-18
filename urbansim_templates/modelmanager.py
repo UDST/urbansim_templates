@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import copy
 from collections import OrderedDict
 
 import orca
@@ -73,17 +74,50 @@ def initialize(path='configs'):
 
 def build_step(d):
     """
-    Build a model step object from a dictionary representation. This includes loading
-    non-dict content from disk.
+    Build a model step object from a saved dictionary. This includes loading supplemental
+    objects from disk.
     
     Parameters
     ----------
     d : dict
         Representation of a model step.
     
+    Returns
+    -------
+    object
+    
     """
-    # TO DO - HANDLE NON-DICT CONTENT
+    if 'supplemental_objects' in d:
+        for i, item in enumerate(d['supplemental_objects']):
+            object = load_supplemental_object(d['name'], **item)
+            d['supplemental_objects'][i] = object
+    
     return globals()[d['template']].from_dict(d)
+    
+
+def load_supplemental_object(step_name, name, content_type, required=True):
+    """
+    Load a supplemental object from disk.
+    
+    Parameters
+    ----------
+    step_name : str
+        Name of the associated model step.
+    name : str
+        Name of the supplemental object.
+    content_type : str
+        Currently supports 'pickle'.
+    required : bool, optional
+        Whether the supplemental object is required (not yet supported).
+    
+    Returns
+    -------
+    object
+    
+    """
+    if content_type is 'pickle':
+        with open(os.path.join(_disk_store, step_name+'-'+name+'.pkl'), 'rb') as f:
+            return pickle.load(f)
     
 
 def register(step, save_to_disk=True):
@@ -150,35 +184,43 @@ def save_step_to_disk(step):
     print("Saving '{}.yaml': {}".format(step.name, 
             os.path.join(os.getcwd(), _disk_store)))
     
+    d = step.to_dict()
+    
+    # Save supplemental objects
+    if 'supplemental_objects' in d:
+        for item in filter(None, d['supplemental_objects']):
+            save_supplemental_object(step.name, **item)
+            del item['content']
+    
+    # Save main yaml file
     headers = {'modelmanager_version': __version__}
 
     content = OrderedDict(headers)
-    content.update({'saved_object': step.to_dict()})
+    content.update({'saved_object': d})
     
     yamlio.convert_to_yaml(content, os.path.join(_disk_store, step.name+'.yaml'))
     
-    # TO DO - HANDLE NON-DICT CONTENT
-    
 
-def save_nondict_content(object, name, content_type, required=True):
+def save_supplemental_object(step_name, name, content, content_type, required=True):
     """
-    Save additional content to disk beyond the dictionary representation of a model step.
-    Currently, only pickled objects are supported.
+    Save a supplemental object to disk.
     
     Parameters
     ----------
-    object : obj
-        Object to save.
+    step_name : str
+        Name of the associated model step.
     name : str
-        Filename without extension.
-    content_type : 'pickle'
-        Content type.
-    required : bool
-        Indication of whether storing the item is required or optional.
+        Name of the supplemental object.
+    content : obj
+        Object to save.
+    content_type : str
+        Currently supports 'pickle'.
+    required : bool, optional
+        Whether the supplemental object is required (not yet supported).
     
     """
     if content_type is 'pickle':
-        object.to_pickle(os.path.join(_disk_store, name+'.pkl'))
+        content.to_pickle(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
         
 
 def get_step(name):
@@ -194,7 +236,7 @@ def get_step(name):
     RegressionStep or other
     
     """
-    return _steps[name]
+    return copy.deepcopy(_steps[name])
 
 
 def remove_step(name):
@@ -209,12 +251,35 @@ def remove_step(name):
     
     """
     print("Removing '{}' and '{}.yaml'".format(name, name))
+    
+    d = _steps[name].to_dict()
+    
+    if 'supplemental_objects' in d:
+        for item in filter(None, d['supplemental_objects']):
+            remove_supplemental_object(name, item.name, item.content_type)
 
     del _steps[name]
-    
     os.remove(os.path.join(_disk_store, name+'.yaml'))
     
-    # TO DO - ALSO REMOVE NON-DICT CONTENT
+
+def remove_supplemental_object(step_name, name, content_type):
+    """
+    Remove a supplemental object from disk.
+    
+    Parameters
+    ----------
+    step_name : str
+        Name of the associated model step.
+    name : str
+        Name of the supplemental object.
+    content_type : str
+        Currently supports 'pickle'.
+    
+    """
+    # TO DO - check that the file exists first
+    
+    if content_type is 'pickle':
+        os.remove(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
     
 
 def get_config_dir():

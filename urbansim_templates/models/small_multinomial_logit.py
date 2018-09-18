@@ -156,11 +156,10 @@ class SmallMultinomialLogitStep(TemplateStep):
                 
         obj.summary_table = d['summary_table']
         
-        try:
-            with open(mm.get_config_dir() + d['name'] + '.pkl', 'rb') as f:
-                obj.model = pickle.load(f)
-        except:
-            pass
+        if 'supplemental_objects' in d:
+            for item in filter(None, d['supplemental_objects']):
+                if item['name'] is 'model-object':
+                    obj.model = item['content']
         
         return obj
 
@@ -168,9 +167,6 @@ class SmallMultinomialLogitStep(TemplateStep):
     def to_dict(self):
         """
         Create a dictionary representation of the object.
-        
-        For the timebeing, this template class needs to store a pickled copy of a PyLogit
-        model to disk. This is performed whenever the `to_dict()` method is run.
         
         Returns
         -------
@@ -203,29 +199,18 @@ class SmallMultinomialLogitStep(TemplateStep):
             'summary_table': self.summary_table
         })
         
+        # Add supplemental objects
+        objects = []
+        if self.model is not None:
+            objects.append({'name': 'model-object',
+                            'content': self.model,
+                            'content_type': 'pickle',
+                            'required': True})
+
+        d.update({'supplemental_objects': objects})
+        
         return d
     
-    
-    def get_extra_payloads(self):
-        """
-        Returns additional payloads beyond the dictionary representation of the object,
-        for storage by ModelManager or other purposes. 
-        
-        Each item is returned as a tuple whose contents are an object, the payload type,
-        and an indication of whether storing the item is required or optional.
-        
-        Returns
-        -------
-        list of tuples with format (object, str, bool)
-        
-        """
-        payloads = []
-        
-        if self.model is not None:
-            payloads.append(self.model, 'pickle', True)  # PyLogit fitted model
-        
-        return payloads
-        
     
     def _get_alts(self):
         """
