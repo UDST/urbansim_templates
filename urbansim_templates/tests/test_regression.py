@@ -7,14 +7,16 @@ from urbansim_templates import modelmanager
 from urbansim_templates.models import OLSRegressionStep
 
 
-d1 = {'a': np.random.random(100),
-      'b': np.random.random(100)}
+@pytest.fixture
+def orca_session():
+    d1 = {'a': np.random.random(100),
+          'b': np.random.random(100)}
 
-obs = pd.DataFrame(d1)
-orca.add_table('obs', obs)
+    obs = pd.DataFrame(d1)
+    orca.add_table('obs', obs)
 
 
-def test_ols():
+def test_ols(orca_session):
     """
     For now this just tests that the code runs.
     
