@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os
 import copy
+import pickle
 from collections import OrderedDict
 
 import orca
@@ -89,8 +90,8 @@ def build_step(d):
     """
     if 'supplemental_objects' in d:
         for i, item in enumerate(d['supplemental_objects']):
-            object = load_supplemental_object(d['name'], **item)
-            d['supplemental_objects'][i] = object
+            content = load_supplemental_object(d['name'], **item)
+            d['supplemental_objects'][i]['content'] = content
     
     return globals()[d['template']].from_dict(d)
     
@@ -115,7 +116,7 @@ def load_supplemental_object(step_name, name, content_type, required=True):
     object
     
     """
-    if content_type is 'pickle':
+    if (content_type == 'pickle'):
         with open(os.path.join(_disk_store, step_name+'-'+name+'.pkl'), 'rb') as f:
             return pickle.load(f)
     
@@ -132,17 +133,6 @@ def register(step, save_to_disk=True):
     step : object
     
     """
-    # TO DO - A long-term architecture issue here is that in order to create a class
-    # object, we need to have already loaded the template definition. This is no problem
-    # as long as all the templates are defined within `urbansim_templates`, because we can 
-    # import them manually. But how should we handle it when we have arbitrary templates 
-    # defined elsewhere? One approach would be to include the template location as an 
-    # attribute in the yaml, and then import the necessary classes using `eval()`. But 
-    # this opens us up to arbitrary code execution, which may not be very safe for a web 
-    # service. Another approach would be to require users to import all the templates
-    # they'll be using, before importing `modelmanager`. Then we can look them up using
-    # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
-    
     if save_to_disk:
         save_step_to_disk(step)
     
@@ -256,7 +246,7 @@ def remove_step(name):
     
     if 'supplemental_objects' in d:
         for item in filter(None, d['supplemental_objects']):
-            remove_supplemental_object(name, item.name, item.content_type)
+            remove_supplemental_object(name, item['name'], item['content_type'])
 
     del _steps[name]
     os.remove(os.path.join(_disk_store, name+'.yaml'))

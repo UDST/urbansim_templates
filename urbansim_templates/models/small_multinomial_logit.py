@@ -158,7 +158,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         
         if 'supplemental_objects' in d:
             for item in filter(None, d['supplemental_objects']):
-                if item['name'] is 'model-object':
+                if (item['name'] == 'model-object'):
                     obj.model = item['content']
         
         return obj
