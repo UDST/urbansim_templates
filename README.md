@@ -27,7 +27,7 @@ Open an issue, or contact Sam (maurer@urbansim.com).
 
 ## Usage overview
 
-[Initialization-demo.ipynb](https://github.com/ual/urbansim_parcel_bayarea/blob/master/general-notebooks/Initialization-demo.ipynb)
+[Initialization-demo.ipynb](https://github.com/UDST/public-template-workspace/blob/master/notebooks-sam/2018-07-initialization-demo.ipynb)
 
 UrbanSim Templates treats model steps as _objects you can interact with_, rather than just functions with inputs and outputs. This enables some nice workflows, such as registration of model steps without needing to add them to a `models.py` file:
 
