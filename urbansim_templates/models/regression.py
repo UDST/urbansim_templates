@@ -8,9 +8,11 @@ import orca
 from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
+from .. import modelmanager
 from .shared import TemplateStep
 
 
+@modelmanager.template
 class OLSRegressionStep(TemplateStep):
     """
     A class for building OLS (ordinary least squares) regression model steps. This extends 

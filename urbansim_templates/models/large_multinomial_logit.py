@@ -10,9 +10,11 @@ from choicemodels import mnl
 from choicemodels import MultinomialLogit
 from choicemodels.tools import MergedChoiceTable
 
+from .. import modelmanager
 from .shared import TemplateStep
 
 
+@modelmanager.template
 class LargeMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
