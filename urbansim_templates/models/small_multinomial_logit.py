@@ -11,7 +11,6 @@ from choicemodels import MultinomialLogit
 import orca
 
 from .shared import TemplateStep
-from .. import modelmanager as mm
 
 
 class SmallMultinomialLogitStep(TemplateStep):
@@ -157,11 +156,10 @@ class SmallMultinomialLogitStep(TemplateStep):
                 
         obj.summary_table = d['summary_table']
         
-        try:
-            with open(mm.get_config_dir() + d['name'] + '.pkl', 'rb') as f:
-                obj.model = pickle.load(f)
-        except:
-            pass
+        if 'supplemental_objects' in d:
+            for item in filter(None, d['supplemental_objects']):
+                if (item['name'] == 'model-object'):
+                    obj.model = item['content']
         
         return obj
 
@@ -169,9 +167,6 @@ class SmallMultinomialLogitStep(TemplateStep):
     def to_dict(self):
         """
         Create a dictionary representation of the object.
-        
-        For the timebeing, this template class needs to store a pickled copy of a PyLogit
-        model to disk. This is performed whenever the `to_dict()` method is run.
         
         Returns
         -------
@@ -204,9 +199,15 @@ class SmallMultinomialLogitStep(TemplateStep):
             'summary_table': self.summary_table
         })
         
-        # Store a pickled version of the PyLogit fitted model
+        # Add supplemental objects
+        objects = []
         if self.model is not None:
-            self.model.to_pickle(os.path.join(mm.get_config_dir(), self.name+'.pkl'))
+            objects.append({'name': 'model-object',
+                            'content': self.model,
+                            'content_type': 'pickle',
+                            'required': True})
+
+        d.update({'supplemental_objects': objects})
         
         return d
     
@@ -384,18 +385,4 @@ class SmallMultinomialLogitStep(TemplateStep):
 
         tabname = self._get_out_table()
         orca.get_table(tabname).update_col_from_series(colname, df._choices, cast=True)
-
-
-    def register(self):
-        """
-        Register the model step with Orca and the ModelManager. This includes saving it
-        to disk so it can be automatically loaded in the future. 
-        
-        Registering a step will rewrite any previously saved step with the same name. 
-        (If a custom name has not been provided, one is generated each time the `fit()` 
-        method runs.)
-                
-        """
-        d = self.to_dict()
-        mm.add_step(d)
 

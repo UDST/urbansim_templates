@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import os
+import copy
+import pickle
 from collections import OrderedDict
 
 import orca
@@ -15,8 +17,8 @@ from .__init__ import __version__
 from .utils import version_greater_or_equal
 
 
-_STEPS = {}  # master dictionary of steps in memory
-_DISK_STORE = None  # path to saved steps on disk
+_steps = {}  # master dictionary of steps in memory
+_disk_store = None  # path to saved steps on disk
 
 
 def initialize(path='configs'):
@@ -38,9 +40,9 @@ def initialize(path='configs'):
         # TO DO - automatically create directory if run again after warning?
         return
         
-    global _STEPS, _DISK_STORE
-    _STEPS = {}  # clear memory
-    _DISK_STORE = path  # save initialization path
+    global _steps, _disk_store
+    _steps = {}  # clear memory
+    _disk_store = path  # save initialization path
     
     files = []
     for f in os.listdir(path):
@@ -67,91 +69,149 @@ def initialize(path='configs'):
     
     for d in steps:
         # TO DO - check for this key, to be safe
-        add_step(d['saved_object'], save_to_disk=False)    
+        step = build_step(d['saved_object'])
+        register(step, save_to_disk=False)
 
 
+def build_step(d):
+    """
+    Build a model step object from a saved dictionary. This includes loading supplemental
+    objects from disk.
+    
+    Parameters
+    ----------
+    d : dict
+        Representation of a model step.
+    
+    Returns
+    -------
+    object
+    
+    """
+    if 'supplemental_objects' in d:
+        for i, item in enumerate(d['supplemental_objects']):
+            content = load_supplemental_object(d['name'], **item)
+            d['supplemental_objects'][i]['content'] = content
+    
+    return globals()[d['template']].from_dict(d)
+    
+
+def load_supplemental_object(step_name, name, content_type, required=True):
+    """
+    Load a supplemental object from disk.
+    
+    Parameters
+    ----------
+    step_name : str
+        Name of the associated model step.
+    name : str
+        Name of the supplemental object.
+    content_type : str
+        Currently supports 'pickle'.
+    required : bool, optional
+        Whether the supplemental object is required (not yet supported).
+    
+    Returns
+    -------
+    object
+    
+    """
+    if (content_type == 'pickle'):
+        with open(os.path.join(_disk_store, step_name+'-'+name+'.pkl'), 'rb') as f:
+            return pickle.load(f)
+    
+
+def register(step, save_to_disk=True):
+    """
+    Register a model step with ModelManager and Orca. This includes saving it to disk,
+    optionally, so it can be automatically loaded in the future.
+    
+    Registering a step will overwrite any previously loaded step with the same name.
+    
+    Parameters
+    ----------
+    step : object
+    
+    """
+    if save_to_disk:
+        save_step_to_disk(step)
+    
+    print("Registering model step '{}'".format(step.name))
+    
+    _steps[step.name] = step
+    
+    # Create a callable that runs the model step, and register it with orca
+    def run_step():
+        return step.run()
+        
+    orca.add_step(step.name, run_step)
+        
+    
 def list_steps():
     """
-    Return a list of registered steps, with name, type, and tags for each.
+    Return a list of registered steps, with name, template, and tags for each.
     
     Returns
     -------
     list of dicts, ordered by name
     
     """
-    l = [{'name': _STEPS[k]['name'],
-          'type': _STEPS[k]['type'],
-          'tags': _STEPS[k]['tags']} for k in sorted(_STEPS.keys())]
+    return [{'name': _steps[k].name,
+             'template': type(_steps[k]).__name__,
+             'tags': _steps[k].tags} for k in sorted(_steps.keys())]
     
-    return l
 
-
-def add_step(d, save_to_disk=True):
-    """
-    Register a model step from a dictionary representation. This will override any 
-    previously registered step with the same name. The step will be registered with Orca 
-    and (if save_to_disk==True) written to persistent storage.
-    
-    Note: This function is intended for internal use. In a model building workflow, it's 
-    better to use an object's `register()` method to register it with ModelManager and 
-    save it to disk at the same time.
-    
-    Parameters
-    ----------
-    d : dict
-    save_to_disk : bool
-    
-    """
-    # TO DO - A long-term architecture issue here is that in order to create a class
-    # object, we need to have already loaded the template definition. This is no problem
-    # as long as all the templates are defined within `urbansim_templates`, because we can 
-    # import them manually. But how should we handle it when we have arbitrary templates 
-    # defined elsewhere? One approach would be to include the template location as an 
-    # attribute in the yaml, and then import the necessary classes using `eval()`. But 
-    # this opens us up to arbitrary code execution, which may not be very safe for a web 
-    # service. Another approach would be to require users to import all the templates
-    # they'll be using, before importing `modelmanager`. Then we can look them up using
-    # `globals()[class_name]`. Safer, but less convenient. Must be other solutions too.
-    
-    if save_to_disk:
-        save_step(d)
-    
-    print("Loading model step '{}'".format(d['name']))
-    
-    _STEPS[d['name']] = d
-    
-    # Create a callable that builds and runs the model step
-    def run_step():
-        return globals()[d['type']].from_dict(d).run()
-        
-    # Register it with Orca
-    orca.add_step(d['name'], run_step)
-        
-    
-def save_step(d):
+def save_step_to_disk(step):
     """
     Save a model step to disk, over-writing the previous file. The file will be named
     'model-name.yaml' and will be saved to the initialization directory.
     
-    Note: This function is for internal use. In a model building workflow, it's better to
-    use an object's `register()` method to register it with ModelManager and save it to 
-    disk at the same time.
-    
     """
-    if _DISK_STORE is None:
-        print("Please run 'mm.initialize()' before registering new model steps")
+    if _disk_store is None:
+        print("Please run 'modelmanager.initialize()' before registering new model steps")
         return
     
-    print("Saving '{}.yaml': {}".format(d['name'], 
-            os.path.join(os.getcwd(), _DISK_STORE)))
+    print("Saving '{}.yaml': {}".format(step.name, 
+            os.path.join(os.getcwd(), _disk_store)))
     
+    d = step.to_dict()
+    
+    # Save supplemental objects
+    if 'supplemental_objects' in d:
+        for item in filter(None, d['supplemental_objects']):
+            save_supplemental_object(step.name, **item)
+            del item['content']
+    
+    # Save main yaml file
     headers = {'modelmanager_version': __version__}
 
     content = OrderedDict(headers)
     content.update({'saved_object': d})
     
-    yamlio.convert_to_yaml(content, os.path.join(_DISK_STORE, d['name']+'.yaml'))
+    yamlio.convert_to_yaml(content, os.path.join(_disk_store, step.name+'.yaml'))
     
+
+def save_supplemental_object(step_name, name, content, content_type, required=True):
+    """
+    Save a supplemental object to disk.
+    
+    Parameters
+    ----------
+    step_name : str
+        Name of the associated model step.
+    name : str
+        Name of the supplemental object.
+    content : obj
+        Object to save.
+    content_type : str
+        Currently supports 'pickle'.
+    required : bool, optional
+        Whether the supplemental object is required (not yet supported).
+    
+    """
+    if content_type is 'pickle':
+        content.to_pickle(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
+        
 
 def get_step(name):
     """
@@ -166,7 +226,7 @@ def get_step(name):
     RegressionStep or other
     
     """
-    return globals()[_STEPS[name]['template']].from_dict(_STEPS[name])    
+    return copy.deepcopy(_steps[name])
 
 
 def remove_step(name):
@@ -181,10 +241,35 @@ def remove_step(name):
     
     """
     print("Removing '{}' and '{}.yaml'".format(name, name))
-
-    del _STEPS[name]
     
-    os.remove(os.path.join(_DISK_STORE, name+'.yaml'))
+    d = _steps[name].to_dict()
+    
+    if 'supplemental_objects' in d:
+        for item in filter(None, d['supplemental_objects']):
+            remove_supplemental_object(name, item['name'], item['content_type'])
+
+    del _steps[name]
+    os.remove(os.path.join(_disk_store, name+'.yaml'))
+    
+
+def remove_supplemental_object(step_name, name, content_type):
+    """
+    Remove a supplemental object from disk.
+    
+    Parameters
+    ----------
+    step_name : str
+        Name of the associated model step.
+    name : str
+        Name of the supplemental object.
+    content_type : str
+        Currently supports 'pickle'.
+    
+    """
+    # TO DO - check that the file exists first
+    
+    if content_type is 'pickle':
+        os.remove(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
     
 
 def get_config_dir():
@@ -196,5 +281,5 @@ def get_config_dir():
     str
     
     """
-    return _DISK_STORE
+    return _disk_store
 
