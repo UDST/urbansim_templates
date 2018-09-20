@@ -75,6 +75,7 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
    2. can rebuild itself from a dict using a method named `from_dict()`  
    3. can execute a configured version of itself using a method named `run()`  
    4. accepts parameters `name` (str) and `tags` (list of str)
+   5. uses the `@modelmanager.template` decorator
 
 - ModelManager (`/urbansim_templates/modelmanager.py`) handles saving and reloading of configured template instances, aka model steps. It also registers them as Orca objects. 
 
