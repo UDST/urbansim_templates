@@ -240,8 +240,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         return self.__alternatives
 
     @alternatives.setter
-    def alternatives(self, alternatives):
-        self.__alternatives = self._normalize_table_param(alternatives)            
+    def alternatives(self, value):
+        self.__alternatives = self._normalize_table_param(value)            
+        self.send_to_listeners('alternatives', value)
     
     @property
     def out_choosers(self):

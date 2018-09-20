@@ -9,47 +9,41 @@ from .. import modelmanager
 from . import LargeMultinomialLogitStep
 
 
-class LargeMultinomialLogitDefaults(LargeMultinomialLogitStep):
-    """
-    This class extends LargeMultinomialLogitStep to 
-    
-    """
-    def __init__(self, *args, **kwargs):
-        self._listeners = []
-        LargeMultinomialLogitStep.__init__(self, *args, **kwargs)
-    
-    def bind_to(self, callback):
-        self._listeners.append(callback)
-    
-    def send_to_listeners(self, param, value):
-        for callback in self._listeners:
-            callback(param, value)
-    
-    @property
-    def model_expression(self):
-        return super(LargeMultinomialLogitStep, self).model_expression
-        
-    @model_expression.setter
-    def model_expression(self, value):
-        super(LargeMultinomialLogitStep, self.__class__).model_expression.fset(self, value)
-        self.send_to_listeners('model_expression', value)
-        
-        
-
 @modelmanager.template
 class SegmentedLargeMultinomialLogitStep():
     """
+    Questions
+    - would you prefer submodels to be a dict indexed by the segmentation value, rather
+      than a list as currently?
     
-    If you set a property of the "default" model, it is immediately passed down to the 
-    submodels. 
+    Generating submodels: The first time you run "build_submodels()" or "fit_all()",
+    submodels will be generated based on the `segmentation_column` and the current
+    properties of the `defaults` object.
     
+    Accessing submodels: 
+    - After they're generated, you can access the individual submodel objects through the 
+      `submodels` property (list of LargeMultinomialLogitSteps).
     
+    Editing a submodel: 
+    - Feel free to modify individual submodels as desired, except for the limitations 
+      described below.
+    
+    Editing all submodels: 
+    - Changing a property of the `defaults` object will update that property for all of 
+      the submodels, without affecting other customizations.
+    
+    Limitations: 
+    - The submodels are implemented by applying filters to the choosers table. If a prior 
+      filter exists, the submodel filters will be added to it. The `chooser_filters` and 
+      `out_chooser_filters` cannot be changed after submodels are generated. 
+        
     
     Parameters
     ----------
     defaults : LargeMultinomialLogitStep, optional
     
     segmentation_column : str, optional
+        Name of column in the choosers table.
     
     name : str, optional
     
@@ -67,59 +61,83 @@ class SegmentedLargeMultinomialLogitStep():
         self.submodels = [LargeMultinomialLogitStep(), LargeMultinomialLogitStep()]
     
     
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create an object instance from a saved dictionary representation.
+        
+        Parameters
+        ----------
+        d : dict
+        
+        Returns
+        -------
+        SegmentedLargeMultinomialLogitStep
+        
+        """
+        # TO DO - implement
+        pass
+    
+    
+    def to_dict(self):
+        """
+        Create a dictionary representation of the object.
+        
+        Returns
+        -------
+        dict
+        
+        """
+        d = {
+            'template': self.template,
+            'template_version': self.template_version,
+            'name': self.name,
+            'tags': self.tags,
+            'defaults': self.defaults.to_dict(),
+            'submodels': [m.to_dict() for m in self.submodels]
+        }
+        return d
+    
+    
+    def build_submodels(self):
+        """
+        Create a submodel for each category of choosers indicated by the segmentation
+        column. (This column should contain categorical values.)
+        
+        Running this method will overwrite any previous submodels. It can be run as many
+        times as desired.
+        
+        """
+        # TO DO - implement
+        self.submodels = []
+        
+    
     def update_submodels(self, param, value):
         """
-        Updates a property across all the submodels. This function is bound to the 
+        Updates a property across all the submodels. This method is bound to the 
         `defaults` object and runs automatically when one of its properties is changed.
+        
+        Parameters
+        ----------
+        param : str
+            Property name.
+        value : anything
         
         """
         for m in self.submodels:
             setattr(m, param, value)
     
     
-    @property
-    def defaults(self):
-        return self.__defaults
-    
-    
-    @defaults.setter
-    def defaults(self, value):
-        self.__defaults = value
-    
-    
-    @classmethod
-    def from_dict(cls, d):
-        pass
-    
-    
-    def to_dict(self):
-        pass
-    
-    
-    def build_submodels(self):
-        """
-        
-        
-        Expected class parameters
-        -------------------------
-        segmentation_column
-        
-        """
-        
-    
     def fit_all(self):
         """
-        
-        Parameters
-        ----------
-        update_with_default_params : bool, optional
-            If True, runs `update_submodels()` before fitting.
+        Fit all the submodels. This method can be run as many times as desired.
         
         """
         if (len(self.submodels) == 0):
             self.build_submodels()
         
-        pass
+        for m in self.submodels:
+            m.fit()
     
     
     def run(self):
