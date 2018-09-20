@@ -128,6 +128,8 @@ class LargeMultinomialLogitStep(TemplateStep):
             out_alternatives=None, out_column=None, out_chooser_filters=None, 
             out_alt_filters=None, name=None, tags=[]):
         
+        self._listeners = []
+        
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=None, model_expression=model_expression, 
                 filters=None, out_tables=None, out_column=out_column, out_transform=None, 
@@ -151,6 +153,15 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = None
 
 
+    def bind_to(self, callback):
+        self._listeners.append(callback)
+    
+    
+    def send_to_listeners(self, param, value):
+        for callback in self._listeners:
+            callback(param, value)
+    
+    
     @classmethod
     def from_dict(cls, d):
         """
@@ -220,8 +231,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         return self.__choosers
 
     @choosers.setter
-    def choosers(self, choosers):
-        self.__choosers = self._normalize_table_param(choosers)
+    def choosers(self, value):
+        self.__choosers = self._normalize_table_param(value)
+        self.send_to_listeners('choosers', value)
             
     @property
     def alternatives(self):

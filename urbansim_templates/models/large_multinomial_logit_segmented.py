@@ -9,20 +9,15 @@ from .. import modelmanager
 from . import LargeMultinomialLogitStep
 
 
-class MyData():
-    def __init__(self):
-        self._listeners = []
-        self.a = 0
+class LargeMultinomialLogitDefaults(LargeMultinomialLogitStep):
+    """
+    This class extends LargeMultinomialLogitStep to 
     
-    @property
-    def a(self):
-        return self.__a
-        
-    @a.setter
-    def a(self, value):
-        self.__a = value
-        self.send_to_listeners('a', value)
-        
+    """
+    def __init__(self, *args, **kwargs):
+        self._listeners = []
+        LargeMultinomialLogitStep.__init__(self, *args, **kwargs)
+    
     def bind_to(self, callback):
         self._listeners.append(callback)
     
@@ -30,8 +25,15 @@ class MyData():
         for callback in self._listeners:
             callback(param, value)
     
-    def __repr__(self):
-        return str(self.a)
+    @property
+    def model_expression(self):
+        return super(LargeMultinomialLogitStep, self).model_expression
+        
+    @model_expression.setter
+    def model_expression(self, value):
+        super(LargeMultinomialLogitStep, self.__class__).model_expression.fset(self, value)
+        self.send_to_listeners('model_expression', value)
+        
         
 
 @modelmanager.template
@@ -42,9 +44,6 @@ class SegmentedLargeMultinomialLogitStep():
     submodels. 
     
     
-    Challenges
-    - how to dynamically pass parameters from the defaults to the individual models,
-      while maintaining the ability to NOT use defaults as well?
     
     Parameters
     ----------
@@ -59,15 +58,24 @@ class SegmentedLargeMultinomialLogitStep():
     """
     def __init__(self, defaults=None, segmentation_column=None, name=None, tags=[]):
         
-        self.defaults = MyData()
+        if defaults is None:
+            defaults = LargeMultinomialLogitStep()
+        
+        self.defaults = defaults
         self.defaults.bind_to(self.update_submodels)
         
-        self.submodels = [MyData(), MyData()]
+        self.submodels = [LargeMultinomialLogitStep(), LargeMultinomialLogitStep()]
     
     
     def update_submodels(self, param, value):
+        """
+        Updates a property across all the submodels. This function is bound to the 
+        `defaults` object and runs automatically when one of its properties is changed.
+        
+        """
         for m in self.submodels:
-            m.a = value
+            setattr(m, param, value)
+    
     
     @property
     def defaults(self):
