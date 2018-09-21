@@ -226,10 +226,11 @@ class LargeMultinomialLogitStep(TemplateStep):
         return d
 
 
+    # TO DO - there has got to be a less verbose way to handle getting and setting
+    
     @property
     def choosers(self):
         return self.__choosers
-
     @choosers.setter
     def choosers(self, value):
         self.__choosers = self._normalize_table_param(value)
@@ -238,28 +239,99 @@ class LargeMultinomialLogitStep(TemplateStep):
     @property
     def alternatives(self):
         return self.__alternatives
-
     @alternatives.setter
     def alternatives(self, value):
-        self.__alternatives = self._normalize_table_param(value)            
+        self.__alternatives = self._normalize_table_param(value)
         self.send_to_listeners('alternatives', value)
     
     @property
+    def model_expression(self):
+        return self.__model_expression
+    @model_expression.setter
+    def model_expression(self, value):
+        self.__model_expression = value
+        self.send_to_listeners('model_expression', value)
+    
+    @property
+    def choice_column(self):
+        return self.__choice_column
+    @choice_column.setter
+    def choice_column(self, value):
+        self.__choice_column = value
+        self.send_to_listeners('choice_column', value)
+    
+    @property
+    def chooser_filters(self):
+        return self.__chooser_filters
+    @chooser_filters.setter
+    def chooser_filters(self, value):
+        self.__chooser_filters = value
+        self.send_to_listeners('chooser_filters', value)
+            
+    @property
+    def chooser_sample_size(self):
+        return self.__chooser_sample_size
+    @chooser_sample_size.setter
+    def chooser_sample_size(self, value):
+        self.__chooser_sample_size = value
+        self.send_to_listeners('chooser_sample_size', value)
+            
+    @property
+    def alt_filters(self):
+        return self.__alt_filters
+    @alt_filters.setter
+    def alt_filters(self, value):
+        self.__alt_filters = value
+        self.send_to_listeners('alt_filters', value)
+
+    @property
+    def alt_sample_size(self):
+        return self.__alt_sample_size
+    @alt_sample_size.setter
+    def alt_sample_size(self, value):
+        self.__alt_sample_size = value
+        self.send_to_listeners('alt_sample_size', value)
+
+    @property
     def out_choosers(self):
         return self.__out_choosers
-
     @out_choosers.setter
-    def out_choosers(self, out_choosers):
-        self.__out_choosers = self._normalize_table_param(out_choosers)
+    def out_choosers(self, value):
+        self.__out_choosers = self._normalize_table_param(value)
+        self.send_to_listeners('out_choosers', value)
             
     @property
     def out_alternatives(self):
         return self.__out_alternatives
-
     @out_alternatives.setter
-    def out_alternatives(self, out_alternatives):
-        self.__out_alternatives = self._normalize_table_param(out_alternatives)            
+    def out_alternatives(self, value):
+        self.__out_alternatives = self._normalize_table_param(value)            
+        self.send_to_listeners('out_alternatives', value)
     
+    @property
+    def out_column(self):
+        return self.__out_column
+    @out_column.setter
+    def out_column(self, value):
+        self.__out_column = value
+        self.send_to_listeners('out_column', value)
+            
+    @property
+    def out_chooser_filters(self):
+        return self.__out_chooser_filters
+    @out_chooser_filters.setter
+    def out_chooser_filters(self, value):
+        self.__out_chooser_filters = value
+        self.send_to_listeners('out_chooser_filters', value)
+            
+    @property
+    def out_alt_filters(self):
+        return self.__out_alt_filters
+    @out_alt_filters.setter
+    def out_alt_filters(self, value):
+        self.__out_alt_filters = value
+        self.send_to_listeners('out_alt_filters', value)
+            
             
     def _get_alt_sample_size(self):
         """

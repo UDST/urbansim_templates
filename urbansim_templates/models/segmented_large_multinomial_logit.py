@@ -58,7 +58,7 @@ class SegmentedLargeMultinomialLogitStep():
         self.defaults = defaults
         self.defaults.bind_to(self.update_submodels)
         
-        self.submodels = []  # TO DO - this should be a dict, actually
+        self.submodels = {}
     
     
     @classmethod
@@ -94,7 +94,7 @@ class SegmentedLargeMultinomialLogitStep():
             'name': self.name,
             'tags': self.tags,
             'defaults': self.defaults.to_dict(),
-            'submodels': [m.to_dict() for m in self.submodels]
+            'submodels': {k: m.to_dict() for k, m in self.submodels.items()}
         }
         return d
     
@@ -119,7 +119,7 @@ class SegmentedLargeMultinomialLogitStep():
         as many times as desired.
         
         """
-        self.submodels = []
+        self.submodels = {}
 
         col = self.get_segmentation_column()
         # TO DO - need to apply any existing chooser filters to the column first
@@ -142,7 +142,7 @@ class SegmentedLargeMultinomialLogitStep():
                 model.chooser_filters = filter
             
             # TO DO - same for out_chooser_filters
-            self.submodels.append(model)
+            self.submodels[cat] = model
         
     
     def update_submodels(self, param, value):
@@ -157,7 +157,7 @@ class SegmentedLargeMultinomialLogitStep():
         value : anything
         
         """
-        for m in self.submodels:
+        for k, m in self.submodels.items():
             setattr(m, param, value)
     
     
@@ -170,7 +170,7 @@ class SegmentedLargeMultinomialLogitStep():
         if (len(self.submodels) == 0):
             self.build_submodels()
         
-        for m in self.submodels:
+        for k, m in self.submodels.items():
             m.fit()
     
     
