@@ -14,9 +14,7 @@ from . import LargeMultinomialLogitStep
 @modelmanager.template
 class SegmentedLargeMultinomialLogitStep():
     """
-    Questions
-    - would you prefer submodels to be a dict indexed by the segmentation value, rather
-      than a list as currently?
+    TO DO - finish documentation
     
     Generating submodels: 
     - The first time you run "build_submodels()" or "fit_all()", submodels will be 
@@ -28,8 +26,7 @@ class SegmentedLargeMultinomialLogitStep():
       `submodels` property (list of LargeMultinomialLogitSteps).
     
     Editing a submodel: 
-    - Feel free to modify individual submodels as desired, except for the limitations 
-      described below.
+    - Feel free to modify individual submodels as desired.
     
     Editing all submodels: 
     - Changing a property of the `defaults` object will update that property for all of 
@@ -37,8 +34,7 @@ class SegmentedLargeMultinomialLogitStep():
     
     Limitations: 
     - The submodels are implemented by applying filters to the choosers table. If a prior 
-      filter exists, the submodel filters will be added to it. The `chooser_filters` and 
-      `out_chooser_filters` cannot be changed after submodels are generated. 
+      filter exists, the submodel filters will be added to it.
         
     
     Parameters
@@ -62,7 +58,7 @@ class SegmentedLargeMultinomialLogitStep():
         self.defaults = defaults
         self.defaults.bind_to(self.update_submodels)
         
-        self.submodels = []
+        self.submodels = []  # TO DO - this should be a dict, actually
     
     
     @classmethod
@@ -126,6 +122,7 @@ class SegmentedLargeMultinomialLogitStep():
         self.submodels = []
 
         col = self.get_segmentation_column()
+        # TO DO - need to apply any existing chooser filters to the column first
         cats = col.astype('category').cat.categories.values
         print("Building submodels for {} categories: {}".format(len(cats), cats))
         
