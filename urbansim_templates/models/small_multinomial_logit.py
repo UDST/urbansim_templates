@@ -10,11 +10,12 @@ import pandas as pd
 from choicemodels import MultinomialLogit
 import orca
 
+from .. import modelmanager
 from .shared import TemplateStep
 
 from .. import modelmanager
 
-@modelmanager.register_templates
+@modelmanager.template
 class SmallMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is

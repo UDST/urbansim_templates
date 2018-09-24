@@ -8,13 +8,14 @@ import orca
 from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
+
 from sklearn.ensemble import RandomForestRegressor
 
+from .. import modelmanager
 from .shared import TemplateStep
 
-from .. import modelmanager
 
-@modelmanager.register_templates
+@modelmanager.template
 class OLSRegressionStep(TemplateStep):
     """
     A class for building OLS (ordinary least squares) regression model steps. This extends 
@@ -205,7 +206,7 @@ class OLSRegressionStep(TemplateStep):
 
         orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
 		
-@modelmanager.register_templates		
+@modelmanager.template		
 class RandomForestRegressionStep(OLSRegressionStep):
 
 	@classmethod

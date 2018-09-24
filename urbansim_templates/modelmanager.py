@@ -12,17 +12,26 @@ from .__init__ import __version__
 from .utils import version_greater_or_equal
 
 
-_steps = {}  # master dictionary of steps in memory
+_templates = {}  # global registry of template classes
+_steps = {}  # global registry of model steps in memory
 _disk_store = None  # path to saved steps on disk
 
 global _templates
 _templates = {}
 
-def register_templates(cls):
 
-	_templates[cls.__name__] = cls
-	return cls
-	
+def template(cls):
+    """
+    This is a decorator for ModelManager-compliant template classes. Place
+    `@modelmanager.template` on the line before a class defintion.
+    
+    This makes the class available to ModelManager (e.g. for reading saved steps from 
+    disk) whenever it's imported.
+    
+    """
+    _templates[cls.__name__] = cls
+    return cls
+
 def initialize(path='configs'):
     """
     Load saved model steps from disk. Each file in the directory will be checked for 
@@ -94,7 +103,7 @@ def build_step(d):
         for i, item in enumerate(d['supplemental_objects']):
             content = load_supplemental_object(d['name'], **item)
             d['supplemental_objects'][i]['content'] = content
-        
+
     return _templates[d['template']].from_dict(d)
     
 
