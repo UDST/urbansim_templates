@@ -8,9 +8,13 @@ import orca
 from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
+from sklearn.ensemble import RandomForestRegressor
+
 from .shared import TemplateStep
 
+from .. import modelmanager
 
+@modelmanager.register_templates
 class OLSRegressionStep(TemplateStep):
     """
     A class for building OLS (ordinary least squares) regression model steps. This extends 
@@ -200,5 +204,119 @@ class OLSRegressionStep(TemplateStep):
         tabname = self._get_out_table()
 
         orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
+		
+@modelmanager.register_templates		
+class RandomForestRegressionStep(OLSRegressionStep):
+
+	@classmethod
+	def from_dict(cls, d):
+		"""
+        Create an object instance from a saved dictionary representation.
+        Use a pickled version of the random forest model
+        Parameters
+        ----------
+        d : dict
+        
+        Returns
+        -------
+        RandomForestRegressionStep
+        
+		"""	
+		# Pass values from the dictionary to the __init__() method
+		obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
+                filters=d['filters'], out_tables=d['out_tables'], 
+                out_column=d['out_column'], out_transform=d['out_transform'],
+                out_filters=d['out_filters'], name=d['name'], tags=d['tags'])
+
+		
+        # Unpack the urbansim.models.RegressionModel() sub-object and resuscitate it
+		model_config_path = open(d['model'], 'rb')
+		obj.model = pickle.load(model_config_path)
+        
+		return obj
+
+	def fit(self):
+	
+		self.model = RandomForestRegressor()
+		
+		output_column = self._get_out_column()
+		data = self._get_data()
+		
+		y_train = np.array(data[output_column])
+		
+		print(self.model_expression.split('~')[1].strip())
+		data.drop(output_column, axis=1, inplace=True)
+		X_train = np.array(data)
+		
+		resutls = self.model.fit(X_train, y_train.ravel())
+		
+		self.name = self._generate_name()
+		
+	def to_dict(self):
+		"""
+        Create a dictionary representation of the object.
+        
+        Returns
+        -------
+        dict
+        
+		"""
+		d = TemplateStep.to_dict(self)
+        
+		# Add parameters not in parent class
+		d.update({
+            'summary_table': self.summary_table,
+            'fitted_parameters': self.fitted_parameters,
+            'model': self.model
+        })
+		
+		# model config is a filepath to a pickled file
+		d['model'] = "%s.pkl" %d['name']
+		
+		return d
+		
+	def run(self):
+		"""
+		Run the model step: calculate predicted values and use them to update a column.
+        
+        The predicted values are written to Orca and also saved to the class object for 
+        interactive use (`predicted_values`, with type pd.Series). But they are not saved 
+        in the dictionary representation of the model step.
+        
+        """
+		# TO DO - figure out what we can infer about requirements for the underlying data
+        # and write an 'orca_test' assertion to confirm compliance.
+
+		output_column = self._get_out_column()
+		data = self._get_data('predict')
+		
+		## This is ugly -- should be a better to sort rhs and lhs varibales
+		values = self.model.predict(np.array(data[[col for col in list(data.columns) if col !=output_column]]))
+		values = pd.Series(values, index=data.index)
+		self.predicted_values = values
+        
+		colname = self._get_out_column()
+		tabname = self._get_out_table()
+
+		orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
+		
+		
+class GradientBoostingRegressionStep(RandomForestRegressionStep):
+
+
+	def fit(self):
+	
+		self.model = GradientBoostingRegressor()
+		
+		output_column = self._get_out_column()
+		data = self._get_data()
+		
+		y_train = np.array(data[output_column])
+		data.drop(output_column, axis=1, inplace=True)
+		X_train = np.array(data)
+		
+		resutls = self.model.fit(X_train, y_train.ravel())
+		
+		self.name = self._generate_name()
         
 

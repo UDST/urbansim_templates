@@ -8,11 +8,6 @@ from collections import OrderedDict
 import orca
 from urbansim.utils import yamlio
 
-from .models import OLSRegressionStep
-from .models import BinaryLogitStep
-from .models import LargeMultinomialLogitStep
-from .models import SmallMultinomialLogitStep
-
 from .__init__ import __version__
 from .utils import version_greater_or_equal
 
@@ -20,7 +15,14 @@ from .utils import version_greater_or_equal
 _steps = {}  # master dictionary of steps in memory
 _disk_store = None  # path to saved steps on disk
 
+global _templates
+_templates = {}
 
+def register_templates(cls):
+
+	_templates[cls.__name__] = cls
+	return cls
+	
 def initialize(path='configs'):
     """
     Load saved model steps from disk. Each file in the directory will be checked for 
@@ -93,7 +95,7 @@ def build_step(d):
             content = load_supplemental_object(d['name'], **item)
             d['supplemental_objects'][i]['content'] = content
     
-    return globals()[d['template']].from_dict(d)
+    return _templates[d['template']].from_dict(d)
     
 
 def load_supplemental_object(step_name, name, content_type, required=True):

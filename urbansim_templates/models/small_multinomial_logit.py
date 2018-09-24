@@ -12,7 +12,9 @@ import orca
 
 from .shared import TemplateStep
 
+from .. import modelmanager
 
+@modelmanager.register_templates
 class SmallMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is

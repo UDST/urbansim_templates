@@ -10,7 +10,9 @@ import orca
 
 from .shared import TemplateStep
 
+from .. import modelmanager
 
+@modelmanager.register_templates
 class BinaryLogitStep(TemplateStep):
     """
     A class for building binary logit model steps. This extends TemplateStep, where some
