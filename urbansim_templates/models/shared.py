@@ -285,7 +285,19 @@ class TemplateStep(object):
         else:
             # TO DO - there must be a cleaner way to get LHS column name
             return self.model_expression.split('~')[0].split(' ')[0]
-    
+			
+    def _get_input_columns(self):
+	
+        """
+        Return name of the column to save data to. This is rhs columns if it exsits,
+         
+        Returns
+        -------
+        list
+        
+        """
+        rhs = self.model_expression.split('~')[1].strip().split('+')
+        return [col.strip() for col in rhs]
     
     def _get_out_table(self):
         """
