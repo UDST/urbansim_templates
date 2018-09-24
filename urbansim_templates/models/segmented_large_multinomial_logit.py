@@ -7,6 +7,8 @@ import pandas as pd
 
 import orca
 
+from ..__init__ import __version__
+from ..utils import update_name
 from .. import modelmanager
 from . import LargeMultinomialLogitStep
 
@@ -60,6 +62,12 @@ class SegmentedLargeMultinomialLogitStep():
         
         self.submodels = {}
     
+        self.name = name
+        self.tags = tags
+        
+        self.template = type(self).__name__  # class name
+        self.template_version = __version__
+
     
     @classmethod
     def from_dict(cls, d):
@@ -75,9 +83,18 @@ class SegmentedLargeMultinomialLogitStep():
         SegmentedLargeMultinomialLogitStep
         
         """
-        # TO DO - implement
-        pass
-    
+        mnl_step = LargeMultinomialLogitStep.from_dict
+        
+        obj = cls(
+            defaults = mnl_step(d['defaults']),
+            segmentation_column = d['segmentation_column'],
+            name = d['name'],
+            tags = d['tags'])
+        
+        obj.submodels = {k: mnl_step(m) for k, m in d['submodels'].items()}
+        
+        return obj
+
     
     def to_dict(self):
         """
@@ -94,6 +111,7 @@ class SegmentedLargeMultinomialLogitStep():
             'name': self.name,
             'tags': self.tags,
             'defaults': self.defaults.to_dict(),
+            'segmentation_column': self.segmentation_column,
             'submodels': {k: m.to_dict() for k, m in self.submodels.items()}
         }
         return d
@@ -172,6 +190,8 @@ class SegmentedLargeMultinomialLogitStep():
         
         for k, m in self.submodels.items():
             m.fit()
+        
+        self.name = update_name(self.template, self.name)
     
     
     def run(self):

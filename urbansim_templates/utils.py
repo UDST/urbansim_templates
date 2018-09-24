@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from datetime import datetime as dt
+
 
 def version_parse(v):
     """
@@ -83,4 +85,27 @@ def version_greater_or_equal(a, b):
     
     return False
     
+
+def update_name(template, name=None):
+    """
+    Generate a name for a configured model step, based on its template class and the 
+    current timestamp. But if a custom name has already been provided, return that 
+    instead. (A name is judged to be custom if it does not contain the class type.)
+            
+    Parameters
+    ----------
+    template : str
+        Template class name.
     
+    name : str, optional
+        Existing name for the configured model step.
+    
+    Returns
+    -------
+    str
+    
+    """
+    if (name is None) or (template in name):
+        return template + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
+    else:
+        return name
