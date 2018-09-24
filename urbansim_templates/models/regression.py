@@ -226,13 +226,9 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
                 filters=d['filters'], out_tables=d['out_tables'], 
                 out_column=d['out_column'], out_transform=d['out_transform'],
-                out_filters=d['out_filters'], name=d['name'], tags=d['tags'])
+                out_filters=d['out_filters'], name=d['name'], tags=d['tags'],
+				)
 
-		
-        # Unpack the urbansim.models.RegressionModel() sub-object and resuscitate it
-		model_config_path = open(d['model'], 'rb')
-		obj.model = pickle.load(model_config_path)
-        
 		return obj
 
 	def fit(self):
@@ -244,9 +240,8 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		
 		y_train = np.array(data[output_column])
 		
-		print(self.model_expression.split('~')[1].strip())
-		data.drop(output_column, axis=1, inplace=True)
-		X_train = np.array(data)
+		self.rhs  = self._get_input_columns()
+		X_train = np.array(data[self.rhs])
 		
 		resutls = self.model.fit(X_train, y_train.ravel())
 		
@@ -271,7 +266,10 @@ class RandomForestRegressionStep(OLSRegressionStep):
         })
 		
 		# model config is a filepath to a pickled file
-		d['model'] = "%s.pkl" %d['name']
+		d['supplemental_objects'] = []
+		d['supplemental_objects'].append({'name': self.name,
+									'content': self.model, 
+									'content_type': 'pickle'})
 		
 		return d
 		
@@ -290,8 +288,7 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		output_column = self._get_out_column()
 		data = self._get_data('predict')
 		
-		## This is ugly -- should be a better to sort rhs and lhs varibales
-		values = self.model.predict(np.array(data[[col for col in list(data.columns) if col !=output_column]]))
+		values = self.model.predict(np.array(data[self.rhs]))
 		values = pd.Series(values, index=data.index)
 		self.predicted_values = values
         
