@@ -17,40 +17,37 @@ from . import LargeMultinomialLogitStep
 @modelmanager.template
 class SegmentedLargeMultinomialLogitStep():
     """
-    TO DO - finish documentation
+    This template automatically generates a set of LargeMultinomialLogitStep submodels
+    corresponding to "segments" or categories of choosers. The submodels can be directly 
+    accessed and edited. 
     
-    Generating submodels: 
-    - The first time you run "build_submodels()" or "fit_all()", submodels will be 
-      generated based on the `segmentation_column` and the current properties of the 
-      `defaults` object.
+    Running 'build_submodels()' will create a submodel for each category of choosers
+    identified in the segmentation column. The submodels are implemented using filter
+    queries. 
     
-    Accessing submodels: 
-    - After they're generated, you can access the individual submodel objects through the 
-      `submodels` property (list of LargeMultinomialLogitSteps).
-    
-    Editing a submodel: 
-    - Feel free to modify individual submodels as desired.
-    
-    Editing all submodels: 
-    - Changing a property of the `defaults` object will update that property for all of 
-      the submodels, without affecting other customizations.
-    
-    Limitations: 
-    - The submodels are implemented by applying filters to the choosers table. If a prior 
-      filter exists, the submodel filters will be added to it.
-        
+    Once they are generated, the 'submodels' property contains a dict of
+    LargeMultinomialLogitStep objects, identified by category name. You can edit their 
+    properties as needed, fit them individually, etc. Editing a property in the 'defaults'
+    object will update all the submodels at once. Customizations to other properties
+    will remain intact.
     
     Parameters
     ----------
     defaults : LargeMultinomialLogitStep, optional
+        Object containing initial parameter values for the submodels. Values for
+        'choosers', 'alternatives', and 'choice_column' are required to generate 
+        submodels, but do not have to be provided when the object is created.
     
     segmentation_column : str, optional
-        Name of a column containing categorical data. Should be found in the `choosers`
-        table of the `defaults` object.
+        Name of a column of categorical values in the 'defaults.choosers' table. Any data 
+        that can be interpreted by Pandas as categorical is valid. This is required to 
+        generate submodels, but does not have to be provided when the object is created.
     
     name : str, optional
+        Name of the model step.
     
     tags : list of str, optional
+        Tags associated with the model step. 
     
     """
     def __init__(self, defaults=None, segmentation_column=None, name=None, tags=[]):
@@ -123,9 +120,9 @@ class SegmentedLargeMultinomialLogitStep():
     
     def get_segmentation_column(self):
         """
-        Get the segmentation column from Orca. Applies the overall chooser and 
-        alternative filters and returns segmentation values for valid observations only.
-        
+        Get the column of segmentation values from Orca. Chooser and alternative filters 
+        are applied to identify valid observations.
+                
         Returns
         -------
         pd.Series
@@ -149,8 +146,10 @@ class SegmentedLargeMultinomialLogitStep():
     def build_submodels(self):
         """
         Create a submodel for each category of choosers identified in the segmentation
-        column. Running this method will overwrite any previous submodels. It can be run 
-        as many times as desired.
+        column. Only categories with at least one observation remaining after applying
+        chooser and alternative filters will be included. 
+        
+        Running this method will overwrite any previous submodels.
         
         """
         self.submodels = {}
