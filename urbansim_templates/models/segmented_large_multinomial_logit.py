@@ -147,23 +147,25 @@ class SegmentedLargeMultinomialLogitStep():
         cats = col.astype('category').cat.categories.values
         print("Building submodels for {} categories: {}".format(len(cats), cats))
         
+        submodel = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
+        
         for cat in cats:
-            model = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
+            m = copy.deepcopy(submodel)
             
             # TO DO - with big tables, is there a more efficient way to filter the data?
-            filter = "{} == '{}'".format(self.segmentation_column, cat)
+            seg_filter = "{} == '{}'".format(self.segmentation_column, cat)
             
-            if isinstance(self.defaults.chooser_filters, list):
-                model.chooser_filters.append(filter)
+            if isinstance(m.chooser_filters, list):
+                m.chooser_filters += [seg_filter]
             
-            elif isinstance(self.defaults.chooser_filters, str):
-                model.chooser_filters = [self.defaults.chooser_filters, filter]
+            elif isinstance(m.chooser_filters, str):
+                m.chooser_filters = [m.chooser_filters, seg_filter]
             
             else:
-                model.chooser_filters = filter
+                m.chooser_filters = seg_filter
             
             # TO DO - same for out_chooser_filters, once we handle simulation
-            self.submodels[cat] = model
+            self.submodels[cat] = m
         
     
     def update_submodels(self, param, value):
@@ -182,9 +184,10 @@ class SegmentedLargeMultinomialLogitStep():
         
         """
         if (param == 'chooser_filters') & (len(self.submodels) > 0):
-            print("Warning: Changing 'defaults.chooser_filters' can affect the " +
-                  "model segmentation, so the submodels have not been updated. " +
-                  "To regenerate them using the new defaults, run 'build_submodels()'")
+            print("Warning: Changing 'chooser_filters' can affect the model " +
+                  "segmentation. Changes have been saved to 'defaults' but not to the " +
+                  "submodels. To regenerate them using the new defaults, run " +
+                  "'build_submodels()'.")
             return
         
         for k, m in self.submodels.items():
