@@ -60,14 +60,17 @@ class SegmentedLargeMultinomialLogitStep():
         self.defaults = defaults
         self.defaults.bind_to(self.update_submodels)
         
-        self.submodels = {}
-    
+        self.segmentation_column = segmentation_column
+        
         self.name = name
         self.tags = tags
         
         self.template = self.__class__.__name__
         self.template_version = __version__
-
+        
+        # Properties to be filled in by build_submodels() or from_dict()
+        self.submodels = {}
+    
     
     @classmethod
     def from_dict(cls, d):
@@ -159,7 +162,7 @@ class SegmentedLargeMultinomialLogitStep():
             else:
                 model.chooser_filters = filter
             
-            # TO DO - same for out_chooser_filters
+            # TO DO - same for out_chooser_filters, once we handle simulation
             self.submodels[cat] = model
         
     
@@ -168,6 +171,9 @@ class SegmentedLargeMultinomialLogitStep():
         Updates a property across all the submodels. This method is bound to the 
         `defaults` object and runs automatically when one of its properties is changed.
         
+        The `chooser_filters` property cannot currently be updated this way, because it 
+        could affect the model segmentation.
+        
         Parameters
         ----------
         param : str
@@ -175,6 +181,12 @@ class SegmentedLargeMultinomialLogitStep():
         value : anything
         
         """
+        if (param == 'chooser_filters') & (len(self.submodels) > 0):
+            print("Warning: Changing 'defaults.chooser_filters' can affect the " +
+                  "model segmentation, so the submodels have not been updated. " +
+                  "To regenerate them using the new defaults, run 'build_submodels()'")
+            return
+        
         for k, m in self.submodels.items():
             setattr(m, param, value)
     
