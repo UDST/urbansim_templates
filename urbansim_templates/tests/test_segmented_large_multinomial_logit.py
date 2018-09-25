@@ -1,7 +1,9 @@
-import orca
 import numpy as np
 import pandas as pd
 import pytest
+
+import orca
+from urbansim.models.util import apply_filter_query
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import SegmentedLargeMultinomialLogitStep
@@ -9,10 +11,15 @@ from urbansim_templates.models import SegmentedLargeMultinomialLogitStep
 
 @pytest.fixture
 def orca_session():
-    d1 = {'oid': np.arange(10), 
-          'group': np.random.choice(['A','B','C'], size=10),
-          'obsval': np.random.random(10),
-          'choice': np.random.choice(np.arange(20), size=10)}
+    """
+    Set up a clean Orca session with a couple of data tables.
+    
+    """
+    d1 = {'oid': np.arange(100), 
+          'group': np.random.choice(['A','B','C'], size=100),
+          'int_group': np.random.choice([3,4], size=100),
+          'obsval': np.random.random(100),
+          'choice': np.random.choice(np.arange(20), size=100)}
 
     d2 = {'aid': np.arange(20), 
           'altval': np.random.random(20)}
@@ -26,6 +33,10 @@ def orca_session():
 
 @pytest.fixture
 def m(orca_session):
+    """
+    Set up a partially configured model step.
+    
+    """
     m = SegmentedLargeMultinomialLogitStep()
     m.defaults.choosers = 'obs'
     m.defaults.alternatives = 'alts'
@@ -36,6 +47,10 @@ def m(orca_session):
 
 
 def test_basic_operation(m):
+    """
+    Test basic operation of the template.
+    
+    """
     m.fit_all()
     m.to_dict()
     assert len(m.submodels) == 3
@@ -43,22 +58,29 @@ def test_basic_operation(m):
     
 def test_numeric_segments(m):
     """
-    Test support for ints as categorical variables.
+    Test support for using ints as categorical variables.
     
     """
-    pass
+    m.segmentation_column = 'int_group'
+    m.build_submodels()
+    assert len(m.submodels) == 2
     
 
 def test_filtering(m):
     """
-    Test that submodel filters are applied correctly.
-    
+    Test that submodel filters generate the correct data subset.
     
     """
-    pass
+    m.build_submodels()
+    
+    df = orca.get_table(m.defaults.choosers).to_frame()
+    len1 = len(apply_filter_query(df.loc[df.group == 'A'], m.defaults.chooser_filters))
+    len2 = len(apply_filter_query(df, m.submodels['A'].chooser_filters))
+    
+    assert len1 == len2
     
 
-def test_persistence(m):
+def test_property_persistence(m):
     """
     Test persistence of properties across registration, saving, and reloading.
     
@@ -75,9 +97,9 @@ def test_persistence(m):
     modelmanager.remove_step('test')
     
 
-def test_filtering(m):
+def test_filter_generation(m):
     """
-    Test additional cases of transforming submodel filters.
+    Test additional cases of generating submodel filters.
     
     """
     m.defaults.chooser_filters = 'test-string'
@@ -153,7 +175,5 @@ def test_independence_of_submodels(m, d):
     d2 = m.submodels['B'].to_dict()
     for k, v in d.items():
         assert d2[k] != v
-
-
 
 
