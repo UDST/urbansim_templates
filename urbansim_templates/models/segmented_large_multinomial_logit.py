@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 import orca
+from urbansim.models.util import apply_filter_query
 
 from ..__init__ import __version__
 from ..utils import update_name
@@ -122,14 +123,26 @@ class SegmentedLargeMultinomialLogitStep():
     
     def get_segmentation_column(self):
         """
-        Get the segmentation column from Orca.
+        Get the segmentation column from Orca. Applies the overall chooser and 
+        alternative filters and returns segmentation values for valid observations only.
         
         Returns
         -------
         pd.Series
         
         """
-        df = orca.get_table(self.defaults.choosers).to_frame()
+        # TO DO - this doesn't filter for columns in the model expression; is there
+        #   centralized functionality for this merge that we should be using instead?
+        
+        obs = orca.get_table(self.defaults.choosers).to_frame()
+        obs = apply_filter_query(obs, self.defaults.chooser_filters)
+        
+        alts = orca.get_table(self.defaults.alternatives).to_frame()
+        alts = apply_filter_query(alts, self.defaults.alt_filters)
+
+        df = pd.merge(obs, alts, how='inner', 
+                      left_on=self.defaults.choice_column, right_index=True)
+        
         return df[self.segmentation_column]
         
     
@@ -141,18 +154,21 @@ class SegmentedLargeMultinomialLogitStep():
         
         """
         self.submodels = {}
+        submodel = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
 
         col = self.get_segmentation_column()
-        # TO DO - need to apply any existing chooser filters to the column first
-        cats = col.astype('category').cat.categories.values
-        print("Building submodels for {} categories: {}".format(len(cats), cats))
+
+        if (len(col) == 0):
+            print("Warning: No valid observations after applying the chooser and "+
+                  "alternative filters")
+            return
         
-        submodel = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
+        cats = col.astype('category').cat.categories.values
+
+        print("Building submodels for {} categories: {}".format(len(cats), cats))
         
         for cat in cats:
             m = copy.deepcopy(submodel)
-            
-            # TO DO - with big tables, is there a more efficient way to filter the data?
             seg_filter = "{} == '{}'".format(self.segmentation_column, cat)
             
             if isinstance(m.chooser_filters, list):

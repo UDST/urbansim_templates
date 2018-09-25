@@ -66,7 +66,35 @@ def test_numeric_segments(m):
     assert len(m.submodels) == 2
     
 
-def test_filtering(m):
+def test_chooser_filters(m):
+    """
+    Test that the default chooser filters generate the correct data subset.
+    
+    """
+    m.defaults.chooser_filters = "group != 'A'"
+    m.build_submodels()
+    assert len(m.submodels) == 2 
+
+    m.defaults.chooser_filters = ["group != 'A'", "group != 'B'"]
+    m.build_submodels()
+    assert len(m.submodels) == 1
+
+
+def test_alternative_filters(m):
+    """
+    Test that the default alternative filters generate the correct data subset.
+    
+    """
+    m.defaults.alt_filters = 'aid < 5'
+    
+    df = orca.get_table(m.defaults.choosers).to_frame()
+    len1 = len(df.loc[df.choice < 5])
+    len2 = len(m.get_segmentation_column())
+    
+    assert len1 == len2
+
+
+def test_submodel_filters(m):
     """
     Test that submodel filters generate the correct data subset.
     
@@ -102,13 +130,14 @@ def test_filter_generation(m):
     Test additional cases of generating submodel filters.
     
     """
-    m.defaults.chooser_filters = 'test-string'
+    m.defaults.chooser_filters = 'obsval > 0.5'
     m.build_submodels()
-    assert m.submodels['A'].chooser_filters == ['test-string', "group == 'A'"]
+    assert m.submodels['A'].chooser_filters == ['obsval > 0.5', "group == 'A'"]
     
-    m.defaults.chooser_filters = ['t1', 't2']
+    m.defaults.chooser_filters = ['obsval > 0.5', 'obsval < 0.9']
     m.build_submodels()
-    assert m.submodels['A'].chooser_filters == ['t1', 't2', "group == 'A'"]
+    assert m.submodels['A'].chooser_filters == \
+                ['obsval > 0.5', 'obsval < 0.9', "group == 'A'"]
     
 
 @pytest.fixture
