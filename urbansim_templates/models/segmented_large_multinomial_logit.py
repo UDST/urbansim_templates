@@ -148,7 +148,7 @@ class SegmentedLargeMultinomialLogitStep():
         print("Building submodels for {} categories: {}".format(len(cats), cats))
         
         for cat in cats:
-            model = copy.deepcopy(self.defaults)
+            model = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
             
             # TO DO - with big tables, is there a more efficient way to filter the data?
             filter = "{} == '{}'".format(self.segmentation_column, cat)
