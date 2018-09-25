@@ -190,8 +190,9 @@ class SegmentedLargeMultinomialLogitStep():
         `defaults` object and runs automatically when one of its properties is changed.
         
         Note that the `chooser_filters` and `alt_filters` properties cannot currently be 
-        updated this way, because they can affect the model segmentation. To regenerate
-        submodels using the updated defaults, run `build_submodels()`.
+        updated this way, because they can affect the model segmentation. If you are 
+        confident the changes are valid, you can edit the submodels directly. Otherwise,
+        you can regenerate them using updated defaults by running `build_submodels()`.
         
         Parameters
         ----------
