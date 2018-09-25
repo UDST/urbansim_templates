@@ -147,7 +147,6 @@ def d():
          'model_expression': 'c', 
          'choice_column': 'd', 
          'chooser_sample_size': 'f', 
-         'alt_filters': 'g', 
          'alt_sample_size': 'h', 
          'out_choosers': 'i', 
          'out_alternatives': 'j', 
@@ -186,9 +185,12 @@ def test_subsequent_propagation_of_defaults(m, d):
     for k, v in d.items():
         assert d2[k] == v
     
-    # chooser_filters should NOT be passed to the submodels
+    # these should NOT be passed to the submodels
     m.defaults.chooser_filters = 'test'
     assert m.submodels['A'].chooser_filters != 'test'
+
+    m.defaults.alt_filters = 'test'
+    assert m.submodels['A'].alt_filters != 'test'
 
 
 def test_independence_of_submodels(m, d):

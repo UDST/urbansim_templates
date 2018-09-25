@@ -27,9 +27,10 @@ class SegmentedLargeMultinomialLogitStep():
     
     Once they are generated, the 'submodels' property contains a dict of
     LargeMultinomialLogitStep objects, identified by category name. You can edit their 
-    properties as needed, fit them individually, etc. Editing a property in the 'defaults'
-    object will update all the submodels at once. Customizations to other properties
-    will remain intact.
+    properties as needed, fit them individually, etc. 
+    
+    Editing a property in the 'defaults' object will update all the submodels at once, 
+    while leaving customizations to other properties intact.
     
     Parameters
     ----------
@@ -188,8 +189,9 @@ class SegmentedLargeMultinomialLogitStep():
         Updates a property across all the submodels. This method is bound to the 
         `defaults` object and runs automatically when one of its properties is changed.
         
-        The `chooser_filters` property cannot currently be updated this way, because it 
-        could affect the model segmentation.
+        Note that the `chooser_filters` and `alt_filters` properties cannot currently be 
+        updated this way, because they can affect the model segmentation. To regenerate
+        submodels using the updated defaults, run `build_submodels()`.
         
         Parameters
         ----------
@@ -198,11 +200,11 @@ class SegmentedLargeMultinomialLogitStep():
         value : anything
         
         """
-        if (param == 'chooser_filters') & (len(self.submodels) > 0):
-            print("Warning: Changing 'chooser_filters' can affect the model " +
-                  "segmentation. Changes have been saved to 'defaults' but not to the " +
-                  "submodels. To regenerate them using the new defaults, run " +
-                  "'build_submodels()'.")
+        if (param in ['chooser_filters', 'alt_filters']) & (len(self.submodels) > 0):
+            print("Warning: Changing '{}' can affect the model segmentation. Changes " +
+                  "have been saved to 'defaults' but not to the submodels. To " +
+                  "regenerate them using the new defaults, run 'build_submodels()'."\
+                  .format(param))
             return
         
         for k, m in self.submodels.items():
