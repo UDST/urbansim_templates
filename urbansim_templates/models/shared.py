@@ -310,6 +310,8 @@ class TemplateStep(object):
     
     def _generate_name(self):
         """
+        THIS METHOD IS DEPRECATED, AND SHOULD BE REPLACED BY UTILS.UPDATE_NAME().
+        
         Generate a name for the class instance, based on its type and the current 
         timestamp. But if a custom name has already been provided, return that instead. 
         

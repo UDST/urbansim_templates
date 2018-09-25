@@ -9,7 +9,7 @@ import orca
 from urbansim.utils import yamlio
 
 from .__init__ import __version__
-from .utils import version_greater_or_equal
+from .utils import update_name, version_greater_or_equal
 
 
 _templates = {}  # global registry of template classes
@@ -135,13 +135,18 @@ def register(step, save_to_disk=True):
     Register a model step with ModelManager and Orca. This includes saving it to disk,
     optionally, so it can be automatically loaded in the future.
     
-    Registering a step will overwrite any previously loaded step with the same name.
+    Registering a step will overwrite any previously loaded step with the same name. If a 
+    name has not yet been assigned, one will be generated from the template name and a 
+    timestamp.
     
     Parameters
     ----------
     step : object
     
     """
+    if step.name is None:
+        step.name = update_name(step.template, step.name)  # TO DO - test this
+    
     if save_to_disk:
         save_step_to_disk(step)
     
@@ -173,7 +178,7 @@ def list_steps():
 def save_step_to_disk(step):
     """
     Save a model step to disk, over-writing the previous file. The file will be named
-    'model-name.yaml' and will be saved to the initialization directory.
+    'model-name.yaml' and will be saved to the initialization directory. 
     
     """
     if _disk_store is None:

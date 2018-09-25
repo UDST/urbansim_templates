@@ -3,7 +3,6 @@ from __future__ import print_function
 import numpy as np
 import pandas as pd
 import patsy
-from datetime import datetime as dt
 
 import orca
 from choicemodels import mnl
@@ -129,6 +128,8 @@ class LargeMultinomialLogitStep(TemplateStep):
             out_alternatives=None, out_column=None, out_chooser_filters=None, 
             out_alt_filters=None, name=None, tags=[]):
         
+        self._listeners = []
+        
         # Parent class can initialize the standard parameters
         TemplateStep.__init__(self, tables=None, model_expression=model_expression, 
                 filters=None, out_tables=None, out_column=out_column, out_transform=None, 
@@ -152,6 +153,15 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = None
 
 
+    def bind_to(self, callback):
+        self._listeners.append(callback)
+    
+    
+    def send_to_listeners(self, param, value):
+        for callback in self._listeners:
+            callback(param, value)
+    
+    
     @classmethod
     def from_dict(cls, d):
         """
@@ -216,38 +226,112 @@ class LargeMultinomialLogitStep(TemplateStep):
         return d
 
 
+    # TO DO - there has got to be a less verbose way to handle getting and setting
+    
     @property
     def choosers(self):
         return self.__choosers
-
     @choosers.setter
-    def choosers(self, choosers):
-        self.__choosers = self._normalize_table_param(choosers)
+    def choosers(self, value):
+        self.__choosers = self._normalize_table_param(value)
+        self.send_to_listeners('choosers', value)
             
     @property
     def alternatives(self):
         return self.__alternatives
-
     @alternatives.setter
-    def alternatives(self, alternatives):
-        self.__alternatives = self._normalize_table_param(alternatives)            
+    def alternatives(self, value):
+        self.__alternatives = self._normalize_table_param(value)
+        self.send_to_listeners('alternatives', value)
     
+    @property
+    def model_expression(self):
+        return self.__model_expression
+    @model_expression.setter
+    def model_expression(self, value):
+        self.__model_expression = value
+        self.send_to_listeners('model_expression', value)
+    
+    @property
+    def choice_column(self):
+        return self.__choice_column
+    @choice_column.setter
+    def choice_column(self, value):
+        self.__choice_column = value
+        self.send_to_listeners('choice_column', value)
+    
+    @property
+    def chooser_filters(self):
+        return self.__chooser_filters
+    @chooser_filters.setter
+    def chooser_filters(self, value):
+        self.__chooser_filters = value
+        self.send_to_listeners('chooser_filters', value)
+            
+    @property
+    def chooser_sample_size(self):
+        return self.__chooser_sample_size
+    @chooser_sample_size.setter
+    def chooser_sample_size(self, value):
+        self.__chooser_sample_size = value
+        self.send_to_listeners('chooser_sample_size', value)
+            
+    @property
+    def alt_filters(self):
+        return self.__alt_filters
+    @alt_filters.setter
+    def alt_filters(self, value):
+        self.__alt_filters = value
+        self.send_to_listeners('alt_filters', value)
+
+    @property
+    def alt_sample_size(self):
+        return self.__alt_sample_size
+    @alt_sample_size.setter
+    def alt_sample_size(self, value):
+        self.__alt_sample_size = value
+        self.send_to_listeners('alt_sample_size', value)
+
     @property
     def out_choosers(self):
         return self.__out_choosers
-
     @out_choosers.setter
-    def out_choosers(self, out_choosers):
-        self.__out_choosers = self._normalize_table_param(out_choosers)
+    def out_choosers(self, value):
+        self.__out_choosers = self._normalize_table_param(value)
+        self.send_to_listeners('out_choosers', value)
             
     @property
     def out_alternatives(self):
         return self.__out_alternatives
-
     @out_alternatives.setter
-    def out_alternatives(self, out_alternatives):
-        self.__out_alternatives = self._normalize_table_param(out_alternatives)            
+    def out_alternatives(self, value):
+        self.__out_alternatives = self._normalize_table_param(value)            
+        self.send_to_listeners('out_alternatives', value)
     
+    @property
+    def out_column(self):
+        return self.__out_column
+    @out_column.setter
+    def out_column(self, value):
+        self.__out_column = value
+        self.send_to_listeners('out_column', value)
+            
+    @property
+    def out_chooser_filters(self):
+        return self.__out_chooser_filters
+    @out_chooser_filters.setter
+    def out_chooser_filters(self, value):
+        self.__out_chooser_filters = value
+        self.send_to_listeners('out_chooser_filters', value)
+            
+    @property
+    def out_alt_filters(self):
+        return self.__out_alt_filters
+    @out_alt_filters.setter
+    def out_alt_filters(self, value):
+        self.__out_alt_filters = value
+        self.send_to_listeners('out_alt_filters', value)
+            
             
     def _get_alt_sample_size(self):
         """
