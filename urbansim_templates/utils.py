@@ -3,7 +3,11 @@ from __future__ import print_function
 from datetime import datetime as dt
 
 
-def version_parse(v):
+##################################
+## VERSION MANAGEMENT FUNCTIONS ##
+##################################
+
+def parse_version(v):
     """
     Parses a version string into its component parts. String is expected to follow the 
     pattern "0.1.1.dev0", which would be parsed into (0, 1, 1, 0). The first two 
@@ -39,7 +43,6 @@ def version_parse(v):
     return (v1, v2, v3, v4)
     
 
-
 def version_greater_or_equal(a, b):
     """
     Tests whether version string 'a' is greater than or equal to version string 'b'.
@@ -59,8 +62,8 @@ def version_greater_or_equal(a, b):
     boolean
     
     """
-    a = version_parse(a)
-    b = version_parse(b)
+    a = parse_version(a)
+    b = parse_version(b)
     
     if (a[0] > b[0]):
         return True
@@ -85,6 +88,75 @@ def version_greater_or_equal(a, b):
     
     return False
     
+
+################################
+## SPEC AND FORMAT MANAGEMENT ##
+################################
+
+def validate_template(cls):
+    """
+    Checks whether a template class meets the basic expectations for working with 
+    ModelManager.
+    
+    (There are many behaviors this does NOT check, because we don't know what particular
+    parameters are expected and valid for a given class. For example, saving a 
+    configured model step and reloading it should produce an equivalent object, but this
+    needs to be checked in template-specific unit tests.)
+    
+    TO DO - make another version of this that accepts a configured class instance
+    
+    Parameters
+    ----------
+    cls : class
+        Template class.
+    
+    Returns
+    -------
+    bool
+    
+    """
+    try:
+        m = cls()
+    except:
+        print("Error instantiating object without arguments")
+        return False
+    
+    methods = ['to_dict', 'from_dict', 'run']
+    for item in methods:
+        if item not in dir(cls):
+            print("Expecting a '{}' method".format(item))
+            return False
+
+    try:
+        d = m.to_dict()
+    except:
+        print("Error running 'to_dict()'")
+        return False
+    
+    params = ['name', 'tags', 'template', 'template_version']
+    for item in params:
+        if item not in d:
+            print("Expecting a '{}' key in dict representation".format(item))
+            return False
+    
+    if (d['template'] != m.__class__.__name__):
+        print("Expecting 'template' value in dict to match the class name")
+        return False
+
+    try:
+        cls.from_dict(m.to_dict())
+    except:
+        print("Error passing dict to 'from_dict()' method")
+        return False
+    
+    # TO DO - check supplemental objects
+    
+    return True
+
+
+###############################
+## TEMPLATE HELPER FUNCTIONS ##
+###############################
 
 def update_name(template, name=None):
     """
