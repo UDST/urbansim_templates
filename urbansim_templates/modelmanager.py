@@ -16,6 +16,9 @@ _templates = {}  # global registry of template classes
 _steps = {}  # global registry of model steps in memory
 _disk_store = None  # path to saved steps on disk
 
+global _templates
+_templates = {}
+
 
 def template(cls):
     """
@@ -28,7 +31,6 @@ def template(cls):
     """
     _templates[cls.__name__] = cls
     return cls
-    
 
 def initialize(path='configs'):
     """
@@ -101,7 +103,7 @@ def build_step(d):
         for i, item in enumerate(d['supplemental_objects']):
             content = load_supplemental_object(d['name'], **item)
             d['supplemental_objects'][i]['content'] = content
-    
+
     return _templates[d['template']].from_dict(d)
     
 
@@ -195,6 +197,7 @@ def save_step_to_disk(step):
         for item in filter(None, d['supplemental_objects']):
             save_supplemental_object(step.name, **item)
             del item['content']
+          
     
     # Save main yaml file
     headers = {'modelmanager_version': __version__}
@@ -224,7 +227,7 @@ def save_supplemental_object(step_name, name, content, content_type, required=Tr
     
     """
     if content_type is 'pickle':
-        content.to_pickle(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
+        pickle.dump(content, open(os.path.join(_disk_store, step_name+'-'+name+'.pkl'), 'wb'))
         
 
 def get_step(name):

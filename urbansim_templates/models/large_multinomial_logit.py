@@ -12,6 +12,8 @@ from choicemodels.tools import MergedChoiceTable
 from .. import modelmanager
 from .shared import TemplateStep
 
+from .. import modelmanager
+
 
 @modelmanager.template
 class LargeMultinomialLogitStep(TemplateStep):
