@@ -209,6 +209,7 @@ class OLSRegressionStep(TemplateStep):
 @modelmanager.template		
 class RandomForestRegressionStep(OLSRegressionStep):
 
+
 	@classmethod
 	def from_dict(cls, d):
 		"""
@@ -231,6 +232,7 @@ class RandomForestRegressionStep(OLSRegressionStep):
 				)
 
 		return obj
+	
 
 	def fit(self):
 	
@@ -248,6 +250,16 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		
 		self.name = self._generate_name()
 		
+		# compute feature importance
+		importance = self.model.feature_importances_
+		self.importance = {}
+		
+		i = 0
+		for variable in self.rhs:
+			self.importance[variable] = float(importance[i])
+			i +=1
+		
+		
 	def to_dict(self):
 		"""
         Create a dictionary representation of the object.
@@ -258,12 +270,11 @@ class RandomForestRegressionStep(OLSRegressionStep):
         
 		"""
 		d = TemplateStep.to_dict(self)
-        
 		# Add parameters not in parent class
 		d.update({
-            'summary_table': self.summary_table,
-            'fitted_parameters': self.fitted_parameters,
-            'model': self.model
+            'model': self.name,
+			'cross validation metric': self.cv_metric,
+			'features importance': self.importance
         })
 		
 		# model config is a filepath to a pickled file
@@ -297,6 +308,9 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		tabname = self._get_out_table()
 
 		orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
+		
+
+			
 		
 		
 class GradientBoostingRegressionStep(RandomForestRegressionStep):
