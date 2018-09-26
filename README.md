@@ -101,8 +101,6 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 
 - Bigger intermediate outputs, like pickled copies of full fitted models, can be automatically stored to disk by providing an entry named `supplemental_objects` in a model's dictionary representation. This should contain a list of dicts, each of which has parameters `name` (str), `content` (obj), and `content_type` (str, e.g. 'pickle').
 
-- Shared template logic is in `shared.py` for now, but it's not very elegant. No need for templates to extend the `TemplateStep` class unless it's helpful.
-
-- Each new template class needs to be imported by name into `modelmanager.py`, for now. See discussion in [issue #42](https://github.com/UDST/urbansim_templates/issues/42).
+- Shared template functionality is in `utils.py`. There's also a `TemplateStep` parent class in `shared.py`, but this hasn't worked very well; see [issue #38](https://github.com/UDST/urbansim_templates/issues/38).
 
 - We don't have design patterns yet for templates whose final output is to _generate_ DataFrames or Series, rather than modifying existing ones, but we're working on it.
