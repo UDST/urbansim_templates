@@ -10,12 +10,17 @@ from datetime import datetime as dt
 def validate_template(cls):
     """
     Checks whether a template class meets the basic expectations for working with 
-    ModelManager.
+    ModelManager, to aid in development and testing.
     
-    (There are many behaviors this does NOT check, because we don't know what particular
-    parameters are expected and valid for a given class. For example, saving a 
+    Looks for 'to_dict', 'from_dict', and 'run' methods, and 'name', 'tags', 'template',
+    and 'template_version' attributes. Checks that an object can be instantiated without 
+    arguments, plus some additional behaviors. See documentation for a full description 
+    of ModelManager specs and guidelines.
+    
+    There are many behaviors this does NOT check, because we don't know what particular
+    parameters are expected and valid for a given template. For example, saving a 
     configured model step and reloading it should produce an equivalent object, but this
-    needs to be checked in template-specific unit tests.)
+    needs to be checked in template-specific unit tests.
     
     Parameters
     ----------
