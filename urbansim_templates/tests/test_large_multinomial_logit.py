@@ -5,6 +5,7 @@ import pytest
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import LargeMultinomialLogitStep
+from urbansim_templates.utils import validate_template
 
 
 @pytest.fixture
@@ -21,6 +22,14 @@ def orca_session():
 
     alts = pd.DataFrame(d2).set_index('aid')
     orca.add_table('alts', alts)
+
+
+def test_template_validity():
+    """
+    Run the template through the standard validation check.
+    
+    """
+    assert validate_template(LargeMultinomialLogitStep)
 
 
 def test_observation_sampling(orca_session):

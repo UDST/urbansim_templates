@@ -17,8 +17,6 @@ def validate_template(cls):
     configured model step and reloading it should produce an equivalent object, but this
     needs to be checked in template-specific unit tests.)
     
-    TO DO - make another version of this that accepts a configured class instance
-    
     Parameters
     ----------
     cls : class
@@ -63,7 +61,7 @@ def validate_template(cls):
         print("Error passing dict to 'from_dict()' method")
         return False
     
-    # TO DO - check supplemental objects
+    # TO DO - check supplemental objects? (but nothing there with unconfigured steps)
     
     return True
 
