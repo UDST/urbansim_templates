@@ -4,38 +4,35 @@ import pandas as pd
 import pytest
 
 from urbansim_templates import modelmanager
-from urbansim_templates.models.regression import RandomForestRegressionStep
+from urbansim_templates.models import BinaryLogitStep
 
 d1 = {'a': np.random.random(100),
-      'b': np.random.randint(2, size=100),
-	  'c': np.random.normal(size=100)}
+      'b': np.random.randint(2, size=100)}
 
 obs = pd.DataFrame(d1)
 orca.add_table('obs', obs)
 
 
-def test_rf():
+def test_binary_logit():
     """
     For now this just tests that the code runs.
     
     """
     modelmanager.initialize()
 
-    m = RandomForestRegressionStep()
+    m = BinaryLogitStep()
     m.tables = 'obs'
-    m.model_expression = 'b ~ a + c'
+    m.model_expression = 'b ~ a'
     
     m.fit()
-    m.cross_validate_score()
-	
     
-    m.name = 'random_forest-test'
+    m.name = 'binary-test'
     modelmanager.register(m)
     
-    #modelmanager.initialize()
-    #m = modelmanager.get_step('random_forest-test')
+    modelmanager.initialize()
+    m = modelmanager.get_step('binary-test')
     
 	
 if __name__ == '__main__':
-    test_rf()
+    test_binary_logit()
 	

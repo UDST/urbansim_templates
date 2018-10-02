@@ -12,6 +12,7 @@ from urbansim.utils import yamlio
 from sklearn.ensemble import RandomForestRegressor
 
 from .. import modelmanager
+from ..utils import convert_to_model
 from .shared import TemplateStep
 
 
@@ -236,17 +237,14 @@ class RandomForestRegressionStep(OLSRegressionStep):
 
 	def fit(self):
 	
-		self.model = RandomForestRegressor()
-		
 		output_column = self._get_out_column()
-		data = self._get_data()
-		
-		y_train = np.array(data[output_column])
-		
 		self.rhs  = self._get_input_columns()
-		X_train = np.array(data[self.rhs])
-		
-		resutls = self.model.fit(X_train, y_train.ravel())
+	
+		# convert model to  a format -- similar fit and predict structure -- than other steps	
+		self.model = convert_to_model(RandomForestRegressor(), self.rhs, output_column)
+	
+	
+		results = self.model.fit(self._get_data())
 		
 		self.name = self._generate_name()
 		
@@ -300,8 +298,8 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		output_column = self._get_out_column()
 		data = self._get_data('predict')
 		
-		values = self.model.predict(np.array(data[self.rhs]))
-		values = pd.Series(values, index=data.index)
+		values = self.model.predict(self._get_data('predict'))
+		#values = pd.Series(values, index=data.index)
 		self.predicted_values = values
         
 		colname = self._get_out_column()

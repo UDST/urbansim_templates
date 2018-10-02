@@ -1,5 +1,6 @@
 from __future__ import print_function
-
+import numpy as np
+import pandas as pd
 
 def version_parse(v):
     """
@@ -82,5 +83,33 @@ def version_greater_or_equal(a, b):
                     return True
     
     return False
+
+	
+def convert_to_model(model, rhs, lhs):
+
+	""""
+	This function takes a model with a predict and a fit attribute and 
+	convert those attributes into a format compatible with .fit and .predict
+	used by urbansim models
+	"""
+	model.fit_previous = model.fit
+	model.predict_previous = model.predict
+	
+	def fit(data):
+	
+		trainX = data[rhs]
+		trainY = np.ravel(data[lhs])
+		
+		return model.fit_previous(trainX, trainY)
+		
+	def predict(data):
+		testX = data[rhs]
+		values = model.predict_previous(testX)
+		return pd.Series(pd.Series(values, index=data.index))
+	
+	model.fit = fit
+	model.predict = predict
+	return model 
+		
     
     
