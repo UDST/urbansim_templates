@@ -31,10 +31,10 @@ def test_rf():
    
 	
 	# compare to random forest
-    rf = RandomForestRegressionStep()
+    rf = RandomForestRegressionStep(out_transform=np.exp, out_column='rent_sqft')
     rf.tables = 'rental_prices'
     rf.n_splits = 10
-    rf.model_expression = 'log_rent_sqft ~ bedrooms + np.log1p(units_500_walk) + np.log1p(rich_500_walk) + np.log1p(singles_500_walk)'
+    rf.model_expression = 'np.log(rent_sqft) ~ bedrooms + np.log1p(units_500_walk) + np.log1p(rich_500_walk) + np.log1p(singles_500_walk)'
 	
     rf.name = 'cross_validate_rf_-test'
    

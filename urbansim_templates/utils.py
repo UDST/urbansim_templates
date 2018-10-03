@@ -99,14 +99,15 @@ def eval_rhs_function(model_expression, data):
 	numpy via patsy
 	"""
 	matrix_variables = dmatrices(model_expression + ' - 1', data, return_type='dataframe')
-	df = pd.DataFrame(matrix_variables[1], index=data.index)
+	df_x = pd.DataFrame(matrix_variables[1], index=data.index)
+	df_y = pd.DataFrame(matrix_variables[0], index=data.index)
 	
-	return df
+	return df_x, df_y
 	
 
     	
 	
-def convert_to_model(model, model_expression, lhs):
+def convert_to_model(model, model_expression, ytransform=None):
 
 	""""
 	This function takes a model with a predict and a fit attribute and 
@@ -119,20 +120,23 @@ def convert_to_model(model, model_expression, lhs):
 	def fit(data):
 	
 		# transform data using patsy dmatrix
-		df = eval_rhs_function(model_expression, data)
+		df_x, df_y = eval_rhs_function(model_expression, data)
 	
-		trainX = df
-		trainY = np.ravel(data[lhs])
+		trainX = df_x
+		trainY = np.ravel(np.array(df_y))
 		
 		return model.fit_previous(trainX, trainY)
 		
 	def predict(data):
 	
 		# transform data using patsy dmatrix
-		df = eval_rhs_function(model_expression, data)
+		df_x, _ = eval_rhs_function(model_expression, data)
 		
-		testX = df
+		testX = np.array(df_x)
 		values = model.predict_previous(testX)
+		
+		if ytransform:
+			values = ytransform(values)
 		return pd.Series(pd.Series(values, index=data.index))
 	
 	model.fit = fit
