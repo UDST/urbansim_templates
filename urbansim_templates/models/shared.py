@@ -379,11 +379,9 @@ class TemplateStep(object):
         mae_metric = np.zeros(n_splits)
 		
         for train, test in self._split(n_splits):
-			
-            y_train = np.array(train[output_column])
-            X_train = np.array(train[self.rhs])
-            self.model.fit(X_train, np.ravel(y_train))
-            predicted = self.model.predict(test[self.rhs])
+			 
+            self.model.fit(train)
+            predicted = self.model.predict(test)
 			
             mean_metric[i] = np.mean((predicted - test[output_column]) ** 2)
             mae_metric[i] = np.mean(abs(predicted - test[output_column]))

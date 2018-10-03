@@ -1,6 +1,7 @@
 from __future__ import print_function
 import numpy as np
 import pandas as pd
+from patsy import dmatrices
 
 def version_parse(v):
     """
@@ -84,8 +85,28 @@ def version_greater_or_equal(a, b):
     
     return False
 
+def eval_rhs_function(model_expression, data):
+
+	""""
+	eval the functin, if any, from the strings in rhs (e.g 
+	'np.log(variable)' will do: data[variable].apply(np.log)
 	
-def convert_to_model(model, rhs, lhs):
+	This is convenient utility to register transformation
+	as part of the model
+	
+	The issue is arbitrary code execution, so we need to restrain
+	the functions allowed. Right now use only functions implemented in
+	numpy via patsy
+	"""
+	matrix_variables = dmatrices(model_expression + ' - 1', data, return_type='dataframe')
+	df = pd.DataFrame(matrix_variables[1], index=data.index)
+	
+	return df
+	
+
+    	
+	
+def convert_to_model(model, model_expression, lhs):
 
 	""""
 	This function takes a model with a predict and a fit attribute and 
@@ -97,13 +118,20 @@ def convert_to_model(model, rhs, lhs):
 	
 	def fit(data):
 	
-		trainX = data[rhs]
+		# transform data using patsy dmatrix
+		df = eval_rhs_function(model_expression, data)
+	
+		trainX = df
 		trainY = np.ravel(data[lhs])
 		
 		return model.fit_previous(trainX, trainY)
 		
 	def predict(data):
-		testX = data[rhs]
+	
+		# transform data using patsy dmatrix
+		df = eval_rhs_function(model_expression, data)
+		
+		testX = df
 		values = model.predict_previous(testX)
 		return pd.Series(pd.Series(values, index=data.index))
 	

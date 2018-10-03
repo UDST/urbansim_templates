@@ -241,7 +241,7 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		self.rhs  = self._get_input_columns()
 	
 		# convert model to  a format -- similar fit and predict structure -- than other steps	
-		self.model = convert_to_model(RandomForestRegressor(), self.rhs, output_column)
+		self.model = convert_to_model(RandomForestRegressor(), self.model_expression, output_column)
 	
 	
 		results = self.model.fit(self._get_data())

@@ -16,10 +16,7 @@ data = pd.merge(data, node_walk, left_on='node_id_walk', right_on='osmid')
 
 # add columns -- we need a way to register those transformations in the model
 data['log_rent_sqft'] = np.log(data.rent_sqft)
-data['log_units_500_walk'] = np.log(data.units_500_walk + 1)
-data['log_rich_500_walk'] = np.log(data.rich_500_walk + 1)
-data['log_singles_500_walk'] = np.log(data.singles_500_walk + 1)
-data['log_children_500_walk'] = np.log(data.children_500_walk + 1)
+
 
 # register data in orca
 orca.add_table('rental_prices', data)
@@ -37,7 +34,7 @@ def test_rf():
     rf = RandomForestRegressionStep()
     rf.tables = 'rental_prices'
     rf.n_splits = 10
-    rf.model_expression = 'log_rent_sqft ~ bedrooms + log_units_500_walk + log_rich_500_walk + log_singles_500_walk'
+    rf.model_expression = 'log_rent_sqft ~ bedrooms + np.log1p(units_500_walk) + np.log1p(rich_500_walk) + np.log1p(singles_500_walk)'
 	
     rf.name = 'cross_validate_rf_-test'
    
