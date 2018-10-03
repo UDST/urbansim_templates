@@ -238,11 +238,14 @@ class RandomForestRegressionStep(OLSRegressionStep):
 	def fit(self):
 	
 		
+		self.rhs  = self._get_input_columns()
+	
 		# convert model to  a format -- similar fit and predict structure -- than other steps	
 		self.model = convert_to_model(RandomForestRegressor(), self.model_expression)
 	
 	
 		results = self.model.fit(self._get_data())
+		
 		self.name = self._generate_name()
 		
 		# compute feature importance
