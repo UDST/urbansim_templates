@@ -25,7 +25,7 @@ def test_rf():
     m.tables = 'obs'
     m.model_expression = 'b ~ a + c'
     
-    m.fit()
+
     m.cross_validate_score()
 	
     
