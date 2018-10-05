@@ -211,14 +211,13 @@ class OLSRegressionStep(TemplateStep):
 class RandomForestRegressionStep(OLSRegressionStep):
 
 	def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
-            out_column=None, out_transform=None, out_filters=None, name=None)
+            out_column=None, out_transform=None, out_filters=None, name=None, tags=[]):
 		
-		super().__init__(tables=None, model_expression=None, filters=None, out_tables=None,
-            out_column=None, out_transform=None, out_filters=None, name=None)
+		super().__init__(self)
 		
 		self.cv_metric = None
 		self.importance = None
-
+		
 
 	@classmethod
 	def from_dict(cls, d):

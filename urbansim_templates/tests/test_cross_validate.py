@@ -41,6 +41,7 @@ def test_rf():
     rf.fit()
     rf.cross_validate_score()
     print(rf.cv_metric)
+    modelmanager.register(rf)
     
     modelmanager.initialize()
     #m = modelmanager.get_step('random_forest-test')
