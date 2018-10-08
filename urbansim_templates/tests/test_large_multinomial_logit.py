@@ -33,11 +33,11 @@ def test_observation_sampling(orca_session):
     m.model_expression = 'obsval + altval'
     
     m.fit()
-    assert(len(m.mergedchoicetable.to_frame()) == 190)  # 200 after fixing alt sampling
+    assert(len(m.mergedchoicetable.to_frame()) == 200)
     
     m.chooser_sample_size = 5
     m.fit()
-    assert(len(m.mergedchoicetable.to_frame()) == 95)  # 100 after fixing alt sampling
+    assert(len(m.mergedchoicetable.to_frame()) == 100)
     
     m.name = 'mnl-test'
     modelmanager.register(m)

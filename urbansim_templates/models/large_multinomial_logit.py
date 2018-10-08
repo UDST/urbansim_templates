@@ -16,24 +16,13 @@ from .shared import TemplateStep
 @modelmanager.template
 class LargeMultinomialLogitStep(TemplateStep):
     """
-    A class for building multinomial logit model steps where the number of alternatives is
-    "large". Estimation is performed using choicemodels.MultinomialLogit(). 
+    Class for building standard multinomial logit model steps where alternatives are 
+    interchangeable and have the same model expression. Supports random sampling of 
+    alternatives.
     
-    Multinomial Logit models can involve a range of different specification and estimation
-    mechanics. For now these are separated into two templates. What's the difference?
+    Estimation and simulation are performed using ChoiceModels.
     
-    "Small" MNL:
-    - data is in a single table (choosers)
-    - each alternative can have a different model expression
-    - all the alternatives are available to all choosers
-    - estimation and simulation use the PyLogit engine (via ChoiceModels)
-    
-    "Large" MNL:
-    - data is in two tables (choosers and alternatives)
-    - each alternative has the same model expression
-    - N alternatives are sampled for each chooser
-    - estimation and simulation use the ChoiceModels engine (formerly UrbanSim MNL)
-    
+
     Parameters
     ----------
     choosers : str or list of str, optional
@@ -43,7 +32,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: 'chosen', 'join_index', 'observation_id'.
+        Reserved column names: 'chosen'.
     
     alternatives : str or list of str, optional
         Name(s) of Orca tables containing data about alternatives. The first table is the
@@ -52,7 +41,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         of the primary table should be a unique ID. In this template, the 'choosers' and
         'alternatives' parameters replace the 'tables' parameter. Both are required for 
         fitting a model, but do not have to be provided when the object is created.
-        Reserved column names: 'chosen', 'join_index', 'observation_id'.
+        Reserved column names: 'chosen'.
     
     model_expression : str, optional
         Patsy-style right-hand-side model expression representing the utility of a
@@ -333,28 +322,28 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.send_to_listeners('out_alt_filters', value)
             
             
-    def _get_alt_sample_size(self):
-        """
-        Return the number of alternatives to sample. If none is specified, use one less 
-        than the number of alternatives. 
-        
-        (This is a temporary solution to the problem that the table-merging codebase in 
-        ChoiceModels currently _requires_ sampling of alternatives. We should make it 
-        optional.)
-        
-        TO DO: What if `out_alternatives` is smaller than `alternatives`? What if it's
-        smaller than `alt_sample_size`?
-
-        """
-        if self.alt_sample_size is not None:
-            return self.alt_sample_size
-        
-        else:
-            alternatives = self._get_df(tables = self.alternatives, 
-                                        filters = self.alt_filters)
-            
-            n_minus_1 = len(alternatives) - 1
-            return n_minus_1
+#     def _get_alt_sample_size(self):
+#         """
+#         Return the number of alternatives to sample. If none is specified, use one less 
+#         than the number of alternatives. 
+#         
+#         (This is a temporary solution to the problem that the table-merging codebase in 
+#         ChoiceModels currently _requires_ sampling of alternatives. We should make it 
+#         optional.)
+#         
+#         TO DO: What if `out_alternatives` is smaller than `alternatives`? What if it's
+#         smaller than `alt_sample_size`?
+# 
+#         """
+#         if self.alt_sample_size is not None:
+#             return self.alt_sample_size
+#         
+#         else:
+#             alternatives = self._get_df(tables = self.alternatives, 
+#                                         filters = self.alt_filters)
+#             
+#             n_minus_1 = len(alternatives) - 1
+#             return n_minus_1
     
     
     def fit(self, mct=None):
@@ -373,7 +362,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         ----------
         mct : choicemodels.tools.MergedChoiceTable
             This parameter is a temporary backdoor allowing us to pass in a more 
-            complicated merged choice table than can be generated within the template, for
+            complicated choice table than can be generated within the template, for 
             example including sampling weights or interaction terms. This will work for 
             model estimation, but is not yet hooked up to the prediction functionality.
         
@@ -393,19 +382,17 @@ class LargeMultinomialLogitStep(TemplateStep):
             if (self.chooser_sample_size is not None):
                 observations = observations.sample(self.chooser_sample_size)
             
-            chosen = observations[self.choice_column]
-        
+#             chosen = observations[self.choice_column]
+#         
             alternatives = self._get_df(tables = self.alternatives, 
                                         filters = self.alt_filters)
         
-            data = MergedChoiceTable(observations = observations,
-                                     alternatives = alternatives,
-                                     chosen_alternatives = chosen,
-                                     sample_size = self._get_alt_sample_size())
+            mct = MergedChoiceTable(observations = observations,
+                                    alternatives = alternatives,
+                                    chosen_alternatives = self.choice_column,
+                                    sample_size = self.alt_sample_size)
         
-        model = MultinomialLogit(data = data.to_frame(),
-                                 observation_id_col = data.observation_id_col, 
-                                 choice_col = data.choice_col,
+        model = MultinomialLogit(data = mct,
                                  model_expression = self.model_expression)        
         results = model.fit()
         
@@ -418,7 +405,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.fitted_parameters = coefs.tolist()
         
         # Save merged choice table to the class object for diagnostic use
-        self.mergedchoicetable = data
+        self.mergedchoicetable = mct
             
     
     def _get_chosen_ids(self, ids, positions):
