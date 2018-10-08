@@ -6,8 +6,8 @@ import patsy
 
 import orca
 from choicemodels import mnl
-from choicemodels import MultinomialLogit
-from choicemodels.tools import MergedChoiceTable
+from choicemodels import MultinomialLogit, MultinomialLogitResults
+from choicemodels.tools import MergedChoiceTable, monte_carlo_choices
 
 from .. import modelmanager
 from .shared import TemplateStep
@@ -408,53 +408,47 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.mergedchoicetable = mct
             
     
-    def _get_chosen_ids(self, ids, positions):
-        """
-        Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
-        rather than id. This function converts them. It should move to ChoiceModels.
-        
-        We observe N choice scenarios. In each, one of J alternatives is chosen. We have a 
-        long (len N * J) list of the available alternatives. We have a list (len N) of 
-        which alternatives were chosen, but it identifies them by POSITION and we want 
-        their ID.    
-    
-        Parameters
-        ----------
-        ids : list or list-like
-            List of alternative ID's (len N * J).
-        
-        positions : list or list-like
-            List of chosen alternatives by position (len N), where each entry is
-            an int in range [0, J).
-    
-        Returns
-        -------
-        chosen_ids : list
-            List of chosen alternatives by ID (len N).
-    
-        """
-        N = len(positions)
-        J = len(ids) // N
-    
-        ids_by_obs = np.reshape(ids, (N,J))
-        return [ids_by_obs[i][positions[i]] for i in range(N)]
-
-    
+#     def _get_chosen_ids(self, ids, positions):
+#         """
+#         Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
+#         rather than id. This function converts them. It should move to ChoiceModels.
+#         
+#         We observe N choice scenarios. In each, one of J alternatives is chosen. We have a 
+#         long (len N * J) list of the available alternatives. We have a list (len N) of 
+#         which alternatives were chosen, but it identifies them by POSITION and we want 
+#         their ID.    
+#     
+#         Parameters
+#         ----------
+#         ids : list or list-like
+#             List of alternative ID's (len N * J).
+#         
+#         positions : list or list-like
+#             List of chosen alternatives by position (len N), where each entry is
+#             an int in range [0, J).
+#     
+#         Returns
+#         -------
+#         chosen_ids : list
+#             List of chosen alternatives by ID (len N).
+#     
+#         """
+#         N = len(positions)
+#         J = len(ids) // N
+#     
+#         ids_by_obs = np.reshape(ids, (N,J))
+#         return [ids_by_obs[i][positions[i]] for i in range(N)]
+# 
+#     
     def run(self):
         """
-        Run the model step: calculate simulated choices and use them to update a column.
+        Run the model step: simulate choices and use them to update an Orca column.
         
-        Predicted probabilities and simulated choices come from ChoiceModels. For now, 
-        the choices are unconstrained (any number of choosers can select the same 
-        alternative).
+        The sampled alternatives, probabilities, and simulated choices are saved to the
+        class object for diagnostics ('mergedchoicetable', 'probabilities', 'choices').
         
-        The predicted probabilities and simulated choices are saved to the class object 
-        for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
-        type pd.Series) but are not persisted in the dictionary representation of the 
-        model step.
-
         """
-        observations = self._get_df(tables=self.out_choosers,
+        observations = self._get_df(tables = self.out_choosers,
                                     fallback_tables = self.choosers, 
                                     filters=self.out_chooser_filters)
         
@@ -462,34 +456,43 @@ class LargeMultinomialLogitStep(TemplateStep):
                                     fallback_tables = self.alternatives,
                                     filters = self.out_alt_filters)
         
-        numalts = self._get_alt_sample_size()
+#         numalts = self._get_alt_sample_size()
+#         
+        mct = MergedChoiceTable(observations, alternatives,
+                                sample_size = self.alt_sample_size)
         
-        mct = MergedChoiceTable(observations = observations,
-                                alternatives = alternatives,
-                                sample_size = numalts)
-        mct_df = mct.to_frame()
+        model = MultinomialLogitResults(self.model_expression, self.fitted_parameters)
+        probs = model.probabilities(mct)
+        choices = monte_carlo_choices(probs)
         
-        # Data columns need to align with the coefficients
-        dm = patsy.dmatrix(self.model_expression, data=mct_df, return_type='dataframe')
-        
-        # Get probabilities and choices
-        probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
-                                 numalts = numalts, returnprobs=True)
+        # Save data to class object for diagnostics
+        self.mergedchoicetable = mct
+        self.probabilities = probs
+        self.choices = choices
 
-        # TO DO - this ends up recalculating the probabilities because there's not 
-        # currently a code path to get both at once - fix this)
-        choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
-                                            numalts = numalts, returnprobs=False)
-        
-        ids = mct_df[mct.alternative_id_col].tolist()
-        choices = self._get_chosen_ids(ids, choice_positions)
-        
-        # Save results to the class object (via df to include indexes)
-        mct_df['probability'] = np.reshape(probs, (probs.size, 1))
-        self.probabilities = mct_df[[mct.observation_id_col, 
-                                     mct.alternative_id_col, 'probability']]
-        observations['choice'] = choices
-        self.choices = observations.choice
+#         mct_df = mct.to_frame()
+#         
+#         # Data columns need to align with the coefficients
+#         dm = patsy.dmatrix(self.model_expression, data=mct_df, return_type='dataframe')
+#         
+#         # Get probabilities and choices
+#         probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+#                                  numalts = numalts, returnprobs=True)
+# 
+#         # TO DO - this ends up recalculating the probabilities because there's not 
+#         # currently a code path to get both at once - fix this)
+#         choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+#                                             numalts = numalts, returnprobs=False)
+#         
+#         ids = mct_df[mct.alternative_id_col].tolist()
+#         choices = self._get_chosen_ids(ids, choice_positions)
+#         
+#         # Save results to the class object (via df to include indexes)
+#         mct_df['probability'] = np.reshape(probs, (probs.size, 1))
+#         self.probabilities = mct_df[[mct.observation_id_col, 
+#                                      mct.alternative_id_col, 'probability']]
+#         observations['choice'] = choices
+#         self.choices = observations.choice
         
         # Update Orca
         if self.out_choosers is not None:
@@ -502,7 +505,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         else:
             column = self.choice_column
         
-        table.update_col_from_series(column, observations.choice, cast=True)
+        table.update_col_from_series(column, choices, cast=True)
         
         # Print a message about limited usage
         print("Warning: choices are unconstrained; additional functionality in progress")
