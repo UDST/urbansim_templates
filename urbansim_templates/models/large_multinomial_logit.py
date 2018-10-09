@@ -385,30 +385,6 @@ class LargeMultinomialLogitStep(TemplateStep):
     def max_iter(self, value):
         self.__max_iter = value
         self.send_to_listeners('max_iter', value)
-            
-            
-#     def _get_alt_sample_size(self):
-#         """
-#         Return the number of alternatives to sample. If none is specified, use one less 
-#         than the number of alternatives. 
-#         
-#         (This is a temporary solution to the problem that the table-merging codebase in 
-#         ChoiceModels currently _requires_ sampling of alternatives. We should make it 
-#         optional.)
-#         
-#         TO DO: What if `out_alternatives` is smaller than `alternatives`? What if it's
-#         smaller than `alt_sample_size`?
-# 
-#         """
-#         if self.alt_sample_size is not None:
-#             return self.alt_sample_size
-#         
-#         else:
-#             alternatives = self._get_df(tables = self.alternatives, 
-#                                         filters = self.alt_filters)
-#             
-#             n_minus_1 = len(alternatives) - 1
-#             return n_minus_1
     
     
     def fit(self, mct=None):
@@ -440,15 +416,12 @@ class LargeMultinomialLogitStep(TemplateStep):
             data = mct
             
         else:        
-            # TO DO - update choicemodels to accept a column name for chosen alts
             observations = self._get_df(tables=self.choosers, 
                                         filters=self.chooser_filters)
         
             if (self.chooser_sample_size is not None):
                 observations = observations.sample(self.chooser_sample_size)
             
-#             chosen = observations[self.choice_column]
-#         
             alternatives = self._get_df(tables = self.alternatives, 
                                         filters = self.alt_filters)
         
@@ -469,48 +442,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         coefs = results.get_raw_results()['fit_parameters']['Coefficient']
         self.fitted_parameters = coefs.tolist()
         
-        # Save merged choice table to the class object for diagnostic use
+        # Save merged choice table to the class object for diagnostics
         self.mergedchoicetable = mct
             
     
-#     def _get_chosen_ids(self, ids, positions):
-#         """
-#         Inconveniently, `choicemodels.mnl.mnl_simulate()` identifies choices by position
-#         rather than id. This function converts them. It should move to ChoiceModels.
-#         
-#         We observe N choice scenarios. In each, one of J alternatives is chosen. We have a 
-#         long (len N * J) list of the available alternatives. We have a list (len N) of 
-#         which alternatives were chosen, but it identifies them by POSITION and we want 
-#         their ID.    
-#     
-#         Parameters
-#         ----------
-#         ids : list or list-like
-#             List of alternative ID's (len N * J).
-#         
-#         positions : list or list-like
-#             List of chosen alternatives by position (len N), where each entry is
-#             an int in range [0, J).
-#     
-#         Returns
-#         -------
-#         chosen_ids : list
-#             List of chosen alternatives by ID (len N).
-#     
-#         """
-#         N = len(positions)
-#         J = len(ids) // N
-#     
-#         ids_by_obs = np.reshape(ids, (N,J))
-#         return [ids_by_obs[i][positions[i]] for i in range(N)]
-# 
-#     
     def run(self):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
         The simulated choices are saved to the class object for diagnostics ('choices').
-        If choices are unconstrained probabilities for sampled alternatives are saved
+        If choices are unconstrained, the probabilities of sampled alternatives are saved
         as well ('probabilities').
         
         """
@@ -520,8 +461,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         alts = self._get_df(tables=self.out_alternatives, 
                 fallback_tables=self.alternatives, filters=self.out_alt_filters)
         
-#         numalts = self._get_alt_sample_size()
-#         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)
 
@@ -532,8 +471,6 @@ class LargeMultinomialLogitStep(TemplateStep):
             return model.probabilities(mct)
 
         if (self.constrained_choices == True):
-            print(type(obs)) #####
-            print(type(alts)) #####
             choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 
                     probs_callable=probs, alt_capacity=self.alt_capacity,
                     chooser_size=self.chooser_size, max_iter=self.max_iter)
@@ -546,30 +483,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         # Save data to class object for diagnostics
         self.choices = choices
 
-#         mct_df = mct.to_frame()
-#         
-#         # Data columns need to align with the coefficients
-#         dm = patsy.dmatrix(self.model_expression, data=mct_df, return_type='dataframe')
-#         
-#         # Get probabilities and choices
-#         probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
-#                                  numalts = numalts, returnprobs=True)
-# 
-#         # TO DO - this ends up recalculating the probabilities because there's not 
-#         # currently a code path to get both at once - fix this)
-#         choice_positions = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
-#                                             numalts = numalts, returnprobs=False)
-#         
-#         ids = mct_df[mct.alternative_id_col].tolist()
-#         choices = self._get_chosen_ids(ids, choice_positions)
-#         
-#         # Save results to the class object (via df to include indexes)
-#         mct_df['probability'] = np.reshape(probs, (probs.size, 1))
-#         self.probabilities = mct_df[[mct.observation_id_col, 
-#                                      mct.alternative_id_col, 'probability']]
-#         observations['choice'] = choices
-#         self.choices = observations.choice
-        
         # Update Orca
         if self.out_choosers is not None:
             table = orca.get_table(self.out_choosers)
@@ -583,6 +496,4 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         table.update_col_from_series(column, choices, cast=True)
         
-#         Print a message about limited usage
-#         print("Warning: choices are unconstrained; additional functionality in progress")
     
