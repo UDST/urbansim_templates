@@ -7,7 +7,8 @@ import patsy
 import orca
 from choicemodels import mnl
 from choicemodels import MultinomialLogit, MultinomialLogitResults
-from choicemodels.tools import MergedChoiceTable, monte_carlo_choices
+from choicemodels.tools import (MergedChoiceTable, monte_carlo_choices, 
+        iterative_lottery_choices)
 
 from .. import modelmanager
 from .shared import TemplateStep
@@ -508,31 +509,41 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
-        The sampled alternatives, probabilities, and simulated choices are saved to the
-        class object for diagnostics ('mergedchoicetable', 'probabilities', 'choices').
+        The simulated choices are saved to the class object for diagnostics ('choices').
+        If choices are unconstrained probabilities for sampled alternatives are saved
+        as well ('probabilities').
         
         """
-        observations = self._get_df(tables = self.out_choosers,
-                                    fallback_tables = self.choosers, 
-                                    filters=self.out_chooser_filters)
+        obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
+                filters=self.out_chooser_filters)
         
-        alternatives = self._get_df(tables = self.out_alternatives, 
-                                    fallback_tables = self.alternatives,
-                                    filters = self.out_alt_filters)
+        alts = self._get_df(tables=self.out_alternatives, 
+                fallback_tables=self.alternatives, filters=self.out_alt_filters)
         
 #         numalts = self._get_alt_sample_size()
 #         
-        mct = MergedChoiceTable(observations, alternatives,
-                                sample_size = self.alt_sample_size)
-        
         model = MultinomialLogitResults(model_expression = self.model_expression, 
-                                        fitted_parameters = self.fitted_parameters)
-        probs = model.probabilities(mct)
-        choices = monte_carlo_choices(probs)
+                fitted_parameters = self.fitted_parameters)
+
+        def mct(obs, alts):
+            return MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
+        
+        def probs(mct):
+            return model.probabilities(mct)
+
+        if (self.constrained_choices == True):
+            print(type(obs)) #####
+            print(type(alts)) #####
+            choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 
+                    probs_callable=probs, alt_capacity=self.alt_capacity,
+                    chooser_size=self.chooser_size, max_iter=self.max_iter)
+            
+        else:
+            probs = probs(mct(obs, alts))
+            choices = monte_carlo_choices(probs)
+            self.probabilities = probs
         
         # Save data to class object for diagnostics
-        self.mergedchoicetable = mct
-        self.probabilities = probs
         self.choices = choices
 
 #         mct_df = mct.to_frame()

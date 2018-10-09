@@ -104,7 +104,16 @@ def test_simulation_unconstrained(m):
     assert obs.loc[:24, 'choice'].equals(m.choices)
     
     
+def test_simulation_single_occupancy(m):
+    """
+    Test simulation of single-occupancy choices.
     
+    """
+    m.constrained_choices = True
+    m.run()
+    
+    obs = orca.get_table('obs').to_frame()
+    assert len(obs) == len(obs.choice.unique())
     
     
     
