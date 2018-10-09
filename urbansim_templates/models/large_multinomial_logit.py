@@ -103,6 +103,26 @@ class LargeMultinomialLogitStep(TemplateStep):
         Filters to apply to the alternatives data before simulation. If not provided, no 
         filters will be applied. Replaces the `predict_filters` argument in UrbanSim.
 
+    constrained_choices : bool, optional
+        "True" means alternatives have limited capacity. "False" (default) means that 
+        alternatives can accommodate an unlimited number of choosers. 
+    
+    alt_capacity : str, optional
+        Name of a column in the out_alternatives table that expresses the capacity of
+        alternatives. If not provided and constrained_choices is True, each alternative
+        is interpreted as accommodating a single chooser. 
+    
+    chooser_size : str, optional
+        Name of a column in the out_choosers table that expresses the size of choosers.
+        Choosers might have varying sizes if the alternative capacities are amounts 
+        rather than counts -- e.g. square footage. Chooser sizes must be in the same units
+        as alternative capacities. If not provided and constrained_choices is True, each
+        chooser has a size of 1.
+        
+    max_iter : int or None, optional
+        Maximum number of choice simulation iterations. If None (default), the algorithm
+        will iterate until all choosers are matched or no alternatives remain.
+    
     name : str, optional
         Name of the model step, passed to ModelManager. If none is provided, a name is
         generated each time the `fit()` method runs.
@@ -115,7 +135,8 @@ class LargeMultinomialLogitStep(TemplateStep):
             choice_column=None, chooser_filters=None, chooser_sample_size=None,
             alt_filters=None, alt_sample_size=None, out_choosers=None, 
             out_alternatives=None, out_column=None, out_chooser_filters=None, 
-            out_alt_filters=None, name=None, tags=[]):
+            out_alt_filters=None, constrained_choices=False, alt_capacity=None, 
+            chooser_size=None, max_iter=None, name=None, tags=[]):
         
         self._listeners = []
         
@@ -136,6 +157,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.out_alternatives = out_alternatives
         self.out_chooser_filters = out_chooser_filters
         self.out_alt_filters = out_alt_filters
+        self.constrained_choices = constrained_choices
+        self.alt_capacity = alt_capacity
+        self.chooser_size = chooser_size
+        self.max_iter = max_iter
         
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
@@ -173,7 +198,10 @@ class LargeMultinomialLogitStep(TemplateStep):
             alt_filters=d['alt_filters'], alt_sample_size=d['alt_sample_size'], 
             out_choosers=d['out_choosers'], out_alternatives=d['out_alternatives'], 
             out_column=d['out_column'], out_chooser_filters=d['out_chooser_filters'], 
-            out_alt_filters=d['out_alt_filters'], name=d['name'], tags=d['tags'])
+            out_alt_filters=d['out_alt_filters'], 
+            constrained_choices=d['constrained_choices'],  alt_capacity=d['alt_capacity'],  
+            chooser_size=d['chooser_size'],  max_iter=d['max_iter'], name=d['name'], 
+            tags=d['tags'])
 
         # Load model fit data
         obj.summary_table = d['summary_table']
@@ -209,6 +237,10 @@ class LargeMultinomialLogitStep(TemplateStep):
             'out_column': self.out_column,
             'out_chooser_filters': self.out_chooser_filters,
             'out_alt_filters': self.out_alt_filters,
+            'constrained_choices': self.constrained_choices,
+            'alt_capacity': self.alt_capacity,
+            'chooser_size': self.chooser_size,
+            'max_iter': self.max_iter,
             'summary_table': self.summary_table,
             'fitted_parameters': self.fitted_parameters,
         }
@@ -320,6 +352,38 @@ class LargeMultinomialLogitStep(TemplateStep):
     def out_alt_filters(self, value):
         self.__out_alt_filters = value
         self.send_to_listeners('out_alt_filters', value)
+            
+    @property
+    def constrained_choices(self):
+        return self.__constrained_choices
+    @constrained_choices.setter
+    def constrained_choices(self, value):
+        self.__constrained_choices = value
+        self.send_to_listeners('constrained_choices', value)
+            
+    @property
+    def alt_capacity(self):
+        return self.__alt_capacity
+    @alt_capacity.setter
+    def alt_capacity(self, value):
+        self.__alt_capacity = value
+        self.send_to_listeners('alt_capacity', value)
+            
+    @property
+    def chooser_size(self):
+        return self.__chooser_size
+    @chooser_size.setter
+    def chooser_size(self, value):
+        self.__chooser_size = value
+        self.send_to_listeners('chooser_size', value)
+            
+    @property
+    def max_iter(self):
+        return self.__max_iter
+    @max_iter.setter
+    def max_iter(self, value):
+        self.__max_iter = value
+        self.send_to_listeners('max_iter', value)
             
             
 #     def _get_alt_sample_size(self):
