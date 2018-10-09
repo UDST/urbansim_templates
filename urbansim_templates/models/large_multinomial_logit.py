@@ -461,7 +461,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         mct = MergedChoiceTable(observations, alternatives,
                                 sample_size = self.alt_sample_size)
         
-        model = MultinomialLogitResults(self.model_expression, self.fitted_parameters)
+        model = MultinomialLogitResults(model_expression = self.model_expression, 
+                                        fitted_parameters = self.fitted_parameters)
         probs = model.probabilities(mct)
         choices = monte_carlo_choices(probs)
         
@@ -507,6 +508,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         table.update_col_from_series(column, choices, cast=True)
         
-        # Print a message about limited usage
-        print("Warning: choices are unconstrained; additional functionality in progress")
+#         Print a message about limited usage
+#         print("Warning: choices are unconstrained; additional functionality in progress")
     

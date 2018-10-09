@@ -47,3 +47,66 @@ def test_observation_sampling(orca_session):
     assert(m.chooser_sample_size == 5)
     
     modelmanager.remove_step('mnl-test')
+
+
+@pytest.fixture
+def data():
+    num_obs = 100
+    num_alts = 120
+    
+    d1 = {'oid': np.arange(num_obs), 
+          'obsval': np.random.random(num_obs),
+          'choice': np.random.choice(np.arange(num_alts), size=num_obs)}
+
+    d2 = {'aid': np.arange(num_alts), 
+          'altval': np.random.random(num_alts)}
+
+    obs = pd.DataFrame(d1).set_index('oid')
+    orca.add_table('obs', obs)
+
+    alts = pd.DataFrame(d2).set_index('aid')
+    orca.add_table('alts', alts)
+
+
+@pytest.fixture
+def m(data):
+    """
+    Build a fitted model.
+    
+    """
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.alt_sample_size = 10
+    
+    m.fit()
+    return m
+
+
+def test_simulation_unconstrained(m):
+    """
+    Test simulation chooser filters with unconstrained choices.
+    
+    """
+    obs = orca.get_table('obs').to_frame()
+    obs.loc[:24, 'choice'] = -1
+    orca.add_table('obs', obs)
+    
+    m.out_chooser_filters = 'choice == -1'
+    m.run()
+    
+    assert len(m.choices) == 25
+    
+    obs = orca.get_table('obs').to_frame()
+    assert sum(obs.choice == -1) == 0
+    assert obs.loc[:24, 'choice'].equals(m.choices)
+    
+    
+    
+    
+    
+    
+    
+    
