@@ -9,7 +9,7 @@ from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
 
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 
 from .. import modelmanager
 from ..utils import convert_to_model
@@ -213,10 +213,12 @@ class RandomForestRegressionStep(OLSRegressionStep):
 	def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
             out_column=None, out_transform=None, out_filters=None, name=None, tags=[]):
 		
-		super().__init__(self)
+		super().__init__(tables=tables, model_expression=model_expression, filters=filters, out_tables=out_tables,
+            out_column=out_column, out_transform=out_transform, name=name)
 		
 		self.cv_metric = None
 		self.importance = None
+		
 		
 
 	@classmethod
@@ -239,7 +241,12 @@ class RandomForestRegressionStep(OLSRegressionStep):
                 out_column=d['out_column'], out_transform=d['out_transform'],
                 out_filters=d['out_filters'], name=d['name'], tags=d['tags'],
 				)
-
+				
+		# Unpack the model sub-object from pickle file and resuscitate it
+		for supplement in d['supplemental_objects']:
+			name = supplement['object_name']
+			content = supplement['content']
+			setattr(obj, name, content)
 		return obj
 	
 
@@ -249,7 +256,9 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		self.rhs  = self._get_input_columns()
 	
 		# convert model to  a format -- similar fit and predict structure -- than other steps	
-		self.model = convert_to_model(RandomForestRegressor(), self.model_expression)
+		self.model = convert_to_model(RandomForestRegressor(), 
+									  self.model_expression, 
+									  ytransform=self.out_transform)
 	
 	
 		results = self.model.fit(self._get_data())
@@ -287,7 +296,8 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		d['supplemental_objects'] = []
 		d['supplemental_objects'].append({'name': self.name,
 									'content': self.model, 
-									'content_type': 'pickle'})
+									'content_type': 'pickle',
+									'object_name': 'model'})
 		
 		return d
 		
@@ -309,32 +319,56 @@ class RandomForestRegressionStep(OLSRegressionStep):
 		values = self.model.predict(self._get_data('predict'))
 		#values = pd.Series(values, index=data.index)
 		self.predicted_values = values
-        
-		colname = self._get_out_column()
+       
 		tabname = self._get_out_table()
 
-		orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
+		orca.get_table(tabname).update_col_from_series(output_column, values, cast=True)
 		
 
 			
 		
-		
+@modelmanager.template		
 class GradientBoostingRegressionStep(RandomForestRegressionStep):
 
 
 	def fit(self):
 	
-		self.model = GradientBoostingRegressor()
 		
-		output_column = self._get_out_column()
-		data = self._get_data()
-		
-		y_train = np.array(data[output_column])
-		data.drop(output_column, axis=1, inplace=True)
-		X_train = np.array(data)
-		
-		resutls = self.model.fit(X_train, y_train.ravel())
+		self.rhs  = self._get_input_columns()
+	
+		# convert model to  a format -- similar fit and predict structure -- than other steps	
+		self.model = convert_to_model(GradientBoostingRegressor(), 
+									  self.model_expression, 
+									  ytransform=self.out_transform)
+	
+		results = self.model.fit(self._get_data())
 		
 		self.name = self._generate_name()
+		
+	def to_dict(self):
+		"""
+        Create a dictionary representation of the object.
+        
+        Returns
+        -------
+        dict
+        
+		"""
+		d = TemplateStep.to_dict(self)
+		# Add parameters not in parent class
+		d.update({
+            'model': self.name,
+			'cross validation metric': self.cv_metric,
+			'features importance': self.importance
+        })
+		
+		# model config is a filepath to a pickled file
+		d['supplemental_objects'] = []
+		d['supplemental_objects'].append({'name': self.name,
+									'content': self.model, 
+									'content_type': 'pickle'})
+		
+		return d
+		
         
 

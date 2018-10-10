@@ -365,7 +365,7 @@ class TemplateStep(object):
             current = stop
             yield training_data, test_data
 			
-    def cross_validate_score(self, n_splits=10):
+    def cross_validate_score(self, n_splits=10, **keywords):
 		
         data = self._get_data()
 	
@@ -380,7 +380,7 @@ class TemplateStep(object):
 		
         for train, test in self._split(n_splits):
 			 
-            self.model.fit(train)
+            self.model.fit(train, **keywords)
             predicted = self.model.predict(test)
 			
             mean_metric[i] = np.mean((predicted - test[output_column]) ** 2)

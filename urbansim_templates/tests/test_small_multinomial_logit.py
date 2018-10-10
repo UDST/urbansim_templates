@@ -40,3 +40,7 @@ def test_small_mnl(orca_session):
     m = modelmanager.get_step('small-mnl-test')
     
     modelmanager.remove_step('small-mnl-test')
+   
+if __name__ == '__main__':
+	session = orca_session()
+	test_small_mnl(session)

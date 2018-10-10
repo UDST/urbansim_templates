@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import os
 import copy
-import pickle
+import dill as pickle
 from collections import OrderedDict
 
 import orca
@@ -15,9 +15,6 @@ from .utils import version_greater_or_equal
 _templates = {}  # global registry of template classes
 _steps = {}  # global registry of model steps in memory
 _disk_store = None  # path to saved steps on disk
-
-global _templates
-_templates = {}
 
 
 def template(cls):
@@ -101,7 +98,7 @@ def build_step(d):
     """
     if 'supplemental_objects' in d:
         for i, item in enumerate(d['supplemental_objects']):
-            content = load_supplemental_object(d['name'], **item)
+            content = load_supplemental_object(d['name'], item['name'], item['content_type'])
             d['supplemental_objects'][i]['content'] = content
 
     return _templates[d['template']].from_dict(d)
@@ -190,7 +187,7 @@ def save_step_to_disk(step):
     # Save supplemental objects
     if 'supplemental_objects' in d:
         for item in filter(None, d['supplemental_objects']):
-            save_supplemental_object(step.name, **item)
+            save_supplemental_object(step.name, item['name'], item['content'], item['content_type'])
             del item['content']
           
     

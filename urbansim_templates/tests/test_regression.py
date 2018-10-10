@@ -36,3 +36,7 @@ def test_ols(orca_session):
     m = modelmanager.get_step('ols-test')
     
     modelmanager.remove_step('ols-test')
+    
+if __name__ == '__main__':
+	session = orca_session()
+	test_ols(session)

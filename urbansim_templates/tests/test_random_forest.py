@@ -32,8 +32,9 @@ def test_rf():
     m.name = 'random_forest-test'
     modelmanager.register(m)
     
-    #modelmanager.initialize()
-    #m = modelmanager.get_step('random_forest-test')
+    modelmanager.initialize()
+    m = modelmanager.get_step('random_forest-test')
+    print(m.model)
     
 	
 if __name__ == '__main__':
