@@ -116,6 +116,25 @@ def test_simulation_single_occupancy(m):
     assert len(obs) == len(obs.choice.unique())
     
     
+def test_simulation_constrained(m):
+    """
+    Test simulation of choices with explicit capacities and sizes.
     
+    """
+    obs = orca.get_table('obs').to_frame()
+    obs.loc[:,'choice'] = -1
+    obs['size'] = np.random.choice([1,2], size=len(obs))
+    orca.add_table('obs', obs)
     
+    alts = orca.get_table('alts').to_frame()
+    alts['cap'] = np.random.choice([1,2,3], size=len(alts))
+    orca.add_table('alts', alts)
     
+    m.constrained_choices = True
+    m.alt_capacity = 'cap'
+    m.chooser_size = 'size'
+    m.run()
+    
+    obs = orca.get_table('obs').to_frame()
+    assert all(~obs.choice.isin([-1]))
+
