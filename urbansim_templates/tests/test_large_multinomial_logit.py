@@ -85,6 +85,37 @@ def m(data):
     return m
 
 
+def test_property_persistence(m):
+    """
+    Test persistence of properties across registration, saving, and reloading.
+    
+    """
+    m.fit()
+    m.name = 'my-model'
+    m.tags = ['tag1']
+    m.chooser_filters = 'filters1'
+    m.chooser_sample_size = 100
+    m.alt_filters = 'filter2'
+    m.out_choosers = 'choosers2'
+    m.out_alternatives = 'alts2'
+    m.out_column = 'choices'
+    m.out_chooser_filters = 'filters3'
+    m.out_alt_filters = 'filters4'
+    m.constrained_choices = True
+    m.alt_capacity = 'cap'
+    m.chooser_size = 'size'
+    m.max_iter = 17
+    
+    d1 = m.to_dict()
+    modelmanager.initialize()
+    modelmanager.register(m)
+    modelmanager.initialize()
+    d2 = modelmanager.get_step('my-model').to_dict()
+    
+    assert d1 == d2
+    modelmanager.remove_step('my-model')
+    
+
 def test_simulation_unconstrained(m):
     """
     Test simulation chooser filters with unconstrained choices.
