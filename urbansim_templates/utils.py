@@ -86,62 +86,109 @@ def version_greater_or_equal(a, b):
     return False
 
 def eval_rhs_function(model_expression, data):
-
-	""""
-	eval the functin, if any, from the strings in rhs (e.g 
-	'np.log(variable)' will do: data[variable].apply(np.log)
-	
-	This is convenient utility to register transformation
-	as part of the model
-	
-	The issue is arbitrary code execution, so we need to restrain
-	the functions allowed. Right now use only functions implemented in
-	numpy via patsy
-	"""
-	matrix_variables = dmatrices(model_expression + ' - 1', data, return_type='dataframe')
-	df_x = pd.DataFrame(matrix_variables[1], index=data.index)
-	df_y = pd.DataFrame(matrix_variables[0], index=data.index)
-	
-	return df_x, df_y
-	
-
-    	
-	
+    """From a patsy string to the corresponding column in data
+    
+    This function looks at each variable names in a 
+    patsy sting, evaluate potential numpy functions applied to that variable 
+    and select the corresponding columns in data
+    
+    This is convenient utility to register transformation
+    as part of the model
+    
+    Example
+    --------
+    >>> model_expression = 'np.log(y) ~ np.log1p(x)'
+    >>> data = pd.DataFrame([[0, 0, 3], [0,2, 4]])
+    >>> data.columns =['x', 'y', 'z']
+    >>> eval_rhs_function(model_expression, data)
+    
+    Arguments
+    --------
+    model_expression: a patsy string 
+            model formula "lhs' ~ 'rhs' with possibly numpy function applied to 
+            rhs and/or lhs variables
+    
+    data: pandas dataframe
+            dataframe with columns including all variable in model_expression
+    
+    To do
+    -------
+    The issue is arbitrary code execution, so we need to restrain
+    the functions allowed. Right now use only functions implemented in
+    numpy via patsy
+    """
+    matrix_variables = dmatrices(model_expression + ' - 1', data, return_type='dataframe')
+    df_x = pd.DataFrame(matrix_variables[1], index=data.index)
+    df_y = pd.DataFrame(matrix_variables[0], index=data.index)
+    
+    return df_x, df_y
+    
+  
 def convert_to_model(model, model_expression, ytransform=None):
-
-	""""
-	This function takes a model with a predict and a fit attribute and 
-	convert those attributes into a format compatible with .fit and .predict
-	used by urbansim models
-	"""
-	model.fit_previous = model.fit
-	model.predict_previous = model.predict
-	
-	def fit(data):
-	
-		# transform data using patsy dmatrix
-		df_x, df_y = eval_rhs_function(model_expression, data)
-	
-		trainX = df_x
-		trainY = np.ravel(np.array(df_y))
-		
-		return model.fit_previous(trainX, trainY)
-		
-	def predict(data):
-	
-		# transform data using patsy dmatrix
-		df_x, _ = eval_rhs_function(model_expression, data)
-		
-		testX = np.array(df_x)
-		values = model.predict_previous(testX)
-		
-		if ytransform:
-			values = ytransform(values)
-		return pd.Series(pd.Series(values, index=data.index))
-	
-	model.fit = fit
-	model.predict = predict
-	return model 
-		
+    """Convert model to the right format 
+    
+    This function returns a model with a fit and predict method compatible with the 
+    TemplateStep structure.
+    
+    Example
+    ----------
+    >>> from sklearn.ensemble import RandomForestRegressor
+    >>> model = RandomForestRegressor()
+    >>> model_expression = 'np.log(y) ~ np.log1p(x)'
+    >>> new_model = convert_to_model(model, model_expression)
+    >>> trainX = np.array(data['X'])
+    >>> trainY = np.array(data['Y']
+    Compare new_model.fit(data) to model.fit(np.log1p(trainX), np.log(trainY))
+    
+    Arguments
+    ---------
+    model: object 
+            model with a fit and predict method
+    
+    model_expression: a patsy string 
+            model formula "lhs' ~ 'rhs' with possibly numpy function applied to 
+            rhs and/or lhs variables
+       
+    Keywords:
+    ---------
+    ytransform: numpy function 
+            applied to the output once predicted
+    
+    Returns
+    ---------
+    object
+            model with modified fit and predict methods
+    """
+    
+    model.fit_previous = model.fit
+    model.predict_previous = model.predict
+    
+    def fit(data, **keywords):
+    
+        # transform data using patsy dmatrix
+        df_x, df_y = eval_rhs_function(model_expression, data)
+    
+        trainX = df_x
+        trainY = np.ravel(np.array(df_y))
+        
+        return model.fit_previous(trainX, trainY, **keywords)
+        
+    def predict(data):
+    
+        # transform data using patsy dmatrix
+        df_x, _ = eval_rhs_function(model_expression, data)
+        
+        testX = np.array(df_x)
+        values = model.predict_previous(testX).ravel()
+    
+        if ytransform:
+            values = ytransform(values)
+        
+        return pd.Series(pd.Series(values, index=data.index))
+    
+    model.fit = fit
+    model.predict = predict
+    return model 
+        
     
     
