@@ -110,6 +110,14 @@ def eval_rhs_function(model_expression, data):
     
     data: pandas dataframe
             dataframe with columns including all variable in model_expression
+            
+    Returns
+    --------
+    df_x: pandas dataframe
+            a dataframe with transformed rhs variables
+    
+    df_y: pandas series
+            a series with tranformed lhs variable
     
     To do
     -------
