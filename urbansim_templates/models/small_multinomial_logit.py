@@ -18,10 +18,10 @@ from .shared import TemplateStep
 class SmallMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
-    "small". Estimation is handled by ChoiceModels and PyLogit. Simulation is handled by
-    PyLogit (probabilities) and within this class (simulation draws). 
+    "small". Estimation is handled by PyLogit via the ChoiceModels API. Simulation is 
+    handled by PyLogit (probabilities) and ChoiceModels (simulation draws). 
     
-    Multinomial Logit models can involve a range of different specification and estimation
+    Multinomial logit models can involve a range of different specification and estimation
     mechanics. For now these are separated into two templates. What's the difference?
     
     "Small" MNL:
