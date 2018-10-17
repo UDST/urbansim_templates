@@ -1,0 +1,48 @@
+name: template-env
+
+channels:
+  - udst  # for orca and pandana
+  - conda-forge  # for choicemodels, statsmodels, and many dependencies
+  - timothyb0912  # for pylogit
+
+dependencies:
+  - python=3.6
+  - geopandas=0.3
+  - jupyter=1.0
+  - line_profiler=2.1
+  - matplotlib=2.2
+  - memory_profiler=0.54
+  - numpy=1.15
+  - orca=1.5
+  - pandana=0.4
+  - pandas=0.23
+  - pylogit=0.2
+  - pytest=3.8
+  - scipy=1.1
+  - statsmodels=0.9
+  - sklearn=0.19.2
+  - dill=0.2.8.2
+
+
+# This Conda environment includes the direct dependencies for template-based UrbanSim 
+# models, plus a variety of other packages that are useful for validation and testing.
+
+# One-time setup (several minutes):
+#   `conda env create -f environment.yml`
+
+# Activate the environment:
+#   `source activate template-env`
+
+# Install development versions of ChoiceModels and UrbanSim Templates 
+# (only needs to be done once, but run git-pull from these directories
+#  periodically to update the codebases)
+
+# Navigate to directory where choicemodels folder should go:
+#   `git clone https://github.com/udst/choicemodels.git`
+#   `cd choicemodels`
+#   `python setup.py develop`
+
+# Navigate to directory where urbansim_templates folder should go:
+#   `git clone https://github.com/udst/urbansim_templates.git`
+#   `cd urbansim_templates`
+#   `python setup.py develop`
