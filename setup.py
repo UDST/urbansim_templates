@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='urbansim_templates',
-    version='0.1.dev13',
+    version='0.1.dev16',
     description='UrbanSim extension for managing model steps',
     author='UrbanSim Inc.',
     author_email='info@urbansim.com',
@@ -21,6 +21,8 @@ setup(
         'pandana >= 0.3',
         'pandas >= 0.22',
         'statsmodels >= 0.8',
-        'urbansim >= 3.1.1'
+        'urbansim >= 3.1.1',
+        'sklearn >= 0.19.2',
+        'dill >= 0.2.8.2'
     ]
 )
