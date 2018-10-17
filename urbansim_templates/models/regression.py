@@ -206,24 +206,24 @@ class OLSRegressionStep(TemplateStep):
         tabname = self._get_out_table()
 
         orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
-		
-@modelmanager.template		
+        
+@modelmanager.template        
 class RandomForestRegressionStep(OLSRegressionStep):
 
-	def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
+    def __init__(self, tables=None, model_expression=None, filters=None, out_tables=None,
             out_column=None, out_transform=None, out_filters=None, name=None, tags=[]):
-		
-		super().__init__(tables=tables, model_expression=model_expression, filters=filters, out_tables=out_tables,
+        
+        super().__init__(tables=tables, model_expression=model_expression, filters=filters, out_tables=out_tables,
             out_column=out_column, out_transform=out_transform, name=name)
-		
-		self.cv_metric = None
-		self.importance = None
-		
-		
+        
+        self.cv_metric = None
+        self.importance = None
+        
+        
 
-	@classmethod
-	def from_dict(cls, d):
-		"""
+    @classmethod
+    def from_dict(cls, d):
+        """
         Create an object instance from a saved dictionary representation.
         Use a pickled version of the random forest model
         Parameters
@@ -234,141 +234,144 @@ class RandomForestRegressionStep(OLSRegressionStep):
         -------
         RandomForestRegressionStep
         
-		"""	
-		# Pass values from the dictionary to the __init__() method
-		obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
+        """    
+        # Pass values from the dictionary to the __init__() method
+        obj = cls(tables=d['tables'], model_expression=d['model_expression'], 
                 filters=d['filters'], out_tables=d['out_tables'], 
                 out_column=d['out_column'], out_transform=d['out_transform'],
                 out_filters=d['out_filters'], name=d['name'], tags=d['tags'],
-				)
-				
-		# Unpack the model sub-object from pickle file and resuscitate it
-		for supplement in d['supplemental_objects']:
-			name = supplement['object_name']
-			content = supplement['content']
-			setattr(obj, name, content)
-		return obj
-	
+                )
 
-	def fit(self):
-	
-		
-		self.rhs  = self._get_input_columns()
-	
-		# convert model to  a format -- similar fit and predict structure -- than other steps	
-		self.model = convert_to_model(RandomForestRegressor(), 
-									  self.model_expression, 
-									  ytransform=self.out_transform)
-	
-	
-		results = self.model.fit(self._get_data())
-		
-		self.name = self._generate_name()
-		
-		# compute feature importance
-		importance = self.model.feature_importances_
-		self.importance = {}
-		
-		i = 0
-		for variable in self.rhs:
-			self.importance[variable] = float(importance[i])
-			i +=1
-		
-		
-	def to_dict(self):
-		"""
+        return obj
+    
+
+    def fit(self):
+        """Fit method to estimate randomForest()
+        
+        This function fits a RandomForest() model using the sklearn library,
+        save the results and compute feature importances
+
+        Arguments
+        ------------
+        self: object instance
+
+        """
+    
+        # convert model to  a format with similar fit and predict structure as in TemplateStep 
+        self.model = convert_to_model(RandomForestRegressor(), 
+                                      self.model_expression, 
+                                      ytransform=self.out_transform)
+    
+        results = self.model.fit(self._get_data())
+        self.name = self._generate_name()
+        
+        # compute feature importance
+        importance = self.model.feature_importances_
+        self.importance = {}
+        i = 0
+        for variable in self.model.rhs:
+            self.importance[variable] = float(importance[i])
+            i += 1
+        
+        
+    def to_dict(self):
+        """
         Create a dictionary representation of the object.
         
         Returns
         -------
         dict
         
-		"""
-		d = TemplateStep.to_dict(self)
-		# Add parameters not in parent class
-		d.update({
+        """
+        d = TemplateStep.to_dict(self)
+        # Add parameters not in parent class
+        d.update({
             'model': self.name,
-			'cross validation metric': self.cv_metric,
-			'features importance': self.importance
+            'cross validation metric': self.cv_metric,
+            'features importance': self.importance
         })
-		
-		# model config is a filepath to a pickled file
-		d['supplemental_objects'] = []
-		d['supplemental_objects'].append({'name': self.name,
-									'content': self.model, 
-									'content_type': 'pickle',
-									'object_name': 'model'})
-		
-		return d
-		
-	def run(self):
-		"""
-		Run the model step: calculate predicted values and use them to update a column.
+        
+        # model config is a filepath to a pickled file
+        d['supplemental_objects'] = []
+        d['supplemental_objects'].append({'name': self.name,
+                                    'content': self.model, 
+                                    'content_type': 'pickle'})
+        
+        return d
+        
+    def run(self):
+        """
+        Run the model step: calculate predicted values and use them to update a column.
         
         The predicted values are written to Orca and also saved to the class object for 
         interactive use (`predicted_values`, with type pd.Series). But they are not saved 
         in the dictionary representation of the model step.
         
         """
-		# TO DO - figure out what we can infer about requirements for the underlying data
+        # TO DO - figure out what we can infer about requirements for the underlying data
         # and write an 'orca_test' assertion to confirm compliance.
 
-		output_column = self._get_out_column()
-		data = self._get_data('predict')
-		
-		values = self.model.predict(self._get_data('predict'))
-		#values = pd.Series(values, index=data.index)
-		self.predicted_values = values
+        output_column = self._get_out_column()
+        data = self._get_data('predict')
+        
+        values = self.model.predict(self._get_data('predict'))
+        #values = pd.Series(values, index=data.index)
+        self.predicted_values = values
        
-		tabname = self._get_out_table()
+        tabname = self._get_out_table()
 
-		orca.get_table(tabname).update_col_from_series(output_column, values, cast=True)
-		
+        orca.get_table(tabname).update_col_from_series(output_column, values, cast=True)
+        
 
-			
-		
-@modelmanager.template		
+            
+        
+@modelmanager.template        
 class GradientBoostingRegressionStep(RandomForestRegressionStep):
 
 
-	def fit(self):
-	
-		
-		self.rhs  = self._get_input_columns()
-	
-		# convert model to  a format -- similar fit and predict structure -- than other steps	
-		self.model = convert_to_model(GradientBoostingRegressor(), 
-									  self.model_expression, 
-									  ytransform=self.out_transform)
-	
-		results = self.model.fit(self._get_data())
-		
-		self.name = self._generate_name()
-		
-	def to_dict(self):
-		"""
+    def fit(self):
+        """Fit method to estimate GradientBoosting()
+        
+        This function fits a GradientBoosting() model using the sklearn library,
+        save the results.
+
+        Arguments
+        ------------
+        self: object instance
+
+        """
+    
+        # convert model to  a format with similar fit and predict structure as in TemplateStep 
+        self.model = convert_to_model(GradientBoostingRegressor(), 
+                                      self.model_expression, 
+                                      ytransform=self.out_transform)
+    
+        results = self.model.fit(self._get_data())
+        self.name = self._generate_name()
+        
+    def to_dict(self):
+        """
         Create a dictionary representation of the object.
         
         Returns
         -------
         dict
         
-		"""
-		d = TemplateStep.to_dict(self)
-		# Add parameters not in parent class
-		d.update({
+        """
+        d = TemplateStep.to_dict(self)
+        # Add parameters not in parent class
+        d.update({
             'model': self.name,
-			'cross validation metric': self.cv_metric,
-			'features importance': self.importance
+            'cross validation metric': self.cv_metric
         })
-		
-		# model config is a filepath to a pickled file
-		d['supplemental_objects'] = []
-		d['supplemental_objects'].append({'name': self.name,
-									'content': self.model, 
-									'content_type': 'pickle'})
-		
-		return d
-		
+        
+        # model config is a filepath to a pickled file
+        d['supplemental_objects'] = []
+        d['supplemental_objects'].append({'name': self.name,
+                                    'content': self.model, 
+                                    'content_type': 'pickle'})
+        
+        return d
+        
         
 
