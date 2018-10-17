@@ -52,7 +52,7 @@ class TemplateStep(object):
         
         self.name = name
         self.tags = tags
-		
+        
         
         self.template = type(self).__name__  # class name
         self.template_version = __version__
@@ -286,20 +286,8 @@ class TemplateStep(object):
         else:
             # TO DO - there must be a cleaner way to get LHS column name
             return self.model_expression.split('~')[0].split(' ')[0]
-			
-    def _get_input_columns(self):
-	
-        """
-        Return name of the column to save data to. This is rhs columns if it exsits,
-         
-        Returns
-        -------
-        list
-        
-        """
-        rhs = self.model_expression.split('~')[1].strip().split('+')
-        return [col.strip() for col in rhs]
-    
+   
+
     def _get_out_table(self):
         """
         Return name of the table to save data to. This is 'out_tables' or its first 
@@ -339,20 +327,32 @@ class TemplateStep(object):
             return self.template + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
         else:
             return self.name
-	
+    
     def _split(self, n_splits=10):
-		
+        """Split the sample between test and train
+
+        This function takes a data and turn it into a k-fold splits,where k=n_splits.
+        One split is reserved for testing, the remaining will be used for training
+
+        Keywords
+        ------------
+        n_splits: int
+            number of split (defualt = 10)
+
+        Returns
+        ----------
+        generator 
+            a generator made of tuple, the first element being the training data and
+            the second being the test data. There is one tuple for each possible 
+            split
         """
-        take a data and turn it into a k-fold splits,where k=n_splits
-        One split is reserved for testing, the rest will be used for training
-        """
-		
+        
         data = self._get_data()
         data_index = np.array(data.index).astype('int64')
-		
+        
         np.random.shuffle(data_index)
         n_samples = data_index.shape[0]
-		
+        
         fold_sizes = (n_samples // n_splits) * np.ones(n_splits, dtype=np.int)
         fold_sizes[:n_samples % n_splits] += 1
         current = 0
@@ -364,28 +364,49 @@ class TemplateStep(object):
             training_data = data.drop(test_indices)
             current = stop
             yield training_data, test_data
-			
+            
     def cross_validate_score(self, n_splits=10, **keywords):
-		
+        """Cross validation iteration
+
+        This function iterates over n_splits-fold splits of the data into
+        training and test data, fits the self.model on each on the training set
+        instance and computes mean squared and mean absolute errors on the corresponding
+        test data. 
+
+        This function adds to the object cross-validation metrics the mean of n_splits
+        -fold mean squared/absolute error. This is useful to compare various models
+        performance.
+
+        keywords
+        -----------
+        n_splits: int
+            number of split (default = 10)
+        
+        **keywords:
+            any keywords that may used in the model.fit method (e.g.
+            batch size if stochastic methods are used) 
+
+        """
+        
         data = self._get_data()
-	
+    
         output_column = self._get_out_column()
         self.rhs  = self._get_input_columns()
-		
+        
         self.cv_metric = {}
         i = 0
         
         mean_metric = np.zeros(n_splits)
         mae_metric = np.zeros(n_splits)
-		
+        
         for train, test in self._split(n_splits):
-			 
+             
             self.model.fit(train, **keywords)
             predicted = self.model.predict(test)
-			
+            
             mean_metric[i] = np.mean((predicted - test[output_column]) ** 2)
             mae_metric[i] = np.mean(abs(predicted - test[output_column]))
             i += 1
-		
+        
         self.cv_metric['mean_cross_validation'] = float(np.mean(mean_metric))
         self.cv_metric['mae_cross_validation'] = float(np.mean(mae_metric.mean()))
