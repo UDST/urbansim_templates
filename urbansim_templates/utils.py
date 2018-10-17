@@ -85,7 +85,7 @@ def version_greater_or_equal(a, b):
     
     return False
 
-def eval_rhs_function(model_expression, data):
+def from_patsy_to_array(model_expression, data):
     """From a patsy string to the corresponding column in data
     
     This function looks at each variable names in a 
@@ -97,11 +97,23 @@ def eval_rhs_function(model_expression, data):
     
     Example
     --------
+    >>> from urbansim_templates.utils import from_patsy_to_array
+    >>> import pandas as pd
     >>> model_expression = 'np.log(y) ~ np.log1p(x)'
     >>> data = pd.DataFrame([[0, 0, 3], [0,2, 4]])
     >>> data.columns =['x', 'y', 'z']
-    >>> eval_rhs_function(model_expression, data)
+    >>> df_x, df_y = from_patsy_to_array(model_expression, data)
     
+    df_x:    np.log1p(x)
+    0	0.0
+    1	0.0
+
+    df_y: 
+        np.log(y)
+    0	0.000000
+    1	0.693147
+
+
     Arguments
     --------
     model_expression: a patsy string 
@@ -166,25 +178,27 @@ def convert_to_model(model, model_expression, ytransform=None):
     ---------
     object
             model with modified fit and predict methods
-    """
-    
+    """ 
     model.fit_previous = model.fit
     model.predict_previous = model.predict
     
     def fit(data, **keywords):
     
         # transform data using patsy dmatrix
-        df_x, df_y = eval_rhs_function(model_expression, data)
+        df_x, df_y = from_patsy_to_array(model_expression, data)
     
         trainX = df_x
         trainY = np.ravel(np.array(df_y))
+        
+        # model right habd side variables
+        model.rhs = list(df_x.columns)
         
         return model.fit_previous(trainX, trainY, **keywords)
         
     def predict(data):
     
         # transform data using patsy dmatrix
-        df_x, _ = eval_rhs_function(model_expression, data)
+        df_x, _ = from_patsy_to_array(model_expression, data)
         
         testX = np.array(df_x)
         values = model.predict_previous(testX).ravel()
@@ -193,7 +207,7 @@ def convert_to_model(model, model_expression, ytransform=None):
             values = ytransform(values)
         
         return pd.Series(pd.Series(values, index=data.index))
-    
+        
     model.fit = fit
     model.predict = predict
     return model 
