@@ -187,8 +187,11 @@ def save_step_to_disk(step):
     # Save supplemental objects
     if 'supplemental_objects' in d:
         for item in filter(None, d['supplemental_objects']):
-            save_supplemental_object(step.name, item['name'], item['content'], item['content_type'])
+            content = item['content']
+            content.role = item['object_name']
+            save_supplemental_object(step.name, item['name'], content, item['content_type'])
             del item['content']
+            del item['object_name']
           
     
     # Save main yaml file

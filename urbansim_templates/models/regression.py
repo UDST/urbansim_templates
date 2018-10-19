@@ -242,6 +242,10 @@ class RandomForestRegressionStep(OLSRegressionStep):
                 out_filters=d['out_filters'], name=d['name'], tags=d['tags'],
                 )
 
+        # add supplemental objects
+        for i, item in enumerate(d['supplemental_objects']):
+            content = d['supplemental_objects'][i]['content']
+            setattr(obj, content.role, content)
         return obj
     
 
@@ -294,6 +298,7 @@ class RandomForestRegressionStep(OLSRegressionStep):
         # model config is a filepath to a pickled file
         d['supplemental_objects'] = []
         d['supplemental_objects'].append({'name': self.name,
+                                    'object_name': 'model',
                                     'content': self.model, 
                                     'content_type': 'pickle'})
         
