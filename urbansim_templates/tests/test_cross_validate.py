@@ -4,49 +4,45 @@ import pandas as pd
 import pytest
 
 from urbansim_templates import modelmanager
-from urbansim_templates.models.regression import RandomForestRegressionStep, OLSRegressionStep
+from urbansim_templates.models.regression import RandomForestRegressionStep,  GradientBoostingRegressionStep
 
-# load rental data
-rental = pd.read_csv('data\\rentals_with_nodes.csv')
-node_small = pd.read_csv('data\\nodessmall_vars.csv') 
-node_walk = pd.read_csv('data\\nodeswalk_vars.csv') 
+@pytest.fixture
+def orca_session():
 
-data = pd.merge(rental, node_small, left_on='node_id_small', right_on='osmid')
-data = pd.merge(data, node_walk, left_on='node_id_walk', right_on='osmid')
+    d1 = {'a': np.random.random(100),
+      'b': np.random.randint(2, size=100),
+	  'c': np.random.normal(size=100)}
 
-# add columns -- we need a way to register those transformations in the model
-data['log_rent_sqft'] = np.log(data.rent_sqft)
+    obs = pd.DataFrame(d1)
+    orca.add_table('obs', obs)
 
-
-# register data in orca
-orca.add_table('rental_prices', data)
-
-def test_rf():
+def test_run(orca_session):
     """
     For now this just tests that the code runs.
     
     """
     modelmanager.initialize()
 
-   
-	
-	# compare to random forest
-    rf = RandomForestRegressionStep(out_transform=np.exp, out_column='rent_sqft')
-    rf.tables = 'rental_prices'
+	# random forest
+    rf = RandomForestRegressionStep(out_transform=np.exp, out_column='a')
+    rf.tables = 'obs'
     rf.n_splits = 10
-    rf.model_expression = 'np.log(rent_sqft) ~ bedrooms + np.log1p(units_500_walk) + np.log1p(rich_500_walk) + np.log1p(singles_500_walk)'
+    rf.model_expression = 'a ~ b + c'
 	
     rf.name = 'cross_validate_rf_-test'
    
     rf.fit()
     rf.cross_validate_score()
-    print(rf.cv_metric)
-    modelmanager.register(rf)
     
-    modelmanager.initialize()
-    #m = modelmanager.get_step('random_forest-test')
-    
+    # gradient boosting
+    gb =  GradientBoostingRegressionStep(out_transform=np.exp, out_column='a')
+    gb.tables = 'obs'
+    gb.n_splits = 10
+    gb.model_expression = 'a ~ b + c'
 	
-if __name__ == '__main__':
-    test_rf()
+    gb.name = 'cross_validate_gb_-test'
+    
+    
+    
+
 	

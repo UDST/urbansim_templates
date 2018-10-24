@@ -34,8 +34,6 @@ def test_observation_sampling(orca_session):
     
     m.fit()
     assert(len(m.mergedchoicetable.to_frame()) == 190)  # 200 after fixing alt sampling
-    m.cross_validate_score()
-    print(m.cv_metric)
     
     m.chooser_sample_size = 5
     m.fit()
@@ -50,6 +48,4 @@ def test_observation_sampling(orca_session):
     
     modelmanager.remove_step('mnl-test')
 	
-if __name__ == "__main__":
-    orc = orca_session()
-    test_observation_sampling(orc)
+
