@@ -290,9 +290,8 @@ class RandomForestRegressionStep(OLSRegressionStep):
         d = TemplateStep.to_dict(self)
         # Add parameters not in parent class
         d.update({
-            'model': self.name,
-            'cross validation metric': self.cv_metric,
-            'features importance': self.importance
+            'cross_validation_metric': self.cv_metric,
+            'features_importance': self.importance
         })
         
         # model config is a filepath to a pickled file
@@ -373,6 +372,7 @@ class GradientBoostingRegressionStep(RandomForestRegressionStep):
         # model config is a filepath to a pickled file
         d['supplemental_objects'] = []
         d['supplemental_objects'].append({'name': self.name,
+                                    'object_name': 'model',
                                     'content': self.model, 
                                     'content_type': 'pickle'})
         
