@@ -391,7 +391,7 @@ class TemplateStep(object):
         data = self._get_data()
     
         output_column = self._get_out_column()
-        self.rhs  = self._get_input_columns()
+        
         
         self.cv_metric = {}
         i = 0
