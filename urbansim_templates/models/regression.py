@@ -201,6 +201,6 @@ class OLSRegressionStep(TemplateStep):
         colname = self._get_out_column()
         tabname = self._get_out_table()
 
-        orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
-        
-
+        #orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
+        values = values.reindex(orca.get_table(tabname).index).fillna(0)
+        orca.add_column(tabname, colname, values)

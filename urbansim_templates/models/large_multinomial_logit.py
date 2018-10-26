@@ -424,7 +424,7 @@ class LargeMultinomialLogitStep(TemplateStep):
             
             alternatives = self._get_df(tables = self.alternatives, 
                                         filters = self.alt_filters)
-        
+
             mct = MergedChoiceTable(observations = observations,
                                     alternatives = alternatives,
                                     chosen_alternatives = self.choice_column,
@@ -444,6 +444,19 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         # Save merged choice table to the class object for diagnostics
         self.mergedchoicetable = mct
+
+
+    ## Remove this once fit results are saved so we can pass to MnlResults.probabilities and get probas that way
+    def probas(self):
+        alternatives = self._get_df(tables = self.out_alternatives, 
+                                    fallback_tables = self.alternatives,
+                                    filters = self.out_alt_filters)
+
+        dm = patsy.dmatrix(self.model_expression, data=alternatives, return_type='dataframe')
+
+        probs = mnl.mnl_simulate(data = dm, coeff = self.fitted_parameters, 
+                                 numalts = len(alternatives), returnprobs=True)
+        return pd.Series(probs.flatten(), index=alternatives.index)
             
     
     def run(self):
@@ -463,7 +476,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)
-
+        del obs[self.choice_column]
         def mct(obs, alts):
             return MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
         

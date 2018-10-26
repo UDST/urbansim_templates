@@ -191,7 +191,11 @@ class TemplateStep(object):
         if isinstance(tables, list):
             df = orca.merge_tables(target=tables[0], tables=tables)
         else:
-            df = orca.get_table(tables).to_frame()
+            from urbansim.models import util
+            if tables == 'buildings':
+                df = orca.get_table(tables).to_frame(util.columns_in_formula(self.model_expression) + [self.alt_capacity])
+            else:
+                df = orca.get_table(tables).to_frame(util.columns_in_filters(self.chooser_filters) + [self.choice_column])
         
         df = util.apply_filter_query(df, filters)
         return df
