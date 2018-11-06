@@ -6,6 +6,7 @@ from collections import OrderedDict
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import SmallMultinomialLogitStep
+from urbansim_templates.utils import validate_template
 
 
 @pytest.fixture
@@ -16,6 +17,14 @@ def orca_session():
 
     obs = pd.DataFrame(d1)
     orca.add_table('obs', obs)
+
+
+def test_template_validity():
+    """
+    Run the template through the standard validation check.
+    
+    """
+    assert validate_template(SmallMultinomialLogitStep)
 
 
 def test_small_mnl(orca_session):
