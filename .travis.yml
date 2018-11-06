@@ -1,0 +1,15 @@
+language: python
+
+python:
+  - '3.6'
+
+install:
+  - pip install .
+  - pip show urbansim_templates
+
+script:
+  - cd urbansim_templates/tests
+  - pytest *.pytest
+
+after_success:
+  - coverage report -m
