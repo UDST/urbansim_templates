@@ -10,7 +10,7 @@ install:
 
 script:
   - cd urbansim_templates/tests
-  - pytest *.pytest
+  - pytest *.py
 
 after_success:
   - coverage report -m
