@@ -5,6 +5,13 @@ python:
   - '3.5'
   - '3.6'
 
+# Temporary solution for Python 3.7 until it's more cleanly supported
+matrix:
+  include:
+    - python: '3.7'
+      dist: xenial
+      sudo: true
+
 install:
   - pip install git+git://github.com/udst/choicemodels.git
   - pip install .
