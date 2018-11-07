@@ -16,11 +16,11 @@ setup(
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
+        'choicemodels >= 0.2.dev4',
         'numpy >= 1.14',
         'orca >= 1.4',
-        'pandana >= 0.3',
         'pandas >= 0.22',
-        'statsmodels >= 0.8',
-        'urbansim >= 3.1.1'
+        'statsmodels >= 0.9',
+        'urbansim >= 3.1'
     ]
 )
