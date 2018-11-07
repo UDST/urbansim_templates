@@ -6,6 +6,8 @@ python:
 
 install:
   - pip install .
+  - pip install git+git://github.com/udst/choicemodels.git
+  - pip list
   - pip show urbansim_templates
 
 script:
