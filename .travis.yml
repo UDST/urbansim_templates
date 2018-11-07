@@ -8,6 +8,8 @@ python:
 install:
   - pip install git+git://github.com/udst/choicemodels.git
   - pip install .
+  - pip install -r requirements-full.txt
+  - pip install -r requirements-dev.txt
   - pip list
   - pip show urbansim_templates
 
