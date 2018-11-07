@@ -15,8 +15,8 @@ install:
 
 script:
   - cd urbansim_templates/tests
-  - coverage run --source urbansim_templates -m pytest --verbose
+  - coverage run --source urbansim_templates --module pytest --verbose
 
 after_success:
-  - coverage report -m
+  - coverage report --show-missing
   - coveralls

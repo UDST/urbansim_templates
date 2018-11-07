@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/UDST/urbansim_templates.svg?branch=master)](https://travis-ci.org/UDST/urbansim_templates)
+[![Coverage Status](https://coveralls.io/repos/github/UDST/urbansim_templates/badge.svg?branch=master)](https://coveralls.io/github/UDST/urbansim_templates?branch=master)
+
 # UrbanSim Templates
 
 UrbanSim Templates defines a common structure for new model steps and provides a core set of flexible templates and related tools. The goal is to enable smoother model setup, easier code reuse, and improvements to task orchestration. 
