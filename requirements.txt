@@ -1,3 +1,5 @@
+# minimal requirements for model management and core templates
+
 choicemodels >= 0.2.dev4
 numpy >= 1.14
 orca >= 1.4

@@ -14,8 +14,8 @@ install:
   - pip show urbansim_templates
 
 script:
-  - cd urbansim_templates/tests
-  - pytest *.py
+  - coverage run --source urbansim_templates -m pytest --verbose
 
 after_success:
   - coverage report -m
+  - coveralls
