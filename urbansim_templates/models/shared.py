@@ -195,7 +195,8 @@ class TemplateStep(object):
             if tables == 'buildings':
                 df = orca.get_table(tables).to_frame(util.columns_in_formula(self.model_expression) + [self.alt_capacity])
             else:
-                df = orca.get_table(tables).to_frame(util.columns_in_filters(self.chooser_filters) + [self.choice_column])
+                cols = util.columns_in_filters(self.chooser_filters) + [self.choice_column] + util.columns_in_formula(self.model_expression)
+                df = orca.get_table(tables).to_frame(cols)
         
         df = util.apply_filter_query(df, filters)
         return df
