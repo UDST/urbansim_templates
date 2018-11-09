@@ -4,5 +4,6 @@ choicemodels >= 0.2.dev4
 numpy >= 1.14
 orca >= 1.4
 pandas >= 0.22
-statsmodels >= 0.9
+patsy >= 0.4
+statsmodels >= 0.8
 urbansim >= 3.1
