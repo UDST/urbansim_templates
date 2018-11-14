@@ -12,10 +12,11 @@ from ..__init__ import __version__
 from ..utils import update_name
 from .. import modelmanager
 from . import LargeMultinomialLogitStep
+from .shared import TemplateStep
 
 
 @modelmanager.template
-class SegmentedLargeMultinomialLogitStep():
+class SegmentedLargeMultinomialLogitStep(TemplateStep):
     """
     This template automatically generates a set of LargeMultinomialLogitStep submodels
     corresponding to "segments" or categories of choosers. The submodels can be directly 
@@ -132,13 +133,15 @@ class SegmentedLargeMultinomialLogitStep():
         # TO DO - this doesn't filter for columns in the model expression; is there
         #   centralized functionality for this merge that we should be using instead?
         
-        obs = orca.get_table(self.defaults.choosers).to_frame()
-        obs = apply_filter_query(obs, self.defaults.chooser_filters)
-        
-        alts = orca.get_table(self.defaults.alternatives).to_frame()
-        alts = apply_filter_query(alts, self.defaults.alt_filters)
+        obs = self._get_df(
+            tables=self.defaults.choosers,
+            filters=self.defaults.chooser_filters)
 
-        df = pd.merge(obs, alts, how='inner', 
+        alts = self._get_df(
+            tables=self.defaults.alternatives,
+            filters=self.defaults.alt_filters)
+
+        df = pd.merge(obs, alts, how='inner',
                       left_on=self.defaults.choice_column, right_index=True)
         
         return df[self.segmentation_column]
@@ -222,6 +225,8 @@ class SegmentedLargeMultinomialLogitStep():
             self.build_submodels()
         
         for k, m in self.submodels.items():
+            print(' SEGMENT: {0} = {1} '.format(
+                self.segmentation_column, str(k)).center(70, '#'))
             m.fit()
         
         self.name = update_name(self.template, self.name)
