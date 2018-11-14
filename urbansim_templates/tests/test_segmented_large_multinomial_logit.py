@@ -32,6 +32,51 @@ def orca_session():
 
 
 @pytest.fixture
+def orca_session_alts_as_list():
+    """
+    Set up a clean Orca session with a couple of data tables.
+    
+    """
+    d1 = {'oid': np.arange(100),
+          'group': np.random.choice(['A', 'B', 'C'], size=100),
+          'int_group': np.random.choice([3, 4], size=100),
+          'obsval': np.random.random(100),
+          'choice': np.random.choice(np.arange(20), size=100)}
+
+    d2 = {'aid': np.arange(20),
+          'altval': np.random.random(20)}
+
+    d3 = {'aid': np.arange(20),
+          'altval_2': np.random.random(20)}
+
+    obs = pd.DataFrame(d1).set_index('oid')
+    orca.add_table('obs', obs)
+
+    d2_df = pd.DataFrame(d2).set_index('aid')
+    orca.add_table('d2', d2_df)
+
+    d3_df = pd.DataFrame(d3).set_index('aid')
+    orca.add_table('d3', d3_df)
+
+    orca.broadcast('d3', 'd2', cast_index=True, onto_index=True)
+
+
+@pytest.fixture
+def m_alts_as_list(orca_session_alts_as_list):
+    """
+    Set up a partially configured model step with multiple
+    tables of alternatives
+    """
+    m = SegmentedLargeMultinomialLogitStep()
+    m.defaults.choosers = 'obs'
+    m.defaults.alternatives = ['d2', 'd3']
+    m.defaults.choice_column = 'choice'
+    m.defaults.model_expression = 'obsval + altval + altval_2'
+    m.segmentation_column = 'group'
+    return m
+
+
+@pytest.fixture
 def m(orca_session):
     """
     Set up a partially configured model step.
@@ -45,6 +90,25 @@ def m(orca_session):
     m.segmentation_column = 'group'
     return m
 
+
+def test_basic_operation(m):
+    """
+    Test basic operation of the template.
+    
+    """
+    m.fit_all()
+    m.to_dict()
+    assert len(m.submodels) == 3
+
+def test_basic_operation_alts_as_list(m_alts_as_list):
+    """
+    Test basic operation of the template.
+    
+    """
+    m = m_alts_as_list
+    m.fit_all()
+    m.to_dict()
+    assert len(m.submodels) == 3
 
 def test_basic_operation(m):
     """
@@ -92,6 +156,20 @@ def test_alternative_filters(m):
     len2 = len(m.get_segmentation_column())
     
     assert len1 == len2
+
+
+def test_alternative_filters_for_alts_as_list(m_alts_as_list):
+    """
+    Test that the default alternative filters generate the correct data subset.
+    
+    """
+    m = m_alts_as_list
+    m.defaults.alt_filters = 'altval_2 < 0.5'
+    
+    m.build_submodels()
+    for k, v in m.submodels.items():
+        alts = v._get_df(tables = v.alternatives, filters = v.alt_filters)
+        assert alts['altval_2'].max() < 0.5
 
 
 def test_submodel_filters(m):
