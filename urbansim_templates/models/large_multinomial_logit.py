@@ -446,7 +446,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.mergedchoicetable = mct
             
     
-    def run(self):
+    def run(self, chooser_batch_size=None, interaction_terms=None):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
@@ -465,7 +465,9 @@ class LargeMultinomialLogitStep(TemplateStep):
                 fitted_parameters = self.fitted_parameters)
 
         def mct(obs, alts):
-            return MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
+            return MergedChoiceTable(
+                obs, alts, sample_size=self.alt_sample_size,
+                interaction_terms=interaction_terms)
         
         def probs(mct):
             return model.probabilities(mct)
@@ -473,7 +475,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         if (self.constrained_choices == True):
             choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 
                     probs_callable=probs, alt_capacity=self.alt_capacity,
-                    chooser_size=self.chooser_size, max_iter=self.max_iter)
+                    chooser_size=self.chooser_size, max_iter=self.max_iter,
+                    chooser_batch_size=chooser_batch_size)
             
         else:
             probs = probs(mct(obs, alts))
