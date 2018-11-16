@@ -453,6 +453,27 @@ class LargeMultinomialLogitStep(TemplateStep):
         The simulated choices are saved to the class object for diagnostics ('choices').
         If choices are unconstrained, the probabilities of sampled alternatives are saved
         as well ('probabilities').
+
+        Parameters
+        ----------
+        chooser_batch_size : int
+            This parameter gets passed to 
+            choicemodels.tools.simulation.iterative_lottery_choices and is a temporary
+            workaround for dealing with memory issues that arise from generating massive
+            merged choice tables for simulations that involve large numbers of choosers,
+            large numbers of alternatives, and large numbers of predictors. It allows the
+            user to specify a batch size for simulating choices one chunk at a time. 
+
+        interaction_terms : pandas.Series, pandas.DataFrame, or list of either, optional
+            Additional column(s) of interaction terms whose values depend on the combination 
+            of observation and alternative, to be merged onto the final data table. If passed
+            as a Series or DataFrame, it should include a two-level MultiIndex. One level's 
+            name and values should match an index or column from the observations table, and 
+            the other should match an index or column from the alternatives table. 
+        
+        Returns
+        -------
+        None
         
         """
         obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
