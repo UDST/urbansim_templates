@@ -124,10 +124,12 @@ class OLSRegressionStep(TemplateStep):
 
         obj.summary_table = d['summary_table']
         obj.fitted_parameters = d['fitted_parameters']
+        obj.model = None
         
         # Unpack the urbansim.models.RegressionModel() sub-object and resuscitate it
-        model_config = yamlio.convert_to_yaml(d['model'], None)
-        obj.model = RegressionModel.from_yaml(model_config)
+        if d['model'] is not None:
+            model_config = yamlio.convert_to_yaml(d['model'], None)
+            obj.model = RegressionModel.from_yaml(model_config)
         
         return obj
         
@@ -147,7 +149,7 @@ class OLSRegressionStep(TemplateStep):
         d.update({
             'summary_table': self.summary_table,
             'fitted_parameters': self.fitted_parameters,
-            'model': self.model.to_dict()  # urbansim.models.RegressionModel() sub-object
+            'model': self.model.to_dict() if self.model else None
         })
         return d
         

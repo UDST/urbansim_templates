@@ -5,6 +5,7 @@ import pytest
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import OLSRegressionStep
+from urbansim_templates.utils import validate_template
 
 
 @pytest.fixture
@@ -14,6 +15,14 @@ def orca_session():
 
     obs = pd.DataFrame(d1)
     orca.add_table('obs', obs)
+
+
+def test_template_validity():
+    """
+    Run the template through the standard validation check.
+    
+    """
+    assert validate_template(OLSRegressionStep)
 
 
 def test_ols(orca_session):

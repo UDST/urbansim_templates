@@ -7,6 +7,7 @@ from urbansim.models.util import apply_filter_query
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import SegmentedLargeMultinomialLogitStep
+from urbansim_templates.utils import validate_template
 
 
 @pytest.fixture
@@ -89,6 +90,14 @@ def m(orca_session):
     m.defaults.model_expression = 'obsval + altval'
     m.segmentation_column = 'group'
     return m
+
+
+def test_template_validity():
+    """
+    Run the template through the standard validation check.
+    
+    """
+    assert validate_template(SegmentedLargeMultinomialLogitStep)
 
 
 def test_basic_operation(m):
