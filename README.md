@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/UDST/urbansim_templates.svg?branch=master)](https://travis-ci.org/UDST/urbansim_templates)
+[![Coverage Status](https://coveralls.io/repos/github/UDST/urbansim_templates/badge.svg?branch=master)](https://coveralls.io/github/UDST/urbansim_templates?branch=master)
+
 # UrbanSim Templates
 
 UrbanSim Templates defines a common structure for new model steps and provides a core set of flexible templates and related tools. The goal is to enable smoother model setup, easier code reuse, and improvements to task orchestration. 
@@ -9,16 +12,30 @@ UrbanSim Templates is currently in pre-release. API documentation is in the Pyth
 
 ## Installation
 
-You can follow the setup instructions in [UAL/urbansim_parcel_bayarea](https://github.com/ual/urbansim_parcel_bayarea) to create a conda environment with everything you need for working in the UrbanSim Templates ecosystem.
+It can be helpful to set up a dedicated Python environment for working on UrbanSim projects, for reproducibility and to avoid conflicts with other projects. MORE INFO TK.
 
-If you already have most of it installed, this should be sufficient:
+### Production releases
+
+Coming soon to pip and conda.
+
+### Development releases
+
+The latest development release can be installed using the Github URL. These currently require having a development release of ChoiceModels as well, which you should install first.
+
+```
+pip install git+git://github.com/udst/choicemodels.git
+pip install git+git://github.com/udst/urbansim_templates.git
+```
+
+### Cloning the repository
+
+If you will be editing the library code or frequently updating to newer development versions, you can clone the repository and link it to your Python environment:
 
 ```
 git clone https://github.com/udst/urbansim_templates.git
 cd urbansim_templates
 python setup.py develop
 ```
-
 
 ## Bug reports
 
@@ -104,3 +121,5 @@ ModelManager works directly with the current versions of [UrbanSim](https://gith
 - Shared template functionality is in `utils.py`. There's also a `TemplateStep` parent class in `shared.py`, but this hasn't worked very well; see [issue #38](https://github.com/UDST/urbansim_templates/issues/38).
 
 - We don't have design patterns yet for templates whose final output is to _generate_ DataFrames or Series, rather than modifying existing ones, but we're working on it.
+
+- To avoid dependency bloat, the default installation only includes the external libraries required for core model management and the most commonly used templates. Templates using additional libraries should check whether they're installed before fitting or running a model step, and provide helpful error messages if not. 
