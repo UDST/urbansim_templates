@@ -1,10 +1,16 @@
 from __future__ import print_function
 
+import numpy as np
+import pandas as pd
+import patsy
+
 import orca
-# choicemodels imports are in the fit() and run() methods
+from choicemodels import mnl
+from choicemodels import MultinomialLogit, MultinomialLogitResults
+from choicemodels.tools import (MergedChoiceTable, monte_carlo_choices, 
+        iterative_lottery_choices)
 
 from .. import modelmanager
-from ..utils import version_greater_or_equal
 from .shared import TemplateStep
 
 
@@ -406,15 +412,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         None
         
         """
-        try:
-            from choicemodels import __version__, MultinomialLogit
-            from choicemodels.tools import MergedChoiceTable
-            assert version_greater_or_equal(__version__, '0.2.dev4')
-        except:
-            raise ImportError("LargeMultinomialLogitStep estimation requires "
-                    "choicemodels 0.2.dev4 or later. For installation instructions, see "
-                    "https://github.com/udst/choicemodels.")
-        
         if (mct is not None):
             data = mct
             
@@ -479,16 +476,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         None
         
         """
-        try:
-            from choicemodels import __version__, MultinomialLogitResults
-            from choicemodels.tools import (MergedChoiceTable, monte_carlo_choices, 
-                    iterative_lottery_choices)
-            assert version_greater_or_equal(__version__, '0.2.dev4')
-        except:
-            raise ImportError("LargeMultinomialLogitStep simulation requires "
-                    "choicemodels 0.2.dev4 or later. For installation instructions, see "
-                    "https://github.com/udst/choicemodels.")
-
         obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
                 filters=self.out_chooser_filters)
         
