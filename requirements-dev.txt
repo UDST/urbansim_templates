@@ -1,5 +1,0 @@
-# requirements for development and testing
-
-coverage
-coveralls
-pytest
