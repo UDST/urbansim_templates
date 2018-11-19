@@ -449,13 +449,34 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.mergedchoicetable = mct
             
     
-    def run(self):
+    def run(self, chooser_batch_size=None, interaction_terms=None):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
         The simulated choices are saved to the class object for diagnostics ('choices').
         If choices are unconstrained, the probabilities of sampled alternatives are saved
         as well ('probabilities').
+
+        Parameters
+        ----------
+        chooser_batch_size : int
+            This parameter gets passed to 
+            choicemodels.tools.simulation.iterative_lottery_choices and is a temporary
+            workaround for dealing with memory issues that arise from generating massive
+            merged choice tables for simulations that involve large numbers of choosers,
+            large numbers of alternatives, and large numbers of predictors. It allows the
+            user to specify a batch size for simulating choices one chunk at a time. 
+
+        interaction_terms : pandas.Series, pandas.DataFrame, or list of either, optional
+            Additional column(s) of interaction terms whose values depend on the combination 
+            of observation and alternative, to be merged onto the final data table. If passed
+            as a Series or DataFrame, it should include a two-level MultiIndex. One level's 
+            name and values should match an index or column from the observations table, and 
+            the other should match an index or column from the alternatives table. 
+        
+        Returns
+        -------
+        None
         
         """
         try:
@@ -478,7 +499,9 @@ class LargeMultinomialLogitStep(TemplateStep):
                 fitted_parameters = self.fitted_parameters)
 
         def mct(obs, alts):
-            return MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
+            return MergedChoiceTable(
+                obs, alts, sample_size=self.alt_sample_size,
+                interaction_terms=interaction_terms)
         
         def probs(mct):
             return model.probabilities(mct)
@@ -486,7 +509,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         if (self.constrained_choices == True):
             choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 
                     probs_callable=probs, alt_capacity=self.alt_capacity,
-                    chooser_size=self.chooser_size, max_iter=self.max_iter)
+                    chooser_size=self.chooser_size, max_iter=self.max_iter,
+                    chooser_batch_size=chooser_batch_size)
             
         else:
             probs = probs(mct(obs, alts))
