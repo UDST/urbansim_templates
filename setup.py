@@ -1,5 +1,9 @@
 from setuptools import setup, find_packages
 
+with open('requirements.txt') as f:
+    requirements = f.readlines()
+requirements = [item.strip() for item in requirements]
+
 setup(
     name='urbansim_templates',
     version='0.1.dev17',
@@ -13,14 +17,8 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'License :: OSI Approved :: BSD License'
     ],
     packages=find_packages(exclude=['*.tests']),
-    install_requires=[
-        'numpy >= 1.14',
-        'orca >= 1.4',
-        'pandana >= 0.3',
-        'pandas >= 0.22',
-        'statsmodels >= 0.8',
-        'urbansim >= 3.1.1'
-    ]
+    install_requires=requirements
 )
