@@ -129,9 +129,9 @@ class LargeMultinomialLogitStep(TemplateStep):
     def __init__(self, choosers=None, alternatives=None, model_expression=None, 
             choice_column=None, chooser_filters=None, chooser_sample_size=None,
             alt_filters=None, alt_sample_size=None, out_choosers=None, 
-            out_alternatives=None, out_column=None, out_chooser_filters=None, 
-            out_alt_filters=None, constrained_choices=False, alt_capacity=None, 
-            chooser_size=None, max_iter=None, name=None, tags=[]):
+            out_alternatives=None, out_column=None,
+            out_chooser_filters=None, out_alt_filters=None, constrained_choices=False,
+            alt_capacity=None, chooser_size=None, max_iter=None, name=None, tags=[]):
         
         self._listeners = []
         
@@ -323,6 +323,7 @@ class LargeMultinomialLogitStep(TemplateStep):
     def out_alternatives(self, value):
         self.__out_alternatives = self._normalize_table_param(value)            
         self.send_to_listeners('out_alternatives', value)
+
     
     @property
     def out_column(self):
@@ -522,10 +523,13 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         # Update Orca
         if self.out_choosers is not None:
-            table = orca.get_table(self.out_choosers)
+            table = self.out_choosers
         else:
-            table = orca.get_table(self.choosers)
-        
+            table = self.choosers
+
+        if isinstance(table, list):
+            table = table[0]
+
         if self.out_column is not None:
             column = self.out_column
         else:
