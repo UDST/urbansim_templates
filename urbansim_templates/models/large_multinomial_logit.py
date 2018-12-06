@@ -530,6 +530,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         if isinstance(table, list):
             table = table[0]
 
+        table = orca.get_table(table)
+
         if self.out_column is not None:
             column = self.out_column
         else:
