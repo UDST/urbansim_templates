@@ -42,10 +42,14 @@ def test_small_mnl(orca_session):
     
     m.fit()
     
+    print(m.model)
+    
     m.name = 'small-mnl-test'
     modelmanager.register(m)
     
     modelmanager.initialize()
     m = modelmanager.get_step('small-mnl-test')
+    
+    print(m.model)
     
     modelmanager.remove_step('small-mnl-test')
