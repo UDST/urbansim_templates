@@ -536,6 +536,9 @@ class LargeMultinomialLogitStep(TemplateStep):
             column = self.out_column
         else:
             column = self.choice_column
+
+        if column not in table.columns:
+            table[column] = None
         
         table.update_col_from_series(column, choices, cast=True)
         
