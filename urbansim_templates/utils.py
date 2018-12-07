@@ -2,6 +2,9 @@ from __future__ import print_function
 
 from datetime import datetime as dt
 
+import orca
+from urbansim.models import util
+
 
 ################################
 ## SPEC AND FORMAT MANAGEMENT ##
@@ -98,6 +101,68 @@ def update_name(template, name=None):
         return template + '-' + dt.now().strftime('%Y%m%d-%H%M%S')
     else:
         return name
+
+
+def validate_colnames(tables, fallback_tables=None, model_expression=None, filters=None, 
+        extra_columns=None):
+    """
+    Confirm that the column names referenced in a model expression and filters are unique
+    within the set of tables the columns are being drawn from. Join keys are excepted.
+    
+    Depending on how merges are specified, duplicate column names may result in (a) an 
+    error, (b) silently dropped columns, or (c) silently renamed columns. Checking that
+    relevant column names are unique before merges helps us avoid this.
+    
+    Parameters
+    ----------
+    tables : str or list of str
+        Name of table(s) to draw data from.
+    
+    fallback_tables : str or list of str, optional
+        Table(s) to use if first parameter evaluates to `None`.
+        
+    model_expression : str
+        Model expression to be evaluated using the merged data.
+        
+    filters : str or list of str, optional
+        Filter(s) to be applied to the merged data.
+    
+    extra_columns : str or list of str, optional
+        Additional column names expected to be unique.
+        
+    Returns
+    -------
+    bool
+        Returns True if column names are unique, and raises a ValueError if not.
+        
+    """
+    if tables is None:
+        tables = fallback_tables
+    
+    if not isinstance(extra_columns, list):
+        extra_columns = [extra_columns]
+    
+    colnames = set(extra_columns + \
+            util.columns_in_filters(filters) + \
+            util.columns_in_formula(model_expression))
+    
+    print(colnames)
+    
+    for c in colnames:
+        col_in_table = []
+        
+        for t in tables:
+            dfw = orca.get_table(t)  # DataFrameWrapper
+            if (c in dfw.columns) or (c in dfw.index.names):
+                col_in_table.append(t)
+        
+        if len(col_in_table) > 1:
+            raise ValueError("Ambiguous merge: column '{}' appears in tables '{}'"\
+                    .format(c, ', '.join(col_in_table)))
+    
+    return True
+    
+    # get broadcasts from orca, and allow duplicate names if they're join keys
 
 
 ########################
