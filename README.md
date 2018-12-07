@@ -12,7 +12,14 @@ UrbanSim Templates is currently in pre-release. API documentation is in the Pyth
 
 ## Installation
 
-It can be helpful to set up a dedicated Python environment for working on UrbanSim projects, for reproducibility and to avoid conflicts with other projects. MORE INFO TK.
+You can install UrbanSim Templates from pip or conda (NOT YET - COMING SOON!) or by cloning the Github repository.
+
+We recommend using the [Anaconda Python distribution](https://www.anaconda.com/download/) and setting up a dedicated Python environment for your UrbanSim Templates projects. This makes it easier to replicate software environments across machines and easier to diagnose dependency problems.
+
+UrbanSim Templates requires UDST packages [Orca](https://github.com/udst/orca), [ChoiceModels](https://github.com/udst/choicemodels), and [UrbanSim](https://github.com/udst/urbansim), plus third-party packages NumPy, Pandas, Patsy, and Statsmodels. These will all be set up automatically when you install UrbanSim Templates.
+
+Certain less-commonly-used templates require additional packages: currently, PyLogit and Scikit-Learn. Running the unit tests requires PyTest, Coveralls, and Coverage. Other packages that can be useful for UrbanSim projects include Matplotlib, Pandana, GeoPandas, SciPy, line_profiler, memory_profiler, and nb_conda_kernels.
+
 
 ### Production releases
 
