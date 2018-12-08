@@ -46,6 +46,9 @@ def orca_session():
     zones = pd.DataFrame(d3).set_index('zone_id')
     orca.add_table('zones', zones)
     
+    orca.broadcast(cast='buildings', onto='households', 
+                   cast_index='True', onto_on='building_id')
+    
 
 def test_colname_validation(orca_session):
     """
@@ -55,7 +58,17 @@ def test_colname_validation(orca_session):
     tables = ['households', 'buildings']
     model_expression = 'tenure ~ age + pop'
     filters = ['age > 20', 'age < 70']
-    extra_columns = 'building_id'
+    extra_columns = 'zone_id'
     
     utils.validate_colnames(tables=tables, model_expression=model_expression, 
-            filters=filters, extra_columns=None)
+            filters=filters, extra_columns=extra_columns)
+    
+    tables = ['households', 'buildings', 'zones']
+    try:
+        utils.validate_colnames(tables=tables, model_expression=model_expression, 
+                filters=filters, extra_columns=extra_columns)
+    except ValueError as e:
+        print(e)
+    
+    
+    

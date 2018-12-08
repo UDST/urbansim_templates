@@ -142,27 +142,38 @@ def validate_colnames(tables, fallback_tables=None, model_expression=None, filte
     if not isinstance(extra_columns, list):
         extra_columns = [extra_columns]
     
-    colnames = set(extra_columns + \
-            util.columns_in_filters(filters) + \
+    colnames = set(extra_columns + util.columns_in_filters(filters) + \
             util.columns_in_formula(model_expression))
     
     print(colnames)
+    print(orca.list_broadcasts())
+    
+    # list all the (table, column) pairs that are included in broadcasts
+    broadcast_cols = []
+    for t_cast, t_onto in orca.list_broadcasts():
+        b = orca.get_broadcast(t_cast, t_onto)
+        broadcast_cols.append((t_cast, b.cast_on))
+        broadcast_cols.append((t_onto, b.onto_on))
+    
+    print(broadcast_cols)
     
     for c in colnames:
+        # list tables where column name appears, excluding indexes and broadcasts
+        
         col_in_table = []
         
         for t in tables:
-            dfw = orca.get_table(t)  # DataFrameWrapper
+            dfw = orca.get_table(t)
             if (c in dfw.columns) or (c in dfw.index.names):
                 col_in_table.append(t)
         
         if len(col_in_table) > 1:
-            raise ValueError("Ambiguous merge: column '{}' appears in tables '{}'"\
-                    .format(c, ', '.join(col_in_table)))
+            raise ValueError("Ambiguous name: column '{}' appears in tables '{}' "\
+                    "and is not a join key".format(c, "' and '".join(col_in_table)))
     
     return True
     
-    # get broadcasts from orca, and allow duplicate names if they're join keys
+    # this is not going to be a sufficient check - it won't catch the tract_id case
 
 
 ########################
