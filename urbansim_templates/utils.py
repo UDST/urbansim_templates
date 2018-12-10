@@ -103,6 +103,82 @@ def update_name(template, name=None):
         return name
 
 
+def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
+        extra_columns=None):
+    """
+    Generate a pd.DataFrame from one or more tables registered with Orca. Templates should 
+    call this function immediately before the data is needed, so that it's as up-to-date 
+    as possible.
+    
+    If a model_expression, filters, and/or extra_columns is provided, the resulting 
+    DataFrame will be filtered to include (a) only relevant columns and (b) only rows that
+    match the filter criteria. Relevant columns include any mentioned in the model 
+    expression, filters, or list of extras, plus join keys if the data is drawn from 
+    multiple tables.
+    
+    Missing column names are fine. If a column is not found in the source tables, it will 
+    just be skipped. This is to support use cases where data is assembled separately for
+    choosers and alternatives and then merged together -- the model expression would 
+    include terms from both sets of tables.
+    
+    Duplicate column names are not recommended -- columns are expected to be unique within 
+    the set of tables they're being drawn from, with the exception of join keys. If column 
+    names are repeated, current behavior is to append them with the name of the table 
+    they're drawn from. This may change in the future and should not be relied on. 
+    
+    Parameters
+    ----------
+    tables : str or list of str
+        Orca table(s) to draw data from.
+    
+    fallback_tables : str or list of str, optional
+        Table(s) to use if first parameter evaluates to `None`. (This option will be 
+        removed shortly when estimation and simulation settings are separated.)
+    
+    model_expression : str, optional
+        Model expression to be evaluated using the merged data. Only used to filter for
+        relevant columns. 
+        
+        Currently accepts a string, iterable, or dict to be parsed by 
+        urbansim.models.util.str_model_expression(). Does NOT yet support PyLogit 
+        OrderedDict format.
+    
+    filters : str or list of str, optional
+        Filter(s) to apply to the merged data, using `pd.DataFrame.query()`.
+    
+    extra_columns : str or list of str, optional
+        Columns to include in addition to those in the model expression and filters.
+
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    if tables is None:
+        tables = fallback_tables
+    
+    if not isinstance(extra_columns, list):
+        extra_columns = [extra_columns]
+    
+    colnames = set(util.columns_in_formula(model_expression) + \
+                   util.columns_in_filters(filters) + extra_columns)
+    
+    print(colnames)
+    
+    # single table, dupe colnames, colnames not in tables
+    
+    df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames,
+                           drop_intersection=False)
+    
+    print(df)
+    
+    
+
+
+
+
+    
+
 def validate_colnames(tables, fallback_tables=None, model_expression=None, filters=None, 
         extra_columns=None):
     """

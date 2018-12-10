@@ -47,28 +47,46 @@ def orca_session():
     orca.add_table('zones', zones)
     
     orca.broadcast(cast='buildings', onto='households', 
-                   cast_index='True', onto_on='building_id')
+                   cast_index=True, onto_on='building_id')
+    
+    orca.broadcast(cast='zones', onto='buildings', 
+                   cast_index=True, onto_on='zone_id')
     
 
-def test_colname_validation(orca_session):
+def test_get_data(orca_session):
     """
-    Test for utils.validate_colnames().
-    
+    Test for utils.get_data().
+        
     """
     tables = ['households', 'buildings']
-    model_expression = 'tenure ~ age + pop'
-    filters = ['age > 20', 'age < 70']
+    model_expression = 'tenure ~ pop'
+    filters = ['age > 20', 'age < 50']
     extra_columns = 'zone_id'
     
-    utils.validate_colnames(tables=tables, model_expression=model_expression, 
+    utils.get_data(tables=tables, model_expression=model_expression, 
             filters=filters, extra_columns=extra_columns)
-    
-    tables = ['households', 'buildings', 'zones']
-    try:
-        utils.validate_colnames(tables=tables, model_expression=model_expression, 
-                filters=filters, extra_columns=extra_columns)
-    except ValueError as e:
-        print(e)
+
+
+
+# def test_colname_validation(orca_session):
+#     """
+#     Test for utils.validate_colnames().
+#     
+#     """
+#     tables = ['households', 'buildings']
+#     model_expression = 'tenure ~ age + pop'
+#     filters = ['age > 20', 'age < 70']
+#     extra_columns = 'zone_id'
+#     
+#     utils.validate_colnames(tables=tables, model_expression=model_expression, 
+#             filters=filters, extra_columns=extra_columns)
+#     
+#     tables = ['households', 'buildings', 'zones']
+#     try:
+#         utils.validate_colnames(tables=tables, model_expression=model_expression, 
+#                 filters=filters, extra_columns=extra_columns)
+#     except ValueError as e:
+#         print(e)
     
     
     
