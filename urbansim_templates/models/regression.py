@@ -28,7 +28,7 @@ class OLSRegressionStep(TemplateStep):
     Then, for simulation:
     - specify some simulation parameters
     - use the `run()` method for interactive testing
-    - use the `register()` method to save the model to Orca and disk
+    - use `modelmanager.register()` to save the model to Orca and disk
     - registered steps can be accessed via ModelManager and Orca
     
     All parameters listed in the constructor can be set directly on the class object,

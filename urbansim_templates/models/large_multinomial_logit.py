@@ -4,7 +4,7 @@ import orca
 # choicemodels imports are in the fit() and run() methods
 
 from .. import modelmanager
-from ..utils import version_greater_or_equal
+from ..utils import get_data, version_greater_or_equal
 from .shared import TemplateStep
 
 
@@ -420,14 +420,17 @@ class LargeMultinomialLogitStep(TemplateStep):
             data = mct
             
         else:        
-            observations = self._get_df(tables=self.choosers, 
-                                        filters=self.chooser_filters)
+            observations = get_data(tables = self.choosers, 
+                                    filters = self.chooser_filters,
+                                    model_expression = self.model_expression,
+                                    extra_columns = self.choice_column)
         
             if (self.chooser_sample_size is not None):
                 observations = observations.sample(self.chooser_sample_size)
             
-            alternatives = self._get_df(tables = self.alternatives, 
-                                        filters = self.alt_filters)
+            alternatives = get_data(tables = self.alternatives, 
+                                    filters = self.alt_filters, 
+                                    model_expression = self.model_expression)
         
             mct = MergedChoiceTable(observations = observations,
                                     alternatives = alternatives,
@@ -469,11 +472,12 @@ class LargeMultinomialLogitStep(TemplateStep):
             user to specify a batch size for simulating choices one chunk at a time. 
 
         interaction_terms : pandas.Series, pandas.DataFrame, or list of either, optional
-            Additional column(s) of interaction terms whose values depend on the combination 
-            of observation and alternative, to be merged onto the final data table. If passed
-            as a Series or DataFrame, it should include a two-level MultiIndex. One level's 
-            name and values should match an index or column from the observations table, and 
-            the other should match an index or column from the alternatives table. 
+            Additional column(s) of interaction terms whose values depend on the 
+            combination of observation and alternative, to be merged onto the final data 
+            table. If passed as a Series or DataFrame, it should include a two-level 
+            MultiIndex. One level's name and values should match an index or column from 
+            the observations table, and the other should match an index or column from the 
+            alternatives table. 
         
         Returns
         -------
@@ -490,11 +494,17 @@ class LargeMultinomialLogitStep(TemplateStep):
                     "choicemodels 0.2.dev4 or later. For installation instructions, see "
                     "https://github.com/udst/choicemodels.")
 
-        obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
-                filters=self.out_chooser_filters)
+        observations = get_data(tables = self.out_choosers, 
+                                fallback_tables = self.choosers, 
+                                filters = self.out_chooser_filters,
+                                model_expression = self.model_expression,
+                                extra_columns = self.chooser_size)
         
-        alts = self._get_df(tables=self.out_alternatives, 
-                fallback_tables=self.alternatives, filters=self.out_alt_filters)
+        alternatives = get_data(tables = self.out_alternatives, 
+                                fallback_tables = self.alternatives, 
+                                filters = self.out_alt_filters,
+                                model_expression = self.model_expression,
+                                extra_columns = self.alt_capacity)
         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)
@@ -508,13 +518,13 @@ class LargeMultinomialLogitStep(TemplateStep):
             return model.probabilities(mct)
 
         if (self.constrained_choices == True):
-            choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 
-                    probs_callable=probs, alt_capacity=self.alt_capacity,
-                    chooser_size=self.chooser_size, max_iter=self.max_iter,
-                    chooser_batch_size=chooser_batch_size)
+            choices = iterative_lottery_choices(observations, alternatives, 
+                    mct_callable=mct, probs_callable=probs, 
+                    alt_capacity=self.alt_capacity, chooser_size=self.chooser_size, 
+                    max_iter=self.max_iter, chooser_batch_size=chooser_batch_size)
             
         else:
-            probs = probs(mct(obs, alts))
+            probs = probs(mct(observations, alternatives))
             choices = monte_carlo_choices(probs)
             self.probabilities = probs
         

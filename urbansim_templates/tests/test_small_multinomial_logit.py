@@ -43,12 +43,18 @@ def test_small_mnl(orca_session):
     m.fit()
     assert(m.model_expression is not None)
     
+    print(m.model_expression)
+    
     m.name = 'small-mnl-test'
     modelmanager.register(m)
     assert(m.model_expression is not None)
     
+    print(m.model_expression)
+    
     modelmanager.initialize()
     m = modelmanager.get_step('small-mnl-test')
     assert(m.model_expression is not None)
+    
+    print(m.model_expression)
     
     modelmanager.remove_step('small-mnl-test')

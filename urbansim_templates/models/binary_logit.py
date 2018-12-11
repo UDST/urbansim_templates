@@ -28,7 +28,7 @@ class BinaryLogitStep(TemplateStep):
     Then, for simulation:
     - specify some simulation parameters
     - use the `run()` method for interactive testing
-    - use the `register()` method to save the model to Orca and disk
+    - use `modelmanager.register()` to save the model to Orca and disk
     - registered steps can be accessed via ModelManager and Orca
     
     All parameters listed in the constructor can be set directly on the class object,
@@ -236,7 +236,7 @@ class BinaryLogitStep(TemplateStep):
         df['_choices'] = choices
         self.choices = df._choices
                 
-        # TO DO - generate column if it does not exist (in get_data?)
+        # TO DO - generate column if it does not exist
 
         colname = self._get_out_column()
         tabname = self._get_out_table()
