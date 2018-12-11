@@ -29,7 +29,7 @@ def test_template_validity():
 
 def test_small_mnl(orca_session):
     """
-    For now this just tests that the code runs.
+    Test that the code runs, and that the model_expression is always available.
     
     """
     modelmanager.initialize()
@@ -41,11 +41,14 @@ def test_small_mnl(orca_session):
             ('intercept', [1,2]), ('a', [0,2]), ('b', [0,2])])
     
     m.fit()
+    assert(m.model_expression is not None)
     
     m.name = 'small-mnl-test'
     modelmanager.register(m)
+    assert(m.model_expression is not None)
     
     modelmanager.initialize()
     m = modelmanager.get_step('small-mnl-test')
+    assert(m.model_expression is not None)
     
     modelmanager.remove_step('small-mnl-test')

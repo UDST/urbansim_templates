@@ -179,6 +179,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         self.model_expression = None
         
         d = TemplateStep.to_dict(self)
+        self.model_expression = tmp_model_expression
         
         # Can't store OrderedDicts in YAML, so convert them
         if tmp_model_expression is not None:
