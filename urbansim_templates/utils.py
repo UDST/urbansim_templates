@@ -178,13 +178,15 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
         tables = fallback_tables
     
     tables = to_list(tables)
-    colnames = None
+    colnames = None  # this will get all columns from Orca utilities
     
     if (model_expression is not None) or (extra_columns is not None):
         colnames = set(columns_in_formula(model_expression) + \
                        columns_in_filters(filters) + to_list(extra_columns))
     
-        # skip cols not found in any of the source tables
+        # skip cols not found in any of the source tables - have to check for this 
+        # explicitly because the orca utilities will raise an error if we request column
+        # names that aren't there
         all_cols = []
         for t in tables:
             dfw = orca.get_table(t)
