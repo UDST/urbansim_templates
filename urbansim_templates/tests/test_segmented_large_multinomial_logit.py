@@ -7,7 +7,7 @@ from urbansim.models.util import apply_filter_query
 
 from urbansim_templates import modelmanager
 from urbansim_templates.models import SegmentedLargeMultinomialLogitStep
-from urbansim_templates.utils import validate_template
+from urbansim_templates.utils import get_data, validate_template
 
 
 @pytest.fixture
@@ -177,7 +177,7 @@ def test_alternative_filters_for_alts_as_list(m_alts_as_list):
     
     m.build_submodels()
     for k, v in m.submodels.items():
-        alts = v._get_df(tables = v.alternatives, filters = v.alt_filters)
+        alts = get_data(tables = v.alternatives, filters = v.alt_filters)
         assert alts['altval_2'].max() < 0.5
 
 
