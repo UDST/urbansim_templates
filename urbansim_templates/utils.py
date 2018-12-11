@@ -78,6 +78,26 @@ def validate_template(cls):
 ## TEMPLATE HELPER FUNCTIONS ##
 ###############################
 
+def to_list(items):
+    """
+    In many places we accept either a single string or a list of strings. This function
+    normalizes None -> [None], str -> [str], and leaves lists unchanged.
+    
+    Parameters
+    ----------
+    items : str, list, or None
+
+    Returns
+    -------
+    list
+    
+    """
+    if not isinstance(items, list):
+        items = [items]
+    
+    return items
+
+
 def update_name(template, name=None):
     """
     Generate a name for a configured model step, based on its template class and the 
@@ -123,8 +143,8 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
     
     Duplicate column names are not recommended -- columns are expected to be unique within 
     the set of tables they're being drawn from, with the exception of join keys. If column 
-    names are repeated, current behavior is to append them with the name of the table 
-    they're drawn from. This may change in the future and should not be relied on. 
+    names are repeated, current behavior is to follow the Orca default and keep the 
+    left-most copy of the column. This may change and should not be relied on. 
     
     Parameters
     ----------
@@ -157,26 +177,30 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
     if tables is None:
         tables = fallback_tables
     
-    if not isinstance(extra_columns, list):
-        extra_columns = [extra_columns]
+    tables = to_list(tables)
+    colnames = None
     
-    colnames = set(util.columns_in_formula(model_expression) + \
-                   util.columns_in_filters(filters) + extra_columns)
+    if (model_expression is not None) or (filters is not None) or \
+            (extra_columns is not None):
+        colnames = set(util.columns_in_formula(model_expression) + \
+                       util.columns_in_filters(filters) + to_list(extra_columns))
     
-    print(colnames)
+        # skip cols not found in any of the source tables
+        all_cols = []
+        for t in tables:
+            dfw = orca.get_table(t)
+            all_cols += list(dfw.index.names) + list(dfw.columns)
     
-    # single table, dupe colnames, colnames not in tables
+        colnames = [c for c in colnames if c in all_cols]
     
-    df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames,
-                           drop_intersection=False)
+    if len(tables) == 1:
+        df = orca.get_table(table_name=tables[0]).to_frame(columns=colnames)
     
-    print(df)
+    else:
+        df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
     
-    
-
-
-
-
+    df = util.apply_filter_query(df, filters)
+    return df
     
 
 def validate_colnames(tables, fallback_tables=None, model_expression=None, filters=None, 

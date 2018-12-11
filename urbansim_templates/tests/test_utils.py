@@ -55,38 +55,37 @@ def orca_session():
 
 def test_get_data(orca_session):
     """
-    Test for utils.get_data().
+    General test - multiple tables, binding filters, extra columns.
         
     """
-    tables = ['households', 'buildings']
-    model_expression = 'tenure ~ pop'
-    filters = ['age > 20', 'age < 50']
-    extra_columns = 'zone_id'
+    df = utils.get_data(tables = ['households', 'buildings'], 
+                        model_expression = 'tenure ~ pop', 
+                        filters = ['age > 20', 'age < 50'],
+                        extra_columns = 'zone_id')
     
-    utils.get_data(tables=tables, model_expression=model_expression, 
-            filters=filters, extra_columns=extra_columns)
+    assert(set(df.columns) == set(['tenure', 'pop', 'age', 'building_id', 'zone_id']))
+    assert(len(df) == 2)
 
 
+def test_get_data_single_table(orca_session):
+    """
+    Single table, no other params.
+        
+    """
+    df = utils.get_data(tables = 'households')
+    assert(len(df) == 3)
 
-# def test_colname_validation(orca_session):
-#     """
-#     Test for utils.validate_colnames().
-#     
-#     """
-#     tables = ['households', 'buildings']
-#     model_expression = 'tenure ~ age + pop'
-#     filters = ['age > 20', 'age < 70']
-#     extra_columns = 'zone_id'
-#     
-#     utils.validate_colnames(tables=tables, model_expression=model_expression, 
-#             filters=filters, extra_columns=extra_columns)
-#     
-#     tables = ['households', 'buildings', 'zones']
-#     try:
-#         utils.validate_colnames(tables=tables, model_expression=model_expression, 
-#                 filters=filters, extra_columns=extra_columns)
-#     except ValueError as e:
-#         print(e)
+
+def test_get_data_bad_columns(orca_session):
+    """
+    Bad column name, should be ignored.
+        
+    """
+    df = utils.get_data(tables = ['households', 'buildings'], 
+                        model_expression = 'tenure ~ pop + potato')
     
+    assert(set(df.columns) == set(['tenure', 'pop', 'building_id']))
+
+
     
     
