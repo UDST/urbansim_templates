@@ -472,11 +472,12 @@ class LargeMultinomialLogitStep(TemplateStep):
             user to specify a batch size for simulating choices one chunk at a time. 
 
         interaction_terms : pandas.Series, pandas.DataFrame, or list of either, optional
-            Additional column(s) of interaction terms whose values depend on the combination 
-            of observation and alternative, to be merged onto the final data table. If passed
-            as a Series or DataFrame, it should include a two-level MultiIndex. One level's 
-            name and values should match an index or column from the observations table, and 
-            the other should match an index or column from the alternatives table. 
+            Additional column(s) of interaction terms whose values depend on the 
+            combination of observation and alternative, to be merged onto the final data 
+            table. If passed as a Series or DataFrame, it should include a two-level 
+            MultiIndex. One level's name and values should match an index or column from 
+            the observations table, and the other should match an index or column from the 
+            alternatives table. 
         
         Returns
         -------
@@ -498,16 +499,12 @@ class LargeMultinomialLogitStep(TemplateStep):
                                 filters = self.out_chooser_filters,
                                 model_expression = self.model_expression,
                                 extra_columns = self.chooser_size)
-#         obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
-#                 filters=self.out_chooser_filters)
         
         alternatives = get_data(tables = self.out_alternatives, 
                                 fallback_tables = self.alternatives, 
                                 filters = self.out_alt_filters,
                                 model_expression = self.model_expression,
                                 extra_columns = self.alt_capacity)
-#         alts = self._get_df(tables=self.out_alternatives, 
-#                 fallback_tables=self.alternatives, filters=self.out_alt_filters)
         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)

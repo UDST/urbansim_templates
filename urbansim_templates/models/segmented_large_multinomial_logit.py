@@ -9,7 +9,7 @@ import orca
 from urbansim.models.util import apply_filter_query
 
 from ..__init__ import __version__
-from ..utils import update_name
+from ..utils import get_data, update_name
 from .. import modelmanager
 from . import LargeMultinomialLogitStep
 from .shared import TemplateStep
@@ -133,13 +133,21 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
         # TO DO - this doesn't filter for columns in the model expression; is there
         #   centralized functionality for this merge that we should be using instead?
         
-        obs = self._get_df(
-            tables=self.defaults.choosers,
-            filters=self.defaults.chooser_filters)
-
-        alts = self._get_df(
-            tables=self.defaults.alternatives,
-            filters=self.defaults.alt_filters)
+        obs = get_data(tables = self.defaults.choosers,
+                       filters = self.defaults.chooser_filters,
+                       extra_columns = [self.defaults.choice_column, 
+                                        self.segmentation_column])
+        
+        alts = get_data(tables = self.defaults.alternatives,
+                        filters = self.defaults.alt_filters)
+        
+#         obs = self._get_df(
+#             tables=self.defaults.choosers,
+#             filters=self.defaults.chooser_filters)
+# 
+#         alts = self._get_df(
+#             tables=self.defaults.alternatives,
+#             filters=self.defaults.alt_filters)
 
         df = pd.merge(obs, alts, how='inner',
                       left_on=self.defaults.choice_column, right_index=True)
