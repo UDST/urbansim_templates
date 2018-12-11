@@ -131,21 +131,23 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     call this function immediately before the data is needed, so that it's as up-to-date 
     as possible.
     
-    If a model_expression, filters, and/or extra_columns is provided, the resulting 
-    DataFrame will be filtered to include (a) only relevant columns and (b) only rows that
-    match the filter criteria. Relevant columns include any mentioned in the model 
-    expression, filters, or list of extras, plus join keys if the data is drawn from 
-    multiple tables.
+    If filters are provided, the output will include only rows that match the filter
+    criteria. 
     
-    Missing column names are fine. If a column is not found in the source tables, it will 
-    just be skipped. This is to support use cases where data is assembled separately for
-    choosers and alternatives and then merged together -- the model expression would 
-    include terms from both sets of tables.
+    Default behavior is for the output to inclue all columns. If a model_expression and/or
+    extra_columns is provided, non-relevant columns will be dropped from the output.
+    Relevant columns include any mentioned in the model expression, filters, or list of 
+    extras, plus join keys if the data is drawn from multiple tables.
+    
+    If a named column is not found in the source tables, it will just be skipped. This is 
+    to support use cases where data is assembled separately for choosers and alternatives 
+    and then merged together -- the model expression would include terms from both sets 
+    of tables.
     
     Duplicate column names are not recommended -- columns are expected to be unique within 
     the set of tables they're being drawn from, with the exception of join keys. If column 
     names are repeated, current behavior is to follow the Orca default and keep the 
-    left-most copy of the column. This may change and should not be relied on. 
+    left-most copy of the column. This may change later and should not be relied on. 
     
     Parameters
     ----------
@@ -160,20 +162,13 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
         Filter(s) to apply to the merged data, using `pd.DataFrame.query()`.
     
     model_expression : str, optional
-        Model expression to be evaluated using the merged data. Only used to filter for
-        relevant columns. 
-        
-        Currently accepts a string, iterable, or dict to be parsed by 
-        urbansim.models.util.str_model_expression(). Does NOT yet support PyLogit 
-        OrderedDict format.
+        Model expression that will be evaluated using the output data. Only used to drop 
+        non-relevant columns. PyLogit format is not yet supported.
     
     extra_columns : str or list of str, optional
-        Columns to include in addition to those in the model expression and filters. 
-        (This could be a multinomial choice column, alternative capacities needed for 
-        simulation, or anything else you would like included in the output table.)
+        Columns to include, in addition to any in the model expression and filters. (If 
+        this and the model_expression are both None, all columns will be included.)
 
-    # FIX ORDERING TO TABLES, FILTERS, COLUMNS, MODEL_EXPRESSION
-    
     Returns
     -------
     pd.DataFrame
@@ -185,8 +180,7 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     tables = to_list(tables)
     colnames = None
     
-    if (model_expression is not None) or (filters is not None) or \
-            (extra_columns is not None):
+    if (model_expression is not None) or (extra_columns is not None):
         colnames = set(columns_in_formula(model_expression) + \
                        columns_in_filters(filters) + to_list(extra_columns))
     
