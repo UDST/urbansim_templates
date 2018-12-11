@@ -3,7 +3,8 @@ from __future__ import print_function
 from datetime import datetime as dt
 
 import orca
-from urbansim.models import util
+from urbansim.models.util import (apply_filter_query, columns_in_filters, 
+        columns_in_formula)
 
 
 ################################
@@ -123,7 +124,7 @@ def update_name(template, name=None):
         return name
 
 
-def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
+def get_data(tables, fallback_tables=None, filters=None, model_expression=None, 
         extra_columns=None):
     """
     Generate a pd.DataFrame from one or more tables registered with Orca. Templates should 
@@ -155,6 +156,9 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
         Table(s) to use if first parameter evaluates to `None`. (This option will be 
         removed shortly when estimation and simulation settings are separated.)
     
+    filters : str or list of str, optional
+        Filter(s) to apply to the merged data, using `pd.DataFrame.query()`.
+    
     model_expression : str, optional
         Model expression to be evaluated using the merged data. Only used to filter for
         relevant columns. 
@@ -163,12 +167,13 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
         urbansim.models.util.str_model_expression(). Does NOT yet support PyLogit 
         OrderedDict format.
     
-    filters : str or list of str, optional
-        Filter(s) to apply to the merged data, using `pd.DataFrame.query()`.
-    
     extra_columns : str or list of str, optional
-        Columns to include in addition to those in the model expression and filters.
+        Columns to include in addition to those in the model expression and filters. 
+        (This could be a multinomial choice column, alternative capacities needed for 
+        simulation, or anything else you would like included in the output table.)
 
+    # FIX ORDERING TO TABLES, FILTERS, COLUMNS, MODEL_EXPRESSION
+    
     Returns
     -------
     pd.DataFrame
@@ -182,8 +187,8 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
     
     if (model_expression is not None) or (filters is not None) or \
             (extra_columns is not None):
-        colnames = set(util.columns_in_formula(model_expression) + \
-                       util.columns_in_filters(filters) + to_list(extra_columns))
+        colnames = set(columns_in_formula(model_expression) + \
+                       columns_in_filters(filters) + to_list(extra_columns))
     
         # skip cols not found in any of the source tables
         all_cols = []
@@ -199,7 +204,7 @@ def get_data(tables, fallback_tables=None, model_expression=None, filters=None,
     else:
         df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
     
-    df = util.apply_filter_query(df, filters)
+    df = apply_filter_query(df, filters)
     return df
     
 
