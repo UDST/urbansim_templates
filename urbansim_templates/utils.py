@@ -199,7 +199,8 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     
     else:
         df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
-    
+    if len(df.columns) > len(colnames):
+        df = df[colnames]
     df = apply_filter_query(df, filters)
     return df
     
