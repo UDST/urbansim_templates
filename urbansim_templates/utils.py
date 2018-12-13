@@ -137,7 +137,8 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     Default behavior is for the output to inclue all columns. If a model_expression and/or
     extra_columns is provided, non-relevant columns will be dropped from the output.
     Relevant columns include any mentioned in the model expression, filters, or list of 
-    extras, plus join keys if the data is drawn from multiple tables.
+    extras. Join keys will *not* be included in the final output even if the data is drawn
+    from multiple tables, unless they appear in the model expression or filters as well.
     
     If a named column is not found in the source tables, it will just be skipped. This is 
     to support use cases where data is assembled separately for choosers and alternatives 
@@ -199,9 +200,11 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     
     else:
         df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
+
     if colnames is not None:
         if len(df.columns) > len(colnames):
             df = df[colnames]
+
     df = apply_filter_query(df, filters)
     return df
     
