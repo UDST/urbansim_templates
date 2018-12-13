@@ -63,7 +63,7 @@ def test_get_data(orca_session):
                         filters = ['age > 20', 'age < 50'],
                         extra_columns = 'zone_id')
     
-    assert(set(df.columns) == set(['tenure', 'pop', 'age', 'building_id', 'zone_id']))
+    assert(set(df.columns) == set(['tenure', 'pop', 'age', 'zone_id']))
     assert(len(df) == 2)
 
 
@@ -84,7 +84,7 @@ def test_get_data_bad_columns(orca_session):
     df = utils.get_data(tables = ['households', 'buildings'], 
                         model_expression = 'tenure ~ pop + potato')
     
-    assert(set(df.columns) == set(['tenure', 'pop', 'building_id']))
+    assert(set(df.columns) == set(['tenure', 'pop']))
 
 
     
