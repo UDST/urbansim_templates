@@ -4,7 +4,7 @@ import orca
 # choicemodels imports are in the fit() and run() methods
 
 from .. import modelmanager
-from ..utils import get_data, version_greater_or_equal
+from ..utils import get_data, version_greater_or_equal, to_list
 from .shared import TemplateStep
 
 
@@ -494,17 +494,24 @@ class LargeMultinomialLogitStep(TemplateStep):
                     "choicemodels 0.2.dev4 or later. For installation instructions, see "
                     "https://github.com/udst/choicemodels.")
 
+        if interaction_terms is not None:
+            obs_extra_cols = to_list(self.chooser_size) + list(interaction_terms.index.names)
+            alts_extra_cols = to_list(self.alt_capacity) + list(interaction_terms.index.names)
+        else:
+            obs_extra_cols = self.chooser_size
+            alts_extra_cols = self.alt_capacity
+
         observations = get_data(tables = self.out_choosers, 
                                 fallback_tables = self.choosers, 
                                 filters = self.out_chooser_filters,
                                 model_expression = self.model_expression,
-                                extra_columns = self.chooser_size)
+                                extra_columns = obs_extra_cols)
         
         alternatives = get_data(tables = self.out_alternatives, 
                                 fallback_tables = self.alternatives, 
                                 filters = self.out_alt_filters,
                                 model_expression = self.model_expression,
-                                extra_columns = self.alt_capacity)
+                                extra_columns = alts_extra_cols)
         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)
