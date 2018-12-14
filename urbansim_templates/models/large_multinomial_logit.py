@@ -475,9 +475,9 @@ class LargeMultinomialLogitStep(TemplateStep):
             Additional column(s) of interaction terms whose values depend on the 
             combination of observation and alternative, to be merged onto the final data 
             table. If passed as a Series or DataFrame, it should include a two-level 
-            MultiIndex. The outermost level's name and values should match an index or
-            column from the observations table, and the second should match an index or
-            column from the alternatives table. 
+            MultiIndex. One level's name and values should match an index or column from 
+            the observations table, and the other should match an index or column from the 
+            alternatives table. 
         
         Returns
         -------
@@ -495,12 +495,12 @@ class LargeMultinomialLogitStep(TemplateStep):
                     "https://github.com/udst/choicemodels.")
 
         if interaction_terms is not None:
-            obs_extra_cols = to_list(self.chooser_size) + list(interaction_terms.index.names)[0]
-            alts_extra_cols = to_list(self.alt_capacity) + list(interaction_terms.index.names)[1]
+            obs_extra_cols = to_list(self.chooser_size) + list(interaction_terms.index.names)
+            alts_extra_cols = to_list(self.alt_capacity) + list(interaction_terms.index.names)
         else:
             obs_extra_cols = self.chooser_size
             alts_extra_cols = self.alt_capacity
-            
+
         observations = get_data(tables = self.out_choosers, 
                                 fallback_tables = self.choosers, 
                                 filters = self.out_chooser_filters,
