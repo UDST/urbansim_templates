@@ -223,7 +223,7 @@ def save_supplemental_object(step_name, name, content, content_type, required=Tr
         Whether the supplemental object is required (not yet supported).
     
     """
-    if content_type is 'pickle':
+    if content_type == 'pickle':
         content.to_pickle(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
         
 
@@ -282,7 +282,7 @@ def remove_supplemental_object(step_name, name, content_type):
     """
     # TO DO - check that the file exists first
     
-    if content_type is 'pickle':
+    if content_type == 'pickle':
         os.remove(os.path.join(_disk_store, step_name+'-'+name+'.pkl'))
     
 
