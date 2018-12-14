@@ -6,10 +6,11 @@ from .. import modelmanager
 from ..utils import get_data, version_greater_or_equal
 from .shared import TemplateStep
 
+
 def check_choicemodels_version():
     try:
-        from choicemodels import __version__
-        assert version_greater_or_equal(__version__, '0.2.dev4')
+        import choicemodels
+        assert version_greater_or_equal(choicemodels.__version__, '0.2.dev4')
     except:
         raise ImportError("LargeMultinomialLogitStep requires choicemodels 0.2.dev4 or "
                 "later. For installation instructions, see "
@@ -134,7 +135,8 @@ class LargeMultinomialLogitStep(TemplateStep):
     
     Attributes
     ----------
-    All parameters can also be get and set as properties.
+    All parameters can also be get and set as properties. The following attributes should
+    be treated as read-only.
     
     choices : pd.Series
         Available after the model step is run. List of chosen alternative id's, indexed 
@@ -151,10 +153,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         
     probabilities : pd.Series
         Available after the model step is run -- but not if choices have capacity 
-        constraints, which requires probabilities to be calculated multiple times. List 
-        of probabilities corresponding to the sampled alternatives, indexed with the 
-        chooser and alternative id's. Does not persist when the model step is reloaded 
-        from storage.
+        constraints, which requires probabilities to be calculated multiple times. 
+        Provides list of probabilities corresponding to the sampled alternatives, indexed 
+        with the chooser and alternative id's. Does not persist when the model step is 
+        reloaded from storage.
     
     """
     def __init__(self, choosers=None, alternatives=None, model_expression=None, 
@@ -495,9 +497,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
-        The simulated choices are saved to the class object for diagnostics ('choices').
-        If choices are unconstrained, the probabilities of sampled alternatives are saved
-        as well ('probabilities').
+        The simulated choices are saved to the class object for diagnostics. If choices 
+        are unconstrained, the choice table and the probabilities of sampled alternatives 
+        are saved as well.
 
         Parameters
         ----------
@@ -570,7 +572,7 @@ class LargeMultinomialLogitStep(TemplateStep):
             probabilities = probs(choicetable)
             choices = monte_carlo_choices(probabilities)
             
-            # Save data to class object for diagnostics
+            # Save data to class object if available
             self.mergedchoicetable = choicetable
             self.probabilities = probabilities
         
