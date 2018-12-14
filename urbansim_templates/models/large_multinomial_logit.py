@@ -497,7 +497,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         if interaction_terms is not None:
             obs_extra_cols = to_list(self.chooser_size) + list(interaction_terms.index.names)[0]
             alts_extra_cols = to_list(self.alt_capacity) + list(interaction_terms.index.names)[1]
-
+        else:
+            obs_extra_cols = self.chooser_size
+            alts_extra_cols = self.alt_capacity
+            
         observations = get_data(tables = self.out_choosers, 
                                 fallback_tables = self.choosers, 
                                 filters = self.out_chooser_filters,
