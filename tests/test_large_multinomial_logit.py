@@ -181,6 +181,18 @@ def test_simulation_constrained(m):
     assert all(~obs.choice.isin([-1]))
 
 
+def test_output_column_autocreation(m):
+    """
+    Test on-the-fly creation of the output column.
+    
+    """
+    m.out_column = 'potato_chips'
+    m.run()
+    
+    assert('potato_chips' in orca.get_table('obs').columns)
+    assert(m.choices.equals(orca.get_table('obs').to_frame()['potato_chips']))
+    
+
 def test_diagnostic_attributes(data):
     """
     Test that diagnostic attributes are available when expected.

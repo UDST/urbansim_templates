@@ -3,7 +3,7 @@ from __future__ import print_function
 import orca
 
 from .. import modelmanager
-from ..utils import get_data, version_greater_or_equal
+from ..utils import get_data, update_column, version_greater_or_equal
 from .shared import TemplateStep
 
 
@@ -94,10 +94,11 @@ class LargeMultinomialLogitStep(TemplateStep):
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
         in the primary `out_choosers` table, it will be created. If not provided, the 
-        `choice_column` will be used. Replaces the `out_fname` argument in UrbanSim.
+        `choice_column` will be used. If the column already exists, choices will be cast 
+        to match its data type. If the column is generated on the fly, it will be given 
+        the same data type as the index of the alternatives table. Replaces the 
+        `out_fname` argument in UrbanSim. 
         
-        # TO DO - auto-generation not yet working; column must exist.
-    
     out_chooser_filters : str or list of str, optional
         Filters to apply to the chooser data before simulation. If not provided, no 
         filters will be applied. Replaces the `predict_filters` argument in UrbanSim.
@@ -580,24 +581,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.choices = choices
 
         # Update Orca
-        if self.out_choosers is not None:
-            table = self.out_choosers
-        else:
-            table = self.choosers
-
-        if isinstance(table, list):
-            table = table[0]
-
-        table = orca.get_table(table)
-
-        if self.out_column is not None:
-            column = self.out_column
-        else:
-            column = self.choice_column
-
-        if column not in table.columns:
-            table[column] = None
-        
-        table.update_col_from_series(column, choices, cast=True)
-        
-    
+        update_column(table = self.out_choosers, 
+                      fallback_table = self.choosers,
+                      column = self.out_column, 
+                      fallback_column = self.choice_column,
+                      data = choices)
+            
