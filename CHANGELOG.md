@@ -8,6 +8,8 @@
 
 - enables on-the-fly creation of output columns across all templates
 
+- moves unit tests out of the module directory
+
 ### 0.1.dev23 (2018-12-13)
 
 - fixes a bug with interaction terms passed into `LargeMultinomialLogitStep.run()`
