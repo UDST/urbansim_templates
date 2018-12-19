@@ -87,5 +87,20 @@ def test_get_data_bad_columns(orca_session):
     assert(set(df.columns) == set(['tenure', 'pop']))
 
 
+def test_update_column(orca_session):
+    """
+    General test. Other things to test: series without index, short series, series with
+    index out of order, series with index missing values, new column, missing values
+    
+    """
+    table = 'buildings'
+    column = 'pop'
+    data = pd.Series([3,3,3], index=[1,2,3])
+    
+    utils.update_column(table, column, data)
+    assert(orca.get_table(table).to_frame()[column].tolist() == [3,3,3])
+    
+    
+    
     
     
