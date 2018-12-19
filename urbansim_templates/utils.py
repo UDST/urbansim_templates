@@ -250,7 +250,7 @@ def update_column(table, column, data, fallback_table=None, fallback_column=None
     dfw = orca.get_table(table)
     
     if column not in dfw.columns:
-        dfw[column] = data
+        dfw.update_col(column, data)
     
     else:
         dfw.update_col_from_series(column, data, cast=True)
