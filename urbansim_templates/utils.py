@@ -216,6 +216,8 @@ def update_column(table, column, data, fallback_table=None, fallback_column=None
     If the column already exists, 'data' will be cast to match the column's data type. If 
     the column needs to be created, it will be given the same data type as 'data'.
     
+    Require an index?
+    
     Parameters
     ----------
     table : str or list of str
