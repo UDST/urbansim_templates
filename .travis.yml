@@ -23,7 +23,7 @@ install:
   - pip show urbansim_templates
 
 script:
-  - cd urbansim_templates/tests
+  - cd tests
   - coverage run --source urbansim_templates --module pytest --verbose
 
 after_success:

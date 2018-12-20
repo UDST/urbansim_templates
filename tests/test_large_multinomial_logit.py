@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from choicemodels import MultinomialLogitResults
+
 from urbansim_templates import modelmanager
 from urbansim_templates.models import LargeMultinomialLogitStep
 from urbansim_templates.utils import validate_template
@@ -177,4 +179,83 @@ def test_simulation_constrained(m):
     
     obs = orca.get_table('obs').to_frame()
     assert all(~obs.choice.isin([-1]))
+
+
+def test_simulation_no_valid_choosers(m):
+    """
+    If there are no valid choosers after applying filters, simulation should exit.
+    
+    """
+    m.out_chooser_filters = 'choice == -1'
+    m.run()
+    
+
+def test_simulation_no_valid_alternatives(m):
+    """
+    If there are no valid alternatives after applying filters, simulation should exit.
+    
+    """
+    m.out_alt_filters = 'altval == -1'
+    m.run()
+    
+
+def test_output_column_autocreation(m):
+    """
+    Test on-the-fly creation of the output column.
+    
+    """
+    m.out_column = 'potato_chips'
+    m.run()
+    
+    assert('potato_chips' in orca.get_table('obs').columns)
+    assert(m.choices.equals(orca.get_table('obs').to_frame()['potato_chips']))
+    
+
+def test_diagnostic_attributes(data):
+    """
+    Test that diagnostic attributes are available when expected.
+    
+    """
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.alt_sample_size = 10
+    
+    assert(m.model is None)
+    assert(m.mergedchoicetable is None)
+    assert(m.probabilities is None)
+    assert(m.choices is None)
+    
+    m.fit()
+    
+    assert(isinstance(m.model, MultinomialLogitResults))
+    
+    len_mct = len(m.mergedchoicetable.to_frame())
+    len_obs_alts = len(orca.get_table(m.choosers).to_frame()) * m.alt_sample_size
+    
+    assert(len_mct == len_obs_alts)
+    
+    name = m.name
+    modelmanager.register(m)
+    modelmanager.initialize()
+    m = modelmanager.get_step(name)
+    
+    assert(isinstance(m.model, MultinomialLogitResults))
+
+    m.run()
+
+    len_mct = len(m.mergedchoicetable.to_frame())
+    len_probs = len(m.probabilities)
+    len_choices = len(m.choices)
+    len_obs = len(orca.get_table(m.choosers).to_frame())
+    len_obs_alts = len_obs * m.alt_sample_size
+    
+    assert(len_mct == len_obs_alts)
+    assert(len_probs == len_obs_alts)
+    assert(len_choices == len_obs)
+
+    modelmanager.remove_step(name)
+
 

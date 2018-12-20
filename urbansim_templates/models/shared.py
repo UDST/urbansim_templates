@@ -172,7 +172,7 @@ class TemplateStep(object):
         elif isinstance(self.model_expression, OrderedDict):
             # TO DO - check that this works in Python 2.7
             expr_cols = [t[0] for t in list(self.model_expression.items()) \
-                         if t[0] is not 'intercept']
+                         if t[0] != 'intercept']
             # TO DO - not very general, maybe we should just override the method
             # TO DO - and this only applies to the fit condition
             if self.choice_column is not None:

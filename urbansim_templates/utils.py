@@ -208,6 +208,55 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     df = apply_filter_query(df, filters)
     return df
     
+    
+def update_column(table, column, data, fallback_table=None, fallback_column=None):
+    """
+    Update an Orca column. If it doesn't exist yet, add it to the table.
+    
+    If the column already exists, 'data' will be cast to match the column's data type. If 
+    the column needs to be created, it will be given the same data type as 'data'.
+    
+    Require an index?
+    
+    Parameters
+    ----------
+    table : str or list of str
+        Name of an Orca table. If list, the first element will be used.
+    
+    column : str
+        Name of a column in the table. Cannot be an index.
+        
+    data : pd.Series
+        Should either align with the index of the table, or have the same number of rows.
+        
+    fallback_table : str or list of str
+        Name of Orca table to use if 'table' evaluates to None.
+    
+    fallback_column : str
+        Name of Orca column to use if 'column' evaluates to None.
+        
+    Returns
+    -------
+    None
+    
+    """
+    if table is None:
+        table = fallback_table
+    
+    if isinstance(table, list):
+        table = table[0]
+    
+    if column is None:
+        column = fallback_column
+    
+    dfw = orca.get_table(table)
+    
+    if column not in dfw.columns:
+        dfw.update_col(column, data)
+    
+    else:
+        dfw.update_col_from_series(column, data, cast=True)
+    
 
 ########################
 ## VERSION MANAGEMENT ##

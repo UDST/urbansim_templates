@@ -1,23 +1,31 @@
 from __future__ import print_function
 
 import orca
-# choicemodels imports are in the fit() and run() methods
 
 from .. import modelmanager
-from ..utils import get_data, version_greater_or_equal, to_list
+from ..utils import get_data, update_column, version_greater_or_equal
 from .shared import TemplateStep
+
+
+def check_choicemodels_version():
+    try:
+        import choicemodels
+        assert version_greater_or_equal(choicemodels.__version__, '0.2.dev4')
+    except:
+        raise ImportError("LargeMultinomialLogitStep requires choicemodels 0.2.dev4 or "
+                "later. For installation instructions, see "
+                "https://github.com/udst/choicemodels.")
 
 
 @modelmanager.template
 class LargeMultinomialLogitStep(TemplateStep):
     """
     Class for building standard multinomial logit model steps where alternatives are 
-    interchangeable and have the same model expression. Supports random sampling of 
+    interchangeable and all have the same model expression. Supports random sampling of 
     alternatives.
     
     Estimation and simulation are performed using ChoiceModels.
     
-
     Parameters
     ----------
     choosers : str or list of str, optional
@@ -86,10 +94,11 @@ class LargeMultinomialLogitStep(TemplateStep):
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
         in the primary `out_choosers` table, it will be created. If not provided, the 
-        `choice_column` will be used. Replaces the `out_fname` argument in UrbanSim.
+        `choice_column` will be used. If the column already exists, choices will be cast 
+        to match its data type. If the column is generated on the fly, it will be given 
+        the same data type as the index of the alternatives table. Replaces the 
+        `out_fname` argument in UrbanSim. 
         
-        # TO DO - auto-generation not yet working; column must exist.
-    
     out_chooser_filters : str or list of str, optional
         Filters to apply to the chooser data before simulation. If not provided, no 
         filters will be applied. Replaces the `predict_filters` argument in UrbanSim.
@@ -125,13 +134,38 @@ class LargeMultinomialLogitStep(TemplateStep):
     tags : list of str, optional
         Tags, passed to ModelManager.
     
+    Attributes
+    ----------
+    All parameters can also be get and set as properties. The following attributes should
+    be treated as read-only.
+    
+    choices : pd.Series
+        Available after the model step is run. List of chosen alternative id's, indexed 
+        with the chooser id. Does not persist when the model step is reloaded from 
+        storage.
+    
+    mergedchoicetable : choicemodels.tools.MergedChoiceTable
+        Table built for estimation or simulation. Does not persist when the model step is 
+        reloaded from storage. Not available if choices have capacity constraints,
+        because multiple choice tables are generated iteratively.
+    
+    model : choicemodels.MultinomialLogitResults
+        Available after a model has been fit. Persists when reloaded from storage.
+        
+    probabilities : pd.Series
+        Available after the model step is run -- but not if choices have capacity 
+        constraints, which requires probabilities to be calculated multiple times. 
+        Provides list of probabilities corresponding to the sampled alternatives, indexed 
+        with the chooser and alternative id's. Does not persist when the model step is 
+        reloaded from storage.
+    
     """
     def __init__(self, choosers=None, alternatives=None, model_expression=None, 
             choice_column=None, chooser_filters=None, chooser_sample_size=None,
             alt_filters=None, alt_sample_size=None, out_choosers=None, 
-            out_alternatives=None, out_column=None,
-            out_chooser_filters=None, out_alt_filters=None, constrained_choices=False,
-            alt_capacity=None, chooser_size=None, max_iter=None, name=None, tags=[]):
+            out_alternatives=None, out_column=None, out_chooser_filters=None, 
+            out_alt_filters=None, constrained_choices=False, alt_capacity=None, 
+            chooser_size=None, max_iter=None, name=None, tags=[]):
         
         self._listeners = []
         
@@ -160,6 +194,12 @@ class LargeMultinomialLogitStep(TemplateStep):
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
         self.fitted_parameters = None
+        self.model = None
+        
+        # Placeholders for diagnostic data, filled in by fit() or run()
+        self.mergedchoicetable = None
+        self.probabilities = None
+        self.choices = None
 
 
     def bind_to(self, callback):
@@ -185,6 +225,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         LargeMultinomialLogitStep
         
         """
+        check_choicemodels_version()
+        from choicemodels import MultinomialLogitResults
+        
         # Pass values from the dictionary to the __init__() method
         obj = cls(choosers=d['choosers'], alternatives=d['alternatives'], 
             model_expression=d['model_expression'], choice_column=d['choice_column'], 
@@ -201,6 +244,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         # Load model fit data
         obj.summary_table = d['summary_table']
         obj.fitted_parameters = d['fitted_parameters']
+        
+        if obj.fitted_parameters is not None:
+            obj.model = MultinomialLogitResults(model_expression = obj.model_expression, 
+                    fitted_parameters = obj.fitted_parameters)
         
         return obj
 
@@ -399,22 +446,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         mct : choicemodels.tools.MergedChoiceTable
             This parameter is a temporary backdoor allowing us to pass in a more 
             complicated choice table than can be generated within the template, for 
-            example including sampling weights or interaction terms. This will work for 
-            model estimation, but is not yet hooked up to the prediction functionality.
+            example including sampling weights or interaction terms. 
         
         Returns
         -------
         None
         
         """
-        try:
-            from choicemodels import __version__, MultinomialLogit
-            from choicemodels.tools import MergedChoiceTable
-            assert version_greater_or_equal(__version__, '0.2.dev4')
-        except:
-            raise ImportError("LargeMultinomialLogitStep estimation requires "
-                    "choicemodels 0.2.dev4 or later. For installation instructions, see "
-                    "https://github.com/udst/choicemodels.")
+        check_choicemodels_version()
+        from choicemodels import MultinomialLogit
+        from choicemodels.tools import MergedChoiceTable
         
         if (mct is not None):
             data = mct
@@ -445,9 +486,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.summary_table = str(results)
         print(self.summary_table)
         
-        # For now, just save the summary table and fitted parameters
         coefs = results.get_raw_results()['fit_parameters']['Coefficient']
         self.fitted_parameters = coefs.tolist()
+        self.model = results
         
         # Save merged choice table to the class object for diagnostics
         self.mergedchoicetable = mct
@@ -457,9 +498,9 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: simulate choices and use them to update an Orca column.
         
-        The simulated choices are saved to the class object for diagnostics ('choices').
-        If choices are unconstrained, the probabilities of sampled alternatives are saved
-        as well ('probabilities').
+        The simulated choices are saved to the class object for diagnostics. If choices 
+        are unconstrained, the choice table and the probabilities of sampled alternatives 
+        are saved as well.
 
         Parameters
         ----------
@@ -484,19 +525,19 @@ class LargeMultinomialLogitStep(TemplateStep):
         None
         
         """
-        try:
-            from choicemodels import __version__, MultinomialLogitResults
-            from choicemodels.tools import (MergedChoiceTable, monte_carlo_choices, 
-                    iterative_lottery_choices)
-            assert version_greater_or_equal(__version__, '0.2.dev4')
-        except:
-            raise ImportError("LargeMultinomialLogitStep simulation requires "
-                    "choicemodels 0.2.dev4 or later. For installation instructions, see "
-                    "https://github.com/udst/choicemodels.")
+        check_choicemodels_version()
+        from choicemodels import MultinomialLogit
+        from choicemodels.tools import (MergedChoiceTable, monte_carlo_choices, 
+                iterative_lottery_choices)
 
+        # Clear simulation attributes from the class object
+        self.mergedchoicetable = None
+        self.probabilities = None
+        self.choices = None
+        
         if interaction_terms is not None:
-            obs_extra_cols = to_list(self.chooser_size) + list(interaction_terms.index.names)
-            alts_extra_cols = to_list(self.alt_capacity) + list(interaction_terms.index.names)
+            obs_extra_cols = [self.chooser_size] + list(interaction_terms.index.names)
+            alts_extra_cols = [self.alt_capacity] + list(interaction_terms.index.names)
         else:
             obs_extra_cols = self.chooser_size
             alts_extra_cols = self.alt_capacity
@@ -507,22 +548,27 @@ class LargeMultinomialLogitStep(TemplateStep):
                                 model_expression = self.model_expression,
                                 extra_columns = obs_extra_cols)
         
+        if len(observations) == 0:
+            print("No valid choosers")
+            return
+        
         alternatives = get_data(tables = self.out_alternatives, 
                                 fallback_tables = self.alternatives, 
                                 filters = self.out_alt_filters,
                                 model_expression = self.model_expression,
                                 extra_columns = alts_extra_cols)
         
-        model = MultinomialLogitResults(model_expression = self.model_expression, 
-                fitted_parameters = self.fitted_parameters)
-
+        if len(alternatives) == 0:
+            print("No valid alternatives")
+            return
+        
         def mct(obs, alts):
             return MergedChoiceTable(
                 obs, alts, sample_size=self.alt_sample_size,
                 interaction_terms=interaction_terms)
         
         def probs(mct):
-            return model.probabilities(mct)
+            return self.model.probabilities(mct)
 
         if (self.constrained_choices == True):
             choices = iterative_lottery_choices(observations, alternatives, 
@@ -531,32 +577,21 @@ class LargeMultinomialLogitStep(TemplateStep):
                     max_iter=self.max_iter, chooser_batch_size=chooser_batch_size)
             
         else:
-            probs = probs(mct(observations, alternatives))
-            choices = monte_carlo_choices(probs)
-            self.probabilities = probs
+            choicetable = mct(observations, alternatives)
+            probabilities = probs(choicetable)
+            choices = monte_carlo_choices(probabilities)
+            
+            # Save data to class object if available
+            self.mergedchoicetable = choicetable
+            self.probabilities = probabilities
         
-        # Save data to class object for diagnostics
+        # Save choices to class object for diagnostics
         self.choices = choices
 
         # Update Orca
-        if self.out_choosers is not None:
-            table = self.out_choosers
-        else:
-            table = self.choosers
-
-        if isinstance(table, list):
-            table = table[0]
-
-        table = orca.get_table(table)
-
-        if self.out_column is not None:
-            column = self.out_column
-        else:
-            column = self.choice_column
-
-        if column not in table.columns:
-            table[column] = None
-        
-        table.update_col_from_series(column, choices, cast=True)
-        
-    
+        update_column(table = self.out_choosers, 
+                      fallback_table = self.choosers,
+                      column = self.out_column, 
+                      fallback_column = self.choice_column,
+                      data = choices)
+            

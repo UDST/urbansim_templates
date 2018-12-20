@@ -87,5 +87,31 @@ def test_get_data_bad_columns(orca_session):
     assert(set(df.columns) == set(['tenure', 'pop']))
 
 
+def test_update_column(orca_session):
+    """
+    General test.
+    
+    Additional tests to add: series without index, adding column on the fly.
+    
+    """
+    table = 'buildings'
+    column = 'pop'
+    data = pd.Series([3,3,3], index=[1,2,3])
+    
+    utils.update_column(table, column, data)
+    assert(orca.get_table(table).to_frame()[column].tolist() == [3,3,3])
     
     
+def test_update_column_incomplete_series(orca_session):
+    """
+    Update certain values but not others, with non-matching index orders.
+    
+    """
+    table = 'buildings'
+    column = 'pop'
+    data = pd.Series([10,5], index=[3,1])
+    
+    utils.update_column(table, column, data)
+    assert(orca.get_table(table).to_frame()[column].tolist() == [5,2,10])
+    
+
