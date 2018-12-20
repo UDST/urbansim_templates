@@ -471,8 +471,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         obs = self._get_df(tables=self.out_choosers, fallback_tables=self.choosers, 
                 filters=self.out_chooser_filters)
         
+        if len(obs) == 0:
+	        print("No valid choosers")
+	        return
+	
         alts = self._get_df(tables=self.out_alternatives, 
                 fallback_tables=self.alternatives, filters=self.out_alt_filters)
+        
+        if len(alts) == 0:
+	        print("No valid alternatives")
+	        return
         
         model = MultinomialLogitResults(model_expression = self.model_expression, 
                 fitted_parameters = self.fitted_parameters)
