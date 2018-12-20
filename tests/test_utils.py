@@ -89,8 +89,9 @@ def test_get_data_bad_columns(orca_session):
 
 def test_update_column(orca_session):
     """
-    General test. Other things to test: series without index, short series, series with
-    index out of order, series with index missing values, new column, missing values
+    General test.
+    
+    Additional tests to add: series without index, adding column on the fly.
     
     """
     table = 'buildings'
@@ -101,6 +102,19 @@ def test_update_column(orca_session):
     assert(orca.get_table(table).to_frame()[column].tolist() == [3,3,3])
     
     
+def test_update_column_incomplete_series(orca_session):
+    """
+    Update certain values but not others, with non-matching index orders.
+    
+    """
+    table = 'buildings'
+    column = 'pop'
+    data = pd.Series([10,5], index=[3,1])
+    
+    utils.update_column(table, column, data)
+    assert(orca.get_table(table).to_frame()[column].tolist() == [5,2,10])
+    
+
     
     
     
