@@ -115,6 +115,3 @@ def test_update_column_incomplete_series(orca_session):
     assert(orca.get_table(table).to_frame()[column].tolist() == [5,2,10])
     
 
-    
-    
-    

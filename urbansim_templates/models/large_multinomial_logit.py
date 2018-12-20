@@ -548,11 +548,19 @@ class LargeMultinomialLogitStep(TemplateStep):
                                 model_expression = self.model_expression,
                                 extra_columns = obs_extra_cols)
         
+        if len(observations) == 0:
+            print("No valid choosers")
+            return
+        
         alternatives = get_data(tables = self.out_alternatives, 
                                 fallback_tables = self.alternatives, 
                                 filters = self.out_alt_filters,
                                 model_expression = self.model_expression,
                                 extra_columns = alts_extra_cols)
+        
+        if len(alternatives) == 0:
+            print("No valid alternatives")
+            return
         
         def mct(obs, alts):
             return MergedChoiceTable(

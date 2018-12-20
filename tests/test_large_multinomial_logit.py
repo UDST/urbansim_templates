@@ -181,6 +181,24 @@ def test_simulation_constrained(m):
     assert all(~obs.choice.isin([-1]))
 
 
+def test_simulation_no_valid_choosers(m):
+    """
+    If there are no valid choosers after applying filters, simulation should exit.
+    
+    """
+    m.out_chooser_filters = 'choice == -1'
+    m.run()
+    
+
+def test_simulation_no_valid_alternatives(m):
+    """
+    If there are no valid alternatives after applying filters, simulation should exit.
+    
+    """
+    m.out_alt_filters = 'altval == -1'
+    m.run()
+    
+
 def test_output_column_autocreation(m):
     """
     Test on-the-fly creation of the output column.
@@ -239,4 +257,5 @@ def test_diagnostic_attributes(data):
     assert(len_choices == len_obs)
 
     modelmanager.remove_step(name)
+
 
