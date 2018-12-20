@@ -1,12 +1,14 @@
 # UrbanSim Templates change log
 
-### 0.1.dev24
+### 0.1.dev24 (2018-12-20)
 
 - fixes a string comparison bug that caused problems with binary logit output in Windows
 
 - adds `model` as an attribute of large MNL model steps, which provides a `choicemodels.MultinomialLogitResults` object and is available any time after a model step is fitted
 
-- enables on-the-fly creation of output columns across all templates
+- enables on-the-fly creation of output columns in large MNL
+
+- fixes a large MNL simulation bug when there are no valid choosers or alternatives after evaluating the filters
 
 - moves unit tests out of the module directory
 
