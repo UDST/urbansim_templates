@@ -82,13 +82,13 @@ class Table():
         IMPLEMENTED.
     
     cache : bool, optional
-        Passed to `Orca.Table()`.
+        Passed to `orca.add_table()`.
     
-    cache_scope : ??, optional
-        Passed to `Orca.Table()`.
+    cache_scope : 'step', 'iteration', or 'forever', optional
+        Passed to `orca.add_table()`.
     
-    copy_col : ??, optional
-        Passed to `Orca.Table()`.
+    copy_col : bool, optional
+        Passed to `orca.add_table()`.
         
     name : str, optional
         Name of the table, for Orca. This will also be used as the name of the model step 
@@ -197,4 +197,22 @@ class Table():
     
     
     def run(self):
-        pass
+        """
+        Register a data table with Orca.
+        
+        Returns
+        -------
+        None
+        
+        """
+        if self.source_type == 'csv':
+            @orca.table(table_name = self.name, 
+                        cache = self.cache, 
+                        cache_scope = self.cache_scope, 
+                        copy_col=self.copy_col)
+            def orca_table():
+                df = pd.read_csv(self.path).set_index(self.csv_index_cols)
+                return df
+            
+        
+        
