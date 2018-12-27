@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import orca
+import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
 
@@ -129,7 +130,7 @@ class Table():
         self.cache_scope = cache_scope
         self.copy_col = copy_col
         
-        # Params required by ModelManager
+        # Standard params
         self.name = name
         self.tags = tags
         self.autorun = autorun
@@ -167,6 +168,7 @@ class Table():
         )
         return obj
     
+    
     def to_dict(self):
         """
         Create a dictionary representation of the object.
@@ -185,6 +187,7 @@ class Table():
             'source_type': self.source_type,
             'path': self.path,
             'csv_index_cols': self.csv_index_cols,
+            'csv_settings': self.csv_settings,
             'cache': self.cache,
             'cache_scope': self.cache_scope,
             'copy_col': self.copy_col

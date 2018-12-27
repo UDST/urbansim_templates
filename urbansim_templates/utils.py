@@ -40,7 +40,7 @@ def validate_template(cls):
         m = cls()
     except:
         print("Error instantiating object without arguments")
-        return False
+        raise
     
     methods = ['to_dict', 'from_dict', 'run']
     for item in methods:
@@ -52,7 +52,7 @@ def validate_template(cls):
         d = m.to_dict()
     except:
         print("Error running 'to_dict()'")
-        return False
+        raise
     
     params = ['name', 'tags', 'template', 'template_version']
     for item in params:
@@ -67,8 +67,8 @@ def validate_template(cls):
     try:
         cls.from_dict(m.to_dict())
     except:
-        print("Error passing dict to 'from_dict()' method")
-        return False
+        print("Error instantiating object with 'from_dict()' method")
+        raise
     
     # TO DO - check supplemental objects? (but nothing there with unconfigured steps)
     
