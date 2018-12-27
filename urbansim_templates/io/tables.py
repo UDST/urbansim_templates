@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import orca
 
-from urbansim_templates import modelmanager
+from urbansim_templates import modelmanager, __version__
 
 
 @modelmanager.template
@@ -82,13 +82,13 @@ class Table():
         IMPLEMENTED.
     
     cache : bool, optional
-        Orca table setting (DEFAULT?).
+        Passed to `Orca.Table()`.
     
     cache_scope : ??, optional
-        Orca table setting.
+        Passed to `Orca.Table()`.
     
     copy_col : ??, optional
-        Orca table setting.
+        Passed to `Orca.Table()`.
         
     name : str, optional
         Name of the table, for Orca. This will also be used as the name of the model step 
@@ -108,16 +108,88 @@ class Table():
     instance.
     
     """
-    def __init__(self):
-        pass
+    def __init__(self, 
+            source_type = None, 
+            path = None, 
+            csv_index_cols = None,
+            csv_settings = None, 
+            cache = None, 
+            cache_scope = None, 
+            copy_col = None, 
+            name = None,
+            tags = [], 
+            autorun = None):
+        
+        # Template-specific params
+        self.source_type = source_type
+        self.path = path
+        self.csv_index_cols = csv_index_cols
+        self.csv_settings = csv_settings
+        self.cache = cache
+        self.cache_scope = cache_scope
+        self.copy_col = copy_col
+        
+        # Params required by ModelManager
+        self.name = name
+        self.tags = tags
+        self.autorun = autorun
+        
+        # Automated params
+        self.template = type(self).__name__  # class name
+        self.template_version = __version__
     
     
     @classmethod
     def from_dict(cls, d):
-        pass
+        """
+        Create an object instance from a saved dictionary representation.
+        
+        Parameters
+        ----------
+        d : dict
+        
+        Returns
+        -------
+        Table
+        
+        """
+        obj = cls(
+            source_type = d['source_type'],
+            path = d['path'],
+            csv_index_cols = d['csv_index_cols'],
+            csv_settings = d['csv_settings'],
+            cache = d['cache'],
+            cache_scope = d['cache_scope'],
+            copy_col = d['copy_col'],
+            name = d['name'],
+            tags = d['tags'],
+            autorun = d['autorun']
+        )
+        return obj
     
     def to_dict(self):
-        pass
+        """
+        Create a dictionary representation of the object.
+        
+        Returns
+        -------
+        dict
+        
+        """
+        d = {
+            'template': self.template,
+            'template_version': self.template_version,
+            'name': self.name,
+            'tags': self.tags,
+            'autorun': True,
+            'source_type': self.source_type,
+            'path': self.path,
+            'csv_index_cols': self.csv_index_cols,
+            'cache': self.cache,
+            'cache_scope': self.cache_scope,
+            'copy_col': self.copy_col
+        }
+        return d
     
     
     def validate(self):
