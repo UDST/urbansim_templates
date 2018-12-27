@@ -237,7 +237,7 @@ def get_step(name):
     
     Returns
     -------
-    RegressionStep or other
+    instance of a template class
     
     """
     return copy.deepcopy(_steps[name])
