@@ -136,7 +136,7 @@ class Table():
         self.autorun = autorun
         
         # Automated params
-        self.template = type(self).__name__  # class name
+        self.template = self.__class__.__name__
         self.template_version = __version__
     
     
