@@ -98,10 +98,8 @@ class Table():
     tags : list of str, optional
         Tags, passed to ModelManager.
     
-    autorun : bool, optional
-        Automatically "run" the step with the parameters passed to the constructor. This 
-        will be set to True in dict representations of the object, so that loading it 
-        into ModelManager will automatically register the table with Orca. 
+    autorun : bool, optional (default True)
+        Automatically run the step whenever it's registered with ModelManager.
     
     Properties and attributes
     -------------------------
@@ -119,7 +117,7 @@ class Table():
             copy_col = None, 
             name = None,
             tags = [], 
-            autorun = None):
+            autorun = True):
         
         # Template-specific params
         self.source_type = source_type
@@ -183,7 +181,7 @@ class Table():
             'template_version': self.template_version,
             'name': self.name,
             'tags': self.tags,
-            'autorun': True,
+            'autorun': self.autorun,
             'source_type': self.source_type,
             'path': self.path,
             'csv_index_cols': self.csv_index_cols,

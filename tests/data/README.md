@@ -1,0 +1,1 @@
+This folder stores data that is temporarily generated during tests.

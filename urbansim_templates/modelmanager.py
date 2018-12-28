@@ -139,9 +139,16 @@ def register(step, save_to_disk=True):
     name has not yet been assigned, one will be generated from the template name and a 
     timestamp.
     
+    If the model step includes an attribute 'autorun' that's set to True, the step will 
+    run after being registered.
+    
     Parameters
     ----------
     step : object
+    
+    Returns
+    -------
+    None
     
     """
     if step.name is None:
@@ -159,6 +166,10 @@ def register(step, save_to_disk=True):
         return step.run()
         
     orca.add_step(step.name, run_step)
+    
+    if hasattr(step, 'autorun'):
+        if step.autorun:
+            orca.run([step.name]) 
         
     
 def list_steps():
