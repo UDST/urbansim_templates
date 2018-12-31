@@ -55,6 +55,10 @@ def test_property_persistence(orca_session):
     pass
 
 
+######################################
+### TESTS OF THE VALIDATE() METHOD ###
+######################################
+
 def test_validation_index_unique(orca_session):
     """
     Table validation should pass if the index is unique.
@@ -135,14 +139,58 @@ def test_validation_unnamed_index(orca_session):
     pytest.fail()  # fail if ValueError wasn't raised
     
 
+def test_validation_columns_vs_other_indexes(orca_session):
+    """
+    Table validation should compare the 'households.building_id' column to 
+    'buildings.build_id'.
+    
+    """
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
+    orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
+
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
+
+    t = Table(name='households')
+    t.validate()
+
+
+def test_validation_index_vs_other_columns(orca_session):
+    """
+    Table validation should compare the 'households.building_id' column to 
+    'buildings.build_id'.
+    
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,5]}
+    orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
+
+    t = Table(name='buildings')
+    t.validate()
+
+
+def test_validation_with_multiindexes(orca_session):
+    """
+    Here, table validation should compare 'choice_table.[home_tract,work_tract]' to
+    'distances.[home_tract,work_tract]'.
+    
+    """
+    pass
+
 # test that parameters make it through a save
-# test that validation works
+# test validation with stand-alone columns
 
 # test loading an h5 file works
 # test passing cache settings
 
 # call it TableStep?
 
+
+#################################
+### TESTS OF THE DATA LOADING ###
+#################################
 
 def test_csv(orca_session, data):
     """
