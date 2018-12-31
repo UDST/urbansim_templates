@@ -55,16 +55,93 @@ def test_property_persistence(orca_session):
     pass
 
 
-# test parameters make it through a save
+def test_validation_index_unique(orca_session):
+    """
+    Table validation should pass if the index is unique.
+    
+    These tests of the validate() method generate Orca tables directly, which is just a 
+    shortcut for testing -- the intended use is for the method to validate the table
+    loaded by the TableStep. 
+    
+    """
+    d = {'id': [1,2,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d).set_index('id'))
+    
+    t = Table(name='tab')
+    t.validate()
+    
 
-# test multiple index columns
+def test_validation_index_not_unique(orca_session):
+    """
+    Table validation should raise a ValueError if the index is not unique.
+    
+    """
+    d = {'id': [1,1,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d).set_index('id'))
+    
+    t = Table(name='tab')
+    try:
+        t.validate()
+    except ValueError:
+        return
+    
+    pytest.fail()  # fail if ValueError wasn't raised
+
+
+def test_validation_multiindex_unique(orca_session):
+    """
+    Table validation should pass with a MultiIndex whose combinations are unique.
+    
+    """
+    d = {'id': [1,1,1], 'sub_id': [1,2,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
+    
+    t = Table(name='tab')
+    t.validate()
+
+
+def test_validation_multiindex_not_unique(orca_session):
+    """
+    Table validation should raise a ValueError if the MultiIndex combinations are not 
+    unique.
+    
+    """
+    d = {'id': [1,1,1], 'sub_id': [2,2,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
+    
+    t = Table(name='tab')
+    try:
+        t.validate()
+    except ValueError:
+        return
+    
+    pytest.fail()  # fail if ValueError wasn't raised
+
+
+def test_validation_unnamed_index(orca_session):
+    """
+    Table validation should raise a ValueError if index is unnamed.
+    
+    """
+    d = {'id': [1,1,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d))  # generates auto index without a name
+    
+    t = Table(name='tab')
+    try:
+        t.validate()
+    except ValueError:
+        return
+    
+    pytest.fail()  # fail if ValueError wasn't raised
+    
+
+# test that parameters make it through a save
 # test that validation works
 
 # test loading an h5 file works
 # test passing cache settings
 
 # call it TableStep?
-# tear down data
 
 
 def test_csv(orca_session, data):
@@ -72,15 +149,15 @@ def test_csv(orca_session, data):
     Test that loading data from a CSV works.
     
     """
-    s = Table()
-    s.name = 'buildings'
-    s.source_type = 'csv'
-    s.path = 'data/buildings.csv'
-    s.csv_index_cols = 'building_id'
+    t = Table()
+    t.name = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data/buildings.csv'
+    t.csv_index_cols = 'building_id'
     
     assert 'buildings' not in orca.list_tables()
     
-    modelmanager.register(s)
+    modelmanager.register(t)
     assert 'buildings' in orca.list_tables()
     
     modelmanager.initialize()
@@ -94,18 +171,17 @@ def test_without_autorun(orca_session, data):
     Confirm that disabling autorun works.
     
     """
-    s = Table()
-    s.name = 'buildings'
-    s.source_type = 'csv'
-    s.path = 'data/buildings.csv'
-    s.csv_index_cols = 'building_id'
-    s.autorun = False
+    t = Table()
+    t.name = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data/buildings.csv'
+    t.csv_index_cols = 'building_id'
+    t.autorun = False
     
-    modelmanager.register(s)
+    modelmanager.register(t)
     assert 'buildings' not in orca.list_tables()
     
     modelmanager.remove_step('buildings')
-    
     
     
     
