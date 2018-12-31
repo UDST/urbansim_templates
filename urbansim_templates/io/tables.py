@@ -219,7 +219,7 @@ class Table():
         bool
         
         """
-        # There are a couple of reasons I'm not using the orca_test library here:
+        # There are a couple of reasons we're not using the orca_test library here:
         # (a) orca_test doesn't currently support MultiIndexes, and (b) the primary-key/
         # foreign-key comparisons aren't asserting anything, just printing status 
         # messages. We should update orca_test to support both, probably.
