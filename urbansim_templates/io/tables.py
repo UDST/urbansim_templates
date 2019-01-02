@@ -248,7 +248,11 @@ class Table():
             
             if set(idx.names).issubset(col_names):
                 vals = orca.get_table(t1).to_frame(idx.names).drop_duplicates()
-                vals_in_idx = vals.isin(idx).sum()
+                
+                # Easier to compare multi-column values to multi-column index if we 
+                # turn the values into an index as well
+                vals = vals.reset_index().set_index(idx.names).index
+                vals_in_idx = sum(vals.isin(idx))
                 
                 if len(idx.names) == 1:
                     idx_str = idx.names[0]
@@ -257,9 +261,9 @@ class Table():
                 
                 print("'{}.{}': {} of {} unique values are found in '{}.{}' ({}%)"\
                         .format(t1, idx_str, 
-                                sum(vals_in_idx), len(vals), 
+                                vals_in_idx, len(vals), 
                                 t2, idx_str, 
-                                round(100*sum(vals_in_idx)/len(vals))))
+                                round(100*vals_in_idx/len(vals))))
     
         return True
     

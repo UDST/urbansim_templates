@@ -177,7 +177,16 @@ def test_validation_with_multiindexes(orca_session):
     'distances.[home_tract,work_tract]'.
     
     """
-    pass
+    d = {'obs_id': [1,1,1,1], 'alt_id': [1,2,3,4], 
+         'home_tract': [55,55,55,55], 'work_tract': [17,46,19,55]}
+    orca.add_table('choice_table', pd.DataFrame(d).set_index(['obs_id','alt_id']))
+
+    d = {'home_tract': [55,55,55], 'work_tract': [17,18,19], 'dist': [1,1,1]}
+    orca.add_table('distances', pd.DataFrame(d).set_index(['home_tract','work_tract']))
+
+    t = Table(name='choice_table')
+    t.validate()
+
 
 # test that parameters make it through a save
 # test validation with stand-alone columns
