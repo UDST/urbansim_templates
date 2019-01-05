@@ -1,2 +1,3 @@
 .cache/*
 urbansim_templates.egg-info/*
+**/*.pyc
