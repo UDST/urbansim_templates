@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utilities API &mdash; UrbanSim Templates 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model-steps.html">Template APIs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utilities API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-urbansim_templates.utils">Spec validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-urbansim_templates.utils">Template helper functions</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Utilities API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utilities-api">
+<h1>Utilities API<a class="headerlink" href="#utilities-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-urbansim_templates.utils">
+<span id="spec-validation"></span><h2>Spec validation<a class="headerlink" href="#module-urbansim_templates.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="urbansim_templates.utils.validate_template">
+<code class="descclassname">urbansim_templates.utils.</code><code class="descname">validate_template</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#validate_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.validate_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether a template class meets the basic expectations for working with 
+ModelManager, to aid in development and testing.</p>
+<p>Looks for ‘to_dict’, ‘from_dict’, and ‘run’ methods, and ‘name’, ‘tags’, ‘template’,
+and ‘template_version’ attributes. Checks that an object can be instantiated without 
+arguments, plus some additional behaviors. See documentation for a full description 
+of ModelManager specs and guidelines.</p>
+<p>There are many behaviors this does NOT check, because we don’t know what particular
+parameters are expected and valid for a given template. For example, saving a 
+configured model step and reloading it should produce an equivalent object, but this
+needs to be checked in template-specific unit tests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>cls</strong> <span class="classifier-delimiter">:</span> <span class="classifier">class</span></dt>
+<dd><p class="first last">Template class.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>bool</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-urbansim_templates.utils">
+<span id="template-helper-functions"></span><h2>Template helper functions<a class="headerlink" href="#module-urbansim_templates.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="urbansim_templates.utils.get_data">
+<code class="descclassname">urbansim_templates.utils.</code><code class="descname">get_data</code><span class="sig-paren">(</span><em>tables</em>, <em>fallback_tables=None</em>, <em>filters=None</em>, <em>model_expression=None</em>, <em>extra_columns=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a pd.DataFrame from one or more tables registered with Orca. Templates should 
+call this function immediately before the data is needed, so that it’s as up-to-date 
+as possible.</p>
+<p>If filters are provided, the output will include only rows that match the filter
+criteria.</p>
+<p>Default behavior is for the output to inclue all columns. If a model_expression and/or
+extra_columns is provided, non-relevant columns will be dropped from the output.
+Relevant columns include any mentioned in the model expression, filters, or list of 
+extras. Join keys will <em>not</em> be included in the final output even if the data is drawn
+from multiple tables, unless they appear in the model expression or filters as well.</p>
+<p>If a named column is not found in the source tables, it will just be skipped. This is 
+to support use cases where data is assembled separately for choosers and alternatives 
+and then merged together – the model expression would include terms from both sets 
+of tables.</p>
+<p>Duplicate column names are not recommended – columns are expected to be unique within 
+the set of tables they’re being drawn from, with the exception of join keys. If column 
+names are repeated, current behavior is to follow the Orca default and keep the 
+left-most copy of the column. This may change later and should not be relied on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>tables</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str</span></dt>
+<dd><p class="first last">Orca table(s) to draw data from.</p>
+</dd>
+<dt><strong>fallback_tables</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str, optional</span></dt>
+<dd><p class="first last">Table(s) to use if first parameter evaluates to <cite>None</cite>. (This option will be 
+removed shortly when estimation and simulation settings are separated.)</p>
+</dd>
+<dt><strong>filters</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str, optional</span></dt>
+<dd><p class="first last">Filter(s) to apply to the merged data, using <cite>pd.DataFrame.query()</cite>.</p>
+</dd>
+<dt><strong>model_expression</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd><p class="first last">Model expression that will be evaluated using the output data. Only used to drop 
+non-relevant columns. PyLogit format is not yet supported.</p>
+</dd>
+<dt><strong>extra_columns</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str, optional</span></dt>
+<dd><p class="first last">Columns to include, in addition to any in the model expression and filters. (If 
+this and the model_expression are both None, all columns will be included.)</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>pd.DataFrame</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="urbansim_templates.utils.update_column">
+<code class="descclassname">urbansim_templates.utils.</code><code class="descname">update_column</code><span class="sig-paren">(</span><em>table</em>, <em>column</em>, <em>data</em>, <em>fallback_table=None</em>, <em>fallback_column=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#update_column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.update_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an Orca column. If it doesn’t exist yet, add it to the table.</p>
+<p>If the column already exists, ‘data’ will be cast to match the column’s data type. If 
+the column needs to be created, it will be given the same data type as ‘data’.</p>
+<p>Require an index?</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>table</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str</span></dt>
+<dd><p class="first last">Name of an Orca table. If list, the first element will be used.</p>
+</dd>
+<dt><strong>column</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Name of a column in the table. Cannot be an index.</p>
+</dd>
+<dt><strong>data</strong> <span class="classifier-delimiter">:</span> <span class="classifier">pd.Series</span></dt>
+<dd><p class="first last">Should either align with the index of the table, or have the same number of rows.</p>
+</dd>
+<dt><strong>fallback_table</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str or list of str</span></dt>
+<dd><p class="first last">Name of Orca table to use if ‘table’ evaluates to None.</p>
+</dd>
+<dt><strong>fallback_column</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Name of Orca column to use if ‘column’ evaluates to None.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>None</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="urbansim_templates.utils.update_name">
+<code class="descclassname">urbansim_templates.utils.</code><code class="descname">update_name</code><span class="sig-paren">(</span><em>template</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#update_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.update_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a name for a configured model step, based on its template class and the 
+current timestamp. But if a custom name has already been provided, return that 
+instead. (A name is judged to be custom if it does not contain the class type.)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>template</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Template class name.</p>
+</dd>
+<dt><strong>name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, optional</span></dt>
+<dd><p class="first last">Existing name for the configured model step.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>str</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="urbansim_templates.utils.to_list">
+<code class="descclassname">urbansim_templates.utils.</code><code class="descname">to_list</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>In many places we accept either a single string or a list of strings. This function
+normalizes None -&gt; [None], str -&gt; [str], and leaves lists unchanged.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>items</strong> <span class="classifier-delimiter">:</span> <span class="classifier">str, list, or None</span></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>list</strong></dt>
+<dd></dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UrbanSim Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

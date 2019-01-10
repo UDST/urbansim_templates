@@ -1,0 +1,593 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.models.small_multinomial_logit &mdash; UrbanSim Templates 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model-steps.html">Template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities API</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.models.small_multinomial_logit</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.models.small_multinomial_logit</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">choicemodels</span> <span class="k">import</span> <span class="n">MultinomialLogit</span>
+<span class="kn">import</span> <span class="nn">orca</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">modelmanager</span>
+<span class="kn">from</span> <span class="nn">.shared</span> <span class="k">import</span> <span class="n">TemplateStep</span>
+
+
+<div class="viewcode-block" id="SmallMultinomialLogitStep"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.SmallMultinomialLogitStep">[docs]</a><span class="nd">@modelmanager</span><span class="o">.</span><span class="n">template</span>
+<span class="k">class</span> <span class="nc">SmallMultinomialLogitStep</span><span class="p">(</span><span class="n">TemplateStep</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for building multinomial logit model steps where the number of alternatives is</span>
+<span class="sd">    &quot;small&quot;. Estimation is handled by PyLogit via the ChoiceModels API. Simulation is </span>
+<span class="sd">    handled by PyLogit (probabilities) and ChoiceModels (simulation draws). </span>
+<span class="sd">    </span>
+<span class="sd">    Multinomial logit models can involve a range of different specification and estimation</span>
+<span class="sd">    mechanics. For now these are separated into two templates. What&#39;s the difference?</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;Small&quot; MNL:</span>
+<span class="sd">    - data is in a single table (choosers)</span>
+<span class="sd">    - each alternative can have a different model expression</span>
+<span class="sd">    - all the alternatives are available to all choosers</span>
+<span class="sd">    - estimation and simulation use the PyLogit engine (via ChoiceModels)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;Large&quot; MNL:</span>
+<span class="sd">    - data is in two tables (choosers and alternatives)</span>
+<span class="sd">    - each alternative has the same model expression</span>
+<span class="sd">    - N alternatives are sampled for each chooser</span>
+<span class="sd">    - estimation and simulation use the ChoiceModels engine (formerly UrbanSim MNL)</span>
+<span class="sd">    </span>
+<span class="sd">    TO DO:</span>
+<span class="sd">    - Add support for specifying availability of alternatives</span>
+<span class="sd">    - Add support for sampling weights</span>
+<span class="sd">    - Add support for on-the-fly interaction calculations (e.g. distance)</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tables : str or list of str, optional</span>
+<span class="sd">        Name(s) of Orca tables to draw data from. The first table is the primary one. </span>
+<span class="sd">        Any additional tables need to have merge relationships (&quot;broadcasts&quot;) specified</span>
+<span class="sd">        so that they can be merged unambiguously onto the first table. Among them, the </span>
+<span class="sd">        tables must contain all variables used in the model expression and filters. The</span>
+<span class="sd">        index of the primary table should be a unique ID. The `tables` parameter is </span>
+<span class="sd">        required for fitting a model, but it does not have to be provided when the object </span>
+<span class="sd">        is created. Reserved column names: &#39;_obs_id&#39;, &#39;_alt_id&#39;, &#39;_chosen&#39;.</span>
+
+<span class="sd">    model_expression : OrderedDict, optional</span>
+<span class="sd">        PyLogit model expression. This parameter is required for fitting a model, but it </span>
+<span class="sd">        does not have to be provided when the object is created.</span>
+<span class="sd">    </span>
+<span class="sd">    model_labels : OrderedDict, optional</span>
+<span class="sd">        PyLogit model labels.</span>
+<span class="sd">        </span>
+<span class="sd">    choice_column : str, optional</span>
+<span class="sd">        Name of the column indicating observed choices, for model estimation. The column</span>
+<span class="sd">        should contain integers matching the alternatives in the model expression. This</span>
+<span class="sd">        parameter is required for fitting a model, but it does not have to be provided</span>
+<span class="sd">        when the object is created.</span>
+<span class="sd">        </span>
+<span class="sd">    initial_coefs : list of numerics, optional</span>
+<span class="sd">        Starting values for the parameter estimation algorithm, passed to PyLogit. Length </span>
+<span class="sd">        must be equal to the number of parameters being estimated. If this is not </span>
+<span class="sd">        provided, zeros will be used.</span>
+<span class="sd">        </span>
+<span class="sd">    filters : str or list of str, optional</span>
+<span class="sd">        Filters to apply to the data before fitting the model. These are passed to </span>
+<span class="sd">        `pd.DataFrame.query()`. Filters are applied after any additional tables are merged </span>
+<span class="sd">        onto the primary one. Replaces the `fit_filters` argument in UrbanSim.</span>
+
+<span class="sd">    out_tables : str or list of str, optional</span>
+<span class="sd">        Name(s) of Orca tables to use for simulation. If not provided, the `tables` </span>
+<span class="sd">        parameter will be used. Same guidance applies: the tables must be able to be </span>
+<span class="sd">        merged unambiguously, and must include all columns used in the model expression </span>
+<span class="sd">        and in the `out_filters`.</span>
+
+<span class="sd">    out_column : str, optional</span>
+<span class="sd">        Name of the column to write simulated choices to. If it does not already exist</span>
+<span class="sd">        in the primary output table, it will be created. If not provided, the </span>
+<span class="sd">        `choice_column` will be used. Replaces the `out_fname` argument in UrbanSim.</span>
+<span class="sd">        </span>
+<span class="sd">        # TO DO - auto-generation not yet working; column must exist in the primary table</span>
+
+<span class="sd">    out_filters : str or list of str, optional</span>
+<span class="sd">        Filters to apply to the data before simulation. If not provided, no filters will</span>
+<span class="sd">        be applied. Replaces the `predict_filters` argument in UrbanSim.</span>
+<span class="sd">        </span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Name of the model step, passed to ModelManager. If none is provided, a name is</span>
+<span class="sd">        generated each time the `fit()` method runs.</span>
+<span class="sd">    </span>
+<span class="sd">    tags : list of str, optional</span>
+<span class="sd">        Tags, passed to ModelManager.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">choice_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_coefs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">out_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[]):</span>
+        
+        <span class="c1"># Parent class can initialize the standard parameters</span>
+        <span class="n">TemplateStep</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span><span class="n">tables</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="n">model_expression</span><span class="p">,</span> 
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">out_tables</span><span class="o">=</span><span class="n">out_tables</span><span class="p">,</span> <span class="n">out_column</span><span class="o">=</span><span class="n">out_column</span><span class="p">,</span> 
+                <span class="n">out_transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_filters</span><span class="o">=</span><span class="n">out_filters</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="n">tags</span><span class="p">)</span>
+        
+        <span class="c1"># Custom parameters not in parent class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_labels</span> <span class="o">=</span> <span class="n">model_labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span> <span class="o">=</span> <span class="n">choice_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span> <span class="o">=</span> <span class="n">initial_coefs</span>
+        
+        <span class="c1"># Placeholders for model fit data, filled in by fit() or from_dict()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+
+    
+<div class="viewcode-block" id="SmallMultinomialLogitStep.from_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.SmallMultinomialLogitStep.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an object instance from a saved dictionary representation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        SmallMultinomialLogitStep</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Pass values from the dictionary to the __init__() method</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">],</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+                <span class="n">choice_column</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;choice_column&#39;</span><span class="p">],</span> <span class="n">initial_coefs</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;initial_coefs&#39;</span><span class="p">],</span> 
+                <span class="n">filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">],</span> <span class="n">out_tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_tables&#39;</span><span class="p">],</span> 
+                <span class="n">out_column</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_column&#39;</span><span class="p">],</span> <span class="n">out_filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_filters&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> 
+                <span class="n">tags</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">])</span>
+                
+        <span class="c1"># Load non-strings and model fit parameters</span>
+        <span class="c1"># TO DO - handle non-existence cases more carefully than &#39;except pass&#39;!</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_expression_keys&#39;</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_expression_values&#39;</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">model_expression</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="n">k</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">))])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_label_keys&#39;</span><span class="p">]</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_label_values&#39;</span><span class="p">]</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">model_labels</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="n">k</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">k</span><span class="p">))])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+                
+        <span class="n">obj</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;summary_table&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="s1">&#39;supplemental_objects&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;model-object&#39;</span><span class="p">):</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="SmallMultinomialLogitStep.to_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.SmallMultinomialLogitStep.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dictionary representation of the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp_model_expression</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="n">d</span> <span class="o">=</span> <span class="n">TemplateStep</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span> <span class="o">=</span> <span class="n">tmp_model_expression</span>
+        
+        <span class="c1"># Can&#39;t store OrderedDicts in YAML, so convert them</span>
+        <span class="k">if</span> <span class="n">tmp_model_expression</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;model_expression_keys&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tmp_model_expression</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+                <span class="s1">&#39;model_expression_values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tmp_model_expression</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+            <span class="p">})</span>
+            
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_labels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;model_label_keys&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_labels</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+                <span class="s1">&#39;model_label_values&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_labels</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+            <span class="p">})</span>
+        
+        <span class="c1"># Add parameters not in parent class</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;model_labels&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;choice_column&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span><span class="p">,</span>
+            <span class="s1">&#39;initial_coefs&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span><span class="p">,</span>
+            <span class="s1">&#39;summary_table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span>
+        <span class="p">})</span>
+        
+        <span class="c1"># Add supplemental objects</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;model-object&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;content&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                            <span class="s1">&#39;content_type&#39;</span><span class="p">:</span> <span class="s1">&#39;pickle&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">:</span> <span class="n">objects</span><span class="p">})</span>
+        
+        <span class="k">return</span> <span class="n">d</span></div>
+    
+    
+    <span class="k">def</span> <span class="nf">_get_alts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a unique, sorted list of alternative id&#39;s included in the model expression.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># TO DO - check if PyLogit supports v being a non-list (single numeric) </span>
+            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                    <span class="n">ids</span> <span class="o">+=</span> <span class="n">elem</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ids</span> <span class="o">+=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_get_param_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Count the number of parameters implied by the model expression.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        int</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># TO DO - check if PyLogit supports v being a non-list (single numeric) </span>
+            <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        
+        <span class="k">return</span> <span class="n">count</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_to_long</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;fit&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a data table from wide format to long format. Currently handles the case</span>
+<span class="sd">        where there are attributes of choosers but not of alternatives, and no </span>
+<span class="sd">        availability or interaction terms. (This is not supported in the PyLogit </span>
+<span class="sd">        conversion utility.)</span>
+<span class="sd">                </span>
+<span class="sd">        TO DO </span>
+<span class="sd">        - extend to handle characteristics of alternatives?</span>
+<span class="sd">        - move to ChoiceModels</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            One row per observation. The observation id should be in the index. Reserved </span>
+<span class="sd">            column names: &#39;_obs_id&#39;, &#39;_alt_id&#39;, &#39;_chosen&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">        task : &#39;fit&#39; or &#39;predict&#39;, optional</span>
+<span class="sd">            If &#39;fit&#39; (default), a column named &#39;_chosen&#39; is generated with binary </span>
+<span class="sd">            indicator of observed choices.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            One row per combination of observation and alternative. The observation is in </span>
+<span class="sd">            &#39;_obs_id&#39;. The alternative is in &#39;alt_id&#39;. Table is sorted by observation and </span>
+<span class="sd">            alternative. If task is &#39;fit&#39;, a column named &#39;_chosen&#39; is generated with </span>
+<span class="sd">            binary indicator of observed choices. Remaining columns are retained from the </span>
+<span class="sd">            input data.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get lists of obs and alts</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">sort_values</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">alts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_alts</span><span class="p">()</span>
+        
+        <span class="c1"># Long df is cartesian product of alts and obs</span>
+        <span class="n">obs_prod</span><span class="p">,</span> <span class="n">alts_prod</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">reshape</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">cartesian_product</span><span class="p">([</span><span class="n">obs</span><span class="p">,</span> <span class="n">alts</span><span class="p">])</span>
+
+        <span class="n">long_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;_obs_id&#39;</span><span class="p">:</span> <span class="n">obs_prod</span><span class="p">,</span> <span class="s1">&#39;_alt_id&#39;</span><span class="p">:</span> <span class="n">alts_prod</span><span class="p">})</span>
+        <span class="n">long_df</span> <span class="o">=</span> <span class="n">long_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;_obs_id&#39;</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;fit&#39;</span><span class="p">):</span>
+            <span class="c1"># Add binary indicator of chosen rows</span>
+            <span class="n">long_df</span><span class="p">[</span><span class="s1">&#39;_chosen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">long_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">long_df</span><span class="o">.</span><span class="n">_alt_id</span> <span class="o">==</span> <span class="n">long_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span><span class="p">],</span> <span class="s1">&#39;_chosen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">long_df</span>    
+    
+    
+<div class="viewcode-block" id="SmallMultinomialLogitStep.fit"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.SmallMultinomialLogitStep.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the model; save and report results. This uses PyLogit via ChoiceModels.</span>
+<span class="sd">        </span>
+<span class="sd">        The `fit()` method can be run as many times as desired. Results will not be saved </span>
+<span class="sd">        with Orca or ModelManager until the `register()` method is run. </span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">long_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_long</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">())</span>
+        
+        <span class="c1"># Set initial coefs to 0 if none provided</span>
+        <span class="n">pc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_param_count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span><span class="p">)</span> <span class="o">!=</span> <span class="n">pc</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">pc</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MultinomialLogit</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">long_df</span><span class="p">,</span> <span class="n">observation_id_col</span><span class="o">=</span><span class="s1">&#39;_obs_id&#39;</span><span class="p">,</span>
+                                 <span class="n">choice_col</span><span class="o">=</span><span class="s1">&#39;_chosen&#39;</span><span class="p">,</span>
+                                 <span class="n">model_expression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">,</span>
+                                 <span class="n">model_labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_labels</span><span class="p">,</span>
+                                 <span class="n">alternative_id_col</span><span class="o">=</span><span class="s1">&#39;_alt_id&#39;</span><span class="p">,</span>
+                                 <span class="n">initial_coefs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">initial_coefs</span><span class="p">)</span>
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_name</span><span class="p">()</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">report_fit</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span><span class="p">)</span>
+
+        <span class="c1"># We need the PyLogit fitted model object for prediction, so save it directly</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get_raw_results</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SmallMultinomialLogitStep.run"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.SmallMultinomialLogitStep.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run the model step: calculate simulated choices and use them to update a column.</span>
+<span class="sd">        </span>
+<span class="sd">        Alternatives that appear in the estimation data but not in the model expression</span>
+<span class="sd">        will not be available for simulation.</span>
+<span class="sd">        </span>
+<span class="sd">        Predicted probabilities come from PyLogit. Monte Carlo simulation of choices is</span>
+<span class="sd">        performed directly. (This functionality will move to ChoiceModels.)</span>
+<span class="sd">        </span>
+<span class="sd">        The predicted probabilities and simulated choices are saved to the class object </span>
+<span class="sd">        for interactive use (`probabilities` with type pd.DataFrame, and `choices` with </span>
+<span class="sd">        type pd.Series) but are not persisted in the dictionary representation of the </span>
+<span class="sd">        model step.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_data</span><span class="p">(</span><span class="s1">&#39;predict&#39;</span><span class="p">)</span>
+        <span class="n">long_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_long</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="s1">&#39;predict&#39;</span><span class="p">)</span>
+        
+        <span class="n">num_obs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">num_alts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_alts</span><span class="p">())</span>
+        
+        <span class="c1"># Get predictions from underlying model - this is an ndarray with the same length</span>
+        <span class="c1"># as the long-format df, representing choice probability for each alternative</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">long_df</span><span class="p">)</span>
+        
+        <span class="c1"># Generate choices by adapting an approach from UrbanSim MNL</span>
+        <span class="c1"># https://github.com/UDST/choicemodels/blob/master/choicemodels/mnl.py#L578-L583</span>
+        <span class="n">cumprobs</span> <span class="o">=</span> <span class="n">probs</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">num_obs</span><span class="p">,</span> <span class="n">num_alts</span><span class="p">))</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rands</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">num_obs</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">cumprobs</span><span class="o">.</span><span class="n">transpose</span><span class="p">(),</span> <span class="n">rands</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+        
+        <span class="c1"># The diff conversion replaces negative values with 0 and positive values with 1,</span>
+        <span class="c1"># so that argmax can return the position of the first positive value</span>
+        <span class="n">choice_ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">((</span><span class="n">diff</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;i4&#39;</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">choice_ix_1d</span> <span class="o">=</span> <span class="n">choice_ix</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_obs</span><span class="p">)</span> <span class="o">*</span> <span class="n">num_alts</span><span class="p">)</span>
+        
+        <span class="n">choices</span> <span class="o">=</span> <span class="n">long_df</span><span class="o">.</span><span class="n">_alt_id</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">choice_ix_1d</span><span class="p">)</span>
+                
+        <span class="c1"># Save results to the class object (via df to include indexes)</span>
+        <span class="n">long_df</span><span class="p">[</span><span class="s1">&#39;_probability&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">probs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">long_df</span><span class="p">[[</span><span class="s1">&#39;_obs_id&#39;</span><span class="p">,</span> <span class="s1">&#39;_alt_id&#39;</span><span class="p">,</span> <span class="s1">&#39;_probability&#39;</span><span class="p">]]</span>
+        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_choices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">choices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">_choices</span>
+       
+        <span class="c1"># Save to Orca</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">colname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">colname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span>
+
+        <span class="n">tabname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_out_table</span><span class="p">()</span>
+        <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">tabname</span><span class="p">)</span><span class="o">.</span><span class="n">update_col_from_series</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">_choices</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UrbanSim Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
