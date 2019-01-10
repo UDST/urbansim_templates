@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>UrbanSim Templates &mdash; UrbanSim Templates 0.1 documentation</title>
+  <title>Design patterns &mdash; UrbanSim Templates 0.1 documentation</title>
   
 
   
@@ -28,7 +28,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="getting-started.html" /> 
+    <link rel="prev" title="Utilities API" href="utilities.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -47,7 +47,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> UrbanSim Templates
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
           
 
           
@@ -81,12 +81,12 @@
               
             
             
-              <ul>
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model-steps.html">Template APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design-patterns.html">Design patterns</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design patterns</a></li>
 </ul>
 
             
@@ -101,7 +101,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">UrbanSim Templates</a>
+          <a href="index.html">UrbanSim Templates</a>
         
       </nav>
 
@@ -130,15 +130,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>UrbanSim Templates</li>
+      <li>Design patterns</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/design-patterns.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -151,44 +151,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="urbansim-templates">
-<h1>UrbanSim Templates<a class="headerlink" href="#urbansim-templates" title="Permalink to this headline">¶</a></h1>
-<p>UrbanSim Templates provides building blocks for Orca-based simulation models.</p>
-<p>The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the <a class="reference external" href="https://udst.github.io/orca">Orca</a> task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.</p>
-<p>v0.1, released January 2019</p>
-<div class="section" id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#intro">Intro</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting-started.html#basic-usage">Basic usage</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="modelmanager.html#module-urbansim_templates.modelmanager">Core operations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="modelmanager.html#internal-functionality">Internal functionality</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="model-steps.html">Template APIs</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#ols-regression">OLS Regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#binary-logit">Binary Logit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#small-multinomial-logit">Small Multinomial Logit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#large-multinomial-logit">Large Multinomial Logit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#segmented-large-multinomial-logit">Segmented Large Multinomial Logit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="model-steps.html#template-step-parent-class">Template Step parent class</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="utilities.html#module-urbansim_templates.utils">Spec validation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="utilities.html#module-urbansim_templates.utils">Template helper functions</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="design-patterns.html">Design patterns</a></li>
-</ul>
-</div>
-</div>
+  <div class="section" id="design-patterns">
+<h1>Design patterns<a class="headerlink" href="#design-patterns" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -199,8 +163,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+        <a href="utilities.html" class="btn btn-neutral" title="Utilities API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

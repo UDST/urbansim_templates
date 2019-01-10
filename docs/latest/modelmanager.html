@@ -157,6 +157,13 @@
             
   <div class="section" id="modelmanager-api">
 <h1>ModelManager API<a class="headerlink" href="#modelmanager-api" title="Permalink to this headline">¶</a></h1>
+<p>ModelManager runs as an extension to the <a class="reference external" href="https://udst.github.io/orca">Orca</a> task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.</p>
+<p>The recommended way to load ModelManager is like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urbansim_templates</span> <span class="k">import</span> <span class="n">modelmanager</span>
+
+<span class="n">modelmanager</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+</pre></div>
+</div>
 <div class="section" id="module-urbansim_templates.modelmanager">
 <span id="core-operations"></span><h2>Core operations<a class="headerlink" href="#module-urbansim_templates.modelmanager" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
