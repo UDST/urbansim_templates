@@ -1,7 +1,7 @@
 Template APIs
 =============
 
-The following templates are included in the core package. 
+The following templates are included in the core package. ModelManager can also work with templates defined elsewhere, as long as they follow the specifications described in the design guidelines.
 
 
 OLS Regression

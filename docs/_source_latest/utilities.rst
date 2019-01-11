@@ -1,6 +1,9 @@
 Utilities API
 =============
 
+The utilities are mainly helper functions for templates. 
+
+
 Spec validation
 ---------------
 

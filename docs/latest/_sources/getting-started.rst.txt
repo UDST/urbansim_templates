@@ -156,7 +156,7 @@ Now we can register the model step:
 
     modelmanager.register(m)
 
-ModelManager parses the step, saves a copy to disk, and registers a runnable version of it with Orca, so that it can be invoked as part of a sequence of other steps:
+ModelManager parses the step, saves a copy to disk, and registers a runnable version of it as a standard Orca step, so that it can be invoked as part of a sequence of other steps:
 
 .. code-block:: python
 

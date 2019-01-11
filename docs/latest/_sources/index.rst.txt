@@ -23,4 +23,4 @@ Contents
    modelmanager
    model-steps
    utilities
-   design-patterns
+   development

@@ -104,7 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model-steps.html">Template APIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities API</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design-patterns.html">Design patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development guide</a></li>
 </ul>
 
             
@@ -284,7 +284,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">modelmanager</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>ModelManager parses the step, saves a copy to disk, and registers a runnable version of it with Orca, so that it can be invoked as part of a sequence of other steps:</p>
+<p>ModelManager parses the step, saves a copy to disk, and registers a runnable version of it as a standard Orca step, so that it can be invoked as part of a sequence of other steps:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">orca</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;price-prediction&#39;</span><span class="p">,</span> <span class="s1">&#39;household-moves&#39;</span><span class="p">,</span> <span class="s1">&#39;residential-development&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
