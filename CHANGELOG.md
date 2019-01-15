@@ -1,5 +1,11 @@
 # UrbanSim Templates change log
 
+### 0.1.dev25 (2019-01-15)
+
+- fixes an OLS simulation bug that raised an error when output column didn't exist yet
+
+- implements `out_transform` for OLS simulation
+
 ### 0.1.dev24 (2018-12-20)
 
 - fixes a string comparison bug that caused problems with binary logit output in Windows
