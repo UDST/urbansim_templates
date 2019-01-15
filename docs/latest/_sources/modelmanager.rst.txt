@@ -1,7 +1,7 @@
 ModelManager API
 ================
 
-ModelManager runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.
+ModelManager runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. 
 
 The recommended way to load ModelManager is like this::
 
