@@ -9,6 +9,7 @@ from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
 from .. import modelmanager
+from ..utils import update_column
 from .shared import TemplateStep
 
 
@@ -67,8 +68,6 @@ class OLSRegressionStep(TemplateStep):
         in the primary output table, it will be created. If not provided, the left-hand-
         side variable from the model expression will be used. Replaces the `out_fname` 
         argument in UrbanSim.
-        
-        # TO DO - auto-generation not yet working; column must exist in the primary table
     
     out_transform : callable, optional
         Transformation to apply to the predicted values, for example to reverse a 
@@ -187,22 +186,24 @@ class OLSRegressionStep(TemplateStep):
         
     def run(self):
         """
-        Run the model step: calculate predicted values and use them to update a column.
+        Run the model step: calculate predicted values, transform them as specified, and 
+        use them to update a column.
         
-        The predicted values are written to Orca and also saved to the class object for 
-        interactive use (`predicted_values`, with type pd.Series). But they are not saved 
-        in the dictionary representation of the model step.
+        The pre-transformation predicted values are saved to the class object for 
+        diagnostic use (`predicted_values` with type pd.Series). The post-transformation 
+        predicted values are written to Orca.
         
         """
-        # TO DO - figure out what we can infer about requirements for the underlying data
-        # and write an 'orca_test' assertion to confirm compliance.
-
         values = self.model.predict(self._get_data('predict'))
         self.predicted_values = values
+        
+        if self.out_transform is not None:
+            values = self.out_transform(values)
         
         colname = self._get_out_column()
         tabname = self._get_out_table()
 
-        orca.get_table(tabname).update_col_from_series(colname, values, cast=True)
-        
+        update_column(table = tabname,
+                      column = colname,
+                      data = values)        
 

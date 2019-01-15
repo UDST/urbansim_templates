@@ -45,3 +45,22 @@ def test_ols(orca_session):
     m = modelmanager.get_step('ols-test')
     
     modelmanager.remove_step('ols-test')
+
+
+def test_simulation(orca_session):
+    """
+    Test that predicted values are correctly written to Orca.
+    
+    """
+    modelmanager.initialize()
+    
+    m = OLSRegressionStep()
+    m.tables = 'obs'
+    m.model_expression = 'a ~ b'
+    m.fit()
+    
+    m.out_column = 'a_predicted'
+    m.run()
+    
+    assert orca.get_table('obs').to_frame()['a_predicted'].equals(m.predicted_values)
+
