@@ -1,5 +1,9 @@
 # UrbanSim Templates change log
 
+### 0.1 (2019-01-16)
+
+- first production release!
+
 ### 0.1.dev25 (2019-01-15)
 
 - fixes an OLS simulation bug that raised an error when output column didn't exist yet
