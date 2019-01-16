@@ -2,7 +2,7 @@
 
 Documentation is generated using [Sphinx](http://sphinx-doc.org) and hosted with Github Pages at http://udst.github.io/urbansim_templates. 
 
-We have multiple copies of the documentation, for developer releases and production releases. For example, `/docs/_source_latest/` has documentation source files for the most recent developer release, and `/docs/_source_stable/` has source files for the most recent production release. 
+We maintain multiple versions of the documentation, for developer releases and production releases. For example, `/docs/_source_latest/` has documentation source files for the most recent developer release, and `/docs/_source_stable/` has source files for the most recent production release. 
 
 Sphinx reads from the source files, plus the docstrings in the code, and renders html files to `/docs/latest/` and `/docs/stable/`. The Github Pages settings are [online](https://github.com/UDST/urbansim_templates/settings). 
 
