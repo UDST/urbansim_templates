@@ -1,0 +1,479 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.models.shared &mdash; UrbanSim Templates 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model-steps.html">Template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Utilities API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.models.shared</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.models.shared</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt</span>
+
+<span class="kn">import</span> <span class="nn">orca</span>
+<span class="kn">from</span> <span class="nn">urbansim.models</span> <span class="k">import</span> <span class="n">util</span>
+
+<span class="kn">from</span> <span class="nn">..__init__</span> <span class="k">import</span> <span class="n">__version__</span>
+
+
+<div class="viewcode-block" id="TemplateStep"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.TemplateStep">[docs]</a><span class="k">class</span> <span class="nc">TemplateStep</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Shared functionality for the template classes.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tables : str or list of str, optional</span>
+<span class="sd">        Required to fit a model, but doesn&#39;t have to be provided at initialization.</span>
+<span class="sd">    model_expression : str, optional</span>
+<span class="sd">        Required to fit a model, but doesn&#39;t have to be provided at initialization.</span>
+<span class="sd">    filters : str or list of str ?, optional</span>
+<span class="sd">        Replaces `fit_filters` argument.</span>
+<span class="sd">    out_tables : str or list of str, optional</span>
+<span class="sd">    out_column : str, optional</span>
+<span class="sd">        Replaces `out_fname` argument.</span>
+<span class="sd">    out_transform : callable, optional</span>
+<span class="sd">        Replaces `ytransform` argument.</span>
+<span class="sd">    out_filters : str or list of str ?, optional</span>
+<span class="sd">        Replaces `predict_filters` argument.</span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        For ModelManager.</span>
+<span class="sd">    tags : list of str, optional</span>
+<span class="sd">        For ModelManager.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">out_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[]):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">tables</span> <span class="o">=</span> <span class="n">tables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span> <span class="o">=</span> <span class="n">model_expression</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
+        
+        <span class="c1"># TO DO - out_transform might not belong here - is it only used for OLS?</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span> <span class="o">=</span> <span class="n">out_tables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span> <span class="o">=</span> <span class="n">out_column</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_transform</span> <span class="o">=</span> <span class="n">out_transform</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span> <span class="o">=</span> <span class="n">out_filters</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># class name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_version</span> <span class="o">=</span> <span class="n">__version__</span>
+                
+
+<div class="viewcode-block" id="TemplateStep.from_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.TemplateStep.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an object instance from a saved dictionary representation. </span>
+<span class="sd">        </span>
+<span class="sd">        Child classes will need to override this method to implement loading of custom</span>
+<span class="sd">        parameters and estimation results. </span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        TemplateStep</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Pass values from the dictionary to the __init__() method</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_expression&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_tables&#39;</span><span class="p">],</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_column&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_transform&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_filters&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">])</span></div>
+    
+    
+<div class="viewcode-block" id="TemplateStep.to_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.TemplateStep.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dictionary representation of the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Child classes will need to override this method to implement saving of custom</span>
+<span class="sd">        parameters and estimation results.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;template&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
+            <span class="s1">&#39;template_version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_version</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
+            <span class="s1">&#39;tables&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">,</span>
+            <span class="s1">&#39;model_expression&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">,</span>
+            <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span>
+            <span class="s1">&#39;out_tables&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span><span class="p">,</span>
+            <span class="s1">&#39;out_column&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span><span class="p">,</span>
+            <span class="s1">&#39;out_transform&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_transform</span><span class="p">,</span>
+            <span class="s1">&#39;out_filters&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+    
+    
+    <span class="k">def</span> <span class="nf">_normalize_table_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Normalize table parameter input. TO DO - add more type validation</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># Normalize [] to None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        
+            <span class="c1"># Normalize [str] to str</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                
+        <span class="k">return</span> <span class="n">tables</span>
+    
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tables</span>
+        
+    <span class="nd">@tables</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_table_param</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">out_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__out_tables</span>
+        
+    <span class="nd">@out_tables</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">out_tables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">out_tables</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__out_tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_table_param</span><span class="p">(</span><span class="n">out_tables</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s1">&#39;fit&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        DEPRECATED - this should be replaced by the more general utils.get_data()</span>
+<span class="sd">        </span>
+<span class="sd">        Generate a data table for estimation or prediction, relying on functionality from</span>
+<span class="sd">        Orca and UrbanSim.models.util. This should be performed immediately before </span>
+<span class="sd">        estimation or prediction so that it reflects the current data state.</span>
+<span class="sd">        </span>
+<span class="sd">        The output includes only the necessary columns: those mentioned in the model</span>
+<span class="sd">        expression or filters, plus (it appears) the index of each merged table. Relevant </span>
+<span class="sd">        filter queries are applied.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        task : &#39;fit&#39; or &#39;predict&#39;</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        DataFrame</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># TO DO - verify input data</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">expr_cols</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">columns_in_formula</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">)</span>
+        
+        <span class="c1"># This is for PyLogit model expressions</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
+            <span class="c1"># TO DO - check that this works in Python 2.7</span>
+            <span class="n">expr_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> \
+                         <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;intercept&#39;</span><span class="p">]</span>
+            <span class="c1"># TO DO - not very general, maybe we should just override the method</span>
+            <span class="c1"># TO DO - and this only applies to the fit condition</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">expr_cols</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">choice_column</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;fit&#39;</span><span class="p">):</span>
+            <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">expr_cols</span> <span class="o">+</span> <span class="n">util</span><span class="o">.</span><span class="n">columns_in_filters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">)</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span>
+        
+        <span class="k">elif</span> <span class="p">(</span><span class="n">task</span> <span class="o">==</span> <span class="s1">&#39;predict&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span>
+                
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">expr_cols</span> <span class="o">+</span> <span class="n">util</span><span class="o">.</span><span class="n">columns_in_filters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">columns</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out_column</span><span class="p">]</span>
+            
+            <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">merge_tables</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tables</span><span class="o">=</span><span class="n">tables</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+            
+        <span class="n">df</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">apply_filter_query</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_filter_columns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        THIS METHOD DOES NOT WORK YET.   </span>
+<span class="sd">        </span>
+<span class="sd">        Return list of column names referenced in the filters.</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_get_out_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return name of the column to save data to. This is &#39;out_column&#39; if it exsits,</span>
+<span class="sd">        otherwise the left-hand-side column name from the model expression.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_column</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># TO DO - there must be a cleaner way to get LHS column name</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    
+    <span class="k">def</span> <span class="nf">_get_out_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return name of the table to save data to. This is &#39;out_tables&#39; or its first </span>
+<span class="sd">        element, if it exists, otherwise &#39;tables&#39; or its first element.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span>
+            
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">tables</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+    
+    <span class="k">def</span> <span class="nf">_generate_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        THIS METHOD IS DEPRECATED, AND SHOULD BE REPLACED BY UTILS.UPDATE_NAME().</span>
+<span class="sd">        </span>
+<span class="sd">        Generate a name for the class instance, based on its type and the current </span>
+<span class="sd">        timestamp. But if a custom name has already been provided, return that instead. </span>
+<span class="sd">        </span>
+<span class="sd">        (We can&#39;t tell with certainty whether an existing name was auto-generated or</span>
+<span class="sd">        customized, and it doesn&#39;t seem worth keeping track. A name is judged to be custom</span>
+<span class="sd">        if it does not contain the class type.)</span>
+<span class="sd">                </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UrbanSim Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.modelmanager &mdash; UrbanSim Templates 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model-steps.html">Template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utilities.html">Utilities API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.modelmanager</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.modelmanager</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">orca</span>
+<span class="kn">from</span> <span class="nn">urbansim.utils</span> <span class="k">import</span> <span class="n">yamlio</span>
+
+<span class="kn">from</span> <span class="nn">.__init__</span> <span class="k">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">update_name</span><span class="p">,</span> <span class="n">version_greater_or_equal</span>
+
+
+<span class="n">_templates</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># global registry of template classes</span>
+<span class="n">_steps</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># global registry of model steps in memory</span>
+<span class="n">_disk_store</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># path to saved steps on disk</span>
+
+
+<div class="viewcode-block" id="template"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.template">[docs]</a><span class="k">def</span> <span class="nf">template</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a decorator for ModelManager-compliant template classes. Place</span>
+<span class="sd">    `@modelmanager.template` on the line before a class defintion.</span>
+<span class="sd">    </span>
+<span class="sd">    This makes the class available to ModelManager (e.g. for reading saved steps from </span>
+<span class="sd">    disk) whenever it&#39;s imported.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_templates</span><span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+    <span class="k">return</span> <span class="bp">cls</span></div>
+    
+
+<div class="viewcode-block" id="initialize"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.initialize">[docs]</a><span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;configs&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load saved model steps from disk. Each file in the directory will be checked for </span>
+<span class="sd">    compliance with the ModelManager YAML format and then loaded into memory.</span>
+<span class="sd">    </span>
+<span class="sd">    If run multiple times, steps will be cleared from memory and re-loaded.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str</span>
+<span class="sd">        Path to config directory, either absolute or relative to the Python working </span>
+<span class="sd">        directory</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Path not found: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">path</span><span class="p">)))</span>
+        <span class="c1"># TO DO - automatically create directory if run again after warning?</span>
+        <span class="k">return</span>
+        
+    <span class="k">global</span> <span class="n">_steps</span><span class="p">,</span> <span class="n">_disk_store</span>
+    <span class="n">_steps</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># clear memory</span>
+    <span class="n">_disk_store</span> <span class="o">=</span> <span class="n">path</span>  <span class="c1"># save initialization path</span>
+    
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.yaml&#39;</span><span class="p">:</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No yaml files found in path &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">return</span>
+        
+    <span class="n">steps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">yamlio</span><span class="o">.</span><span class="n">yaml_to_dict</span><span class="p">(</span><span class="n">str_or_buffer</span><span class="o">=</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;modelmanager_version&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="c1"># TO DO - check that file name matches object name in the file?</span>
+            <span class="k">if</span> <span class="n">version_greater_or_equal</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;modelmanager_version&#39;</span><span class="p">],</span> <span class="s1">&#39;0.1.dev8&#39;</span><span class="p">):</span>
+                <span class="c1"># This is the version that switched from a single file to multiple files</span>
+                <span class="c1"># with one object stored in each</span>
+                <span class="n">steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>            
+    
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No files from ModelManager 0.1.dev8 or later found in path &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span>\
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+        <span class="c1"># TO DO - check for this key, to be safe</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">build_step</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;saved_object&#39;</span><span class="p">])</span>
+        <span class="n">register</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">save_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="build_step"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.build_step">[docs]</a><span class="k">def</span> <span class="nf">build_step</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build a model step object from a saved dictionary. This includes loading supplemental</span>
+<span class="sd">    objects from disk.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d : dict</span>
+<span class="sd">        Representation of a model step.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;supplemental_objects&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">]):</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">load_supplemental_object</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;content&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">content</span>
+    
+    <span class="k">return</span> <span class="n">_templates</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="load_supplemental_object"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.load_supplemental_object">[docs]</a><span class="k">def</span> <span class="nf">load_supplemental_object</span><span class="p">(</span><span class="n">step_name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">content_type</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a supplemental object from disk.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    step_name : str</span>
+<span class="sd">        Name of the associated model step.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the supplemental object.</span>
+<span class="sd">    content_type : str</span>
+<span class="sd">        Currently supports &#39;pickle&#39;.</span>
+<span class="sd">    required : bool, optional</span>
+<span class="sd">        Whether the supplemental object is required (not yet supported).</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    object</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">content_type</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_disk_store</span><span class="p">,</span> <span class="n">step_name</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.pkl&#39;</span><span class="p">),</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.register">[docs]</a><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">save_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a model step with ModelManager and Orca. This includes saving it to disk,</span>
+<span class="sd">    optionally, so it can be automatically loaded in the future.</span>
+<span class="sd">    </span>
+<span class="sd">    Registering a step will overwrite any previously loaded step with the same name. If a </span>
+<span class="sd">    name has not yet been assigned, one will be generated from the template name and a </span>
+<span class="sd">    timestamp.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    step : object</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">step</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">step</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">update_name</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># TO DO - test this</span>
+    
+    <span class="k">if</span> <span class="n">save_to_disk</span><span class="p">:</span>
+        <span class="n">save_step_to_disk</span><span class="p">(</span><span class="n">step</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Registering model step &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    
+    <span class="n">_steps</span><span class="p">[</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span>
+    
+    <span class="c1"># Create a callable that runs the model step, and register it with orca</span>
+    <span class="k">def</span> <span class="nf">run_step</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">step</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        
+    <span class="n">orca</span><span class="o">.</span><span class="n">add_step</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">run_step</span><span class="p">)</span></div>
+        
+    
+<div class="viewcode-block" id="list_steps"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.list_steps">[docs]</a><span class="k">def</span> <span class="nf">list_steps</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a list of registered steps, with name, template, and tags for each.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of dicts, ordered by name</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">_steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+             <span class="s1">&#39;template&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">_steps</span><span class="p">[</span><span class="n">k</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+             <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="n">_steps</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">tags</span><span class="p">}</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_steps</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span></div>
+    
+
+<div class="viewcode-block" id="save_step_to_disk"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.save_step_to_disk">[docs]</a><span class="k">def</span> <span class="nf">save_step_to_disk</span><span class="p">(</span><span class="n">step</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a model step to disk, over-writing the previous file. The file will be named</span>
+<span class="sd">    &#39;model-name.yaml&#39; and will be saved to the initialization directory. </span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">_disk_store</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Please run &#39;modelmanager.initialize()&#39; before registering new model steps&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Saving &#39;</span><span class="si">{}</span><span class="s2">.yaml&#39;: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> 
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">_disk_store</span><span class="p">)))</span>
+    
+    <span class="n">d</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    
+    <span class="c1"># Save supplemental objects</span>
+    <span class="k">if</span> <span class="s1">&#39;supplemental_objects&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">]):</span>
+            <span class="n">save_supplemental_object</span><span class="p">(</span><span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">item</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># Save main yaml file</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;modelmanager_version&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">}</span>
+
+    <span class="n">content</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">content</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;saved_object&#39;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
+    
+    <span class="n">yamlio</span><span class="o">.</span><span class="n">convert_to_yaml</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_disk_store</span><span class="p">,</span> <span class="n">step</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.yaml&#39;</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="save_supplemental_object"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.save_supplemental_object">[docs]</a><span class="k">def</span> <span class="nf">save_supplemental_object</span><span class="p">(</span><span class="n">step_name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">content_type</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save a supplemental object to disk.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    step_name : str</span>
+<span class="sd">        Name of the associated model step.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the supplemental object.</span>
+<span class="sd">    content : obj</span>
+<span class="sd">        Object to save.</span>
+<span class="sd">    content_type : str</span>
+<span class="sd">        Currently supports &#39;pickle&#39;.</span>
+<span class="sd">    required : bool, optional</span>
+<span class="sd">        Whether the supplemental object is required (not yet supported).</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="n">content</span><span class="o">.</span><span class="n">to_pickle</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_disk_store</span><span class="p">,</span> <span class="n">step_name</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.pkl&#39;</span><span class="p">))</span></div>
+        
+
+<div class="viewcode-block" id="get_step"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.get_step">[docs]</a><span class="k">def</span> <span class="nf">get_step</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the class representation of a registered step, by name.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    RegressionStep or other</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">_steps</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="remove_step"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.remove_step">[docs]</a><span class="k">def</span> <span class="nf">remove_step</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove a model step, by name. It will immediately be removed from ModelManager and </span>
+<span class="sd">    from disk, but will remain registered in Orca until the current Python process </span>
+<span class="sd">    terminates.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removing &#39;</span><span class="si">{}</span><span class="s2">&#39; and &#39;</span><span class="si">{}</span><span class="s2">.yaml&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+    
+    <span class="n">d</span> <span class="o">=</span> <span class="n">_steps</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;supplemental_objects&#39;</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;supplemental_objects&#39;</span><span class="p">]):</span>
+            <span class="n">remove_supplemental_object</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;content_type&#39;</span><span class="p">])</span>
+
+    <span class="k">del</span> <span class="n">_steps</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_disk_store</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39;.yaml&#39;</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="remove_supplemental_object"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.remove_supplemental_object">[docs]</a><span class="k">def</span> <span class="nf">remove_supplemental_object</span><span class="p">(</span><span class="n">step_name</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">content_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove a supplemental object from disk.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    step_name : str</span>
+<span class="sd">        Name of the associated model step.</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the supplemental object.</span>
+<span class="sd">    content_type : str</span>
+<span class="sd">        Currently supports &#39;pickle&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TO DO - check that the file exists first</span>
+    
+    <span class="k">if</span> <span class="n">content_type</span> <span class="o">==</span> <span class="s1">&#39;pickle&#39;</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_disk_store</span><span class="p">,</span> <span class="n">step_name</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.pkl&#39;</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="get_config_dir"><a class="viewcode-back" href="../../modelmanager.html#urbansim_templates.modelmanager.get_config_dir">[docs]</a><span class="k">def</span> <span class="nf">get_config_dir</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return the config directory, for other services that need to interoperate.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_disk_store</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UrbanSim Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

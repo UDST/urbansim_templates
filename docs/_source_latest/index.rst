@@ -3,18 +3,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to UrbanSim Templates's documentation!
-==============================================
+UrbanSim Templates
+==================
+
+UrbanSim Templates provides building blocks for Orca-based simulation models. 
+
+The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.
+
+v0.1, released January 2019
+
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   
+   getting-started
+   modelmanager
+   model-steps
+   utilities
+   development
