@@ -1,4 +1,6 @@
 .cache/*
+build/*
+dist/*
 urbansim_templates.egg-info/*
 **/*.pyc
 **/.doctrees/*
