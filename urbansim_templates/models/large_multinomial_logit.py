@@ -1,9 +1,10 @@
 from __future__ import print_function
 
 import orca
+from urbansim.models.util import columns_in_formula
 
 from .. import modelmanager
-from ..utils import get_data, update_column, version_greater_or_equal
+from ..utils import get_data, update_column, to_list, version_greater_or_equal
 from .shared import TemplateStep
 
 
@@ -371,7 +372,6 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.__out_alternatives = self._normalize_table_param(value)            
         self.send_to_listeners('out_alternatives', value)
 
-    
     @property
     def out_column(self):
         return self.__out_column
@@ -561,7 +561,17 @@ class LargeMultinomialLogitStep(TemplateStep):
         if len(alternatives) == 0:
             print("No valid alternatives")
             return
+                
+        # Remove filter columns before merging, in case column names overlap
+        expr_cols = columns_in_formula(self.model_expression)
         
+        obs_cols = set(observations.columns) & set(expr_cols + to_list(obs_extra_cols))
+        observations = observations[list(obs_cols)]
+        
+        alt_cols = set(alternatives.columns) & set(expr_cols + to_list(alts_extra_cols))
+        alternatives = alternatives[list(alt_cols)]
+        
+        # Callables for iterative choices
         def mct(obs, alts):
             return MergedChoiceTable(
                 obs, alts, sample_size=self.alt_sample_size,
