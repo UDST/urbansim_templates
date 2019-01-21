@@ -259,3 +259,27 @@ def test_diagnostic_attributes(data):
     modelmanager.remove_step(name)
 
 
+def test_simulation_join_key_as_filter(m):
+    """
+    This tests that it's possible to use a join key as a both a data filter for one of 
+    the tables, and as a choice column for the model. 
+    
+    This came up because MergedChoiceTable doesn't allow the observations and 
+    alternatives to have any column names in common -- the rationale is to maintain data 
+    traceability by avoiding any of-the-fly renaming or dropped columns. 
+    
+    In the templates, in order to support things like using 'households.building_id' as a 
+    filter column and 'buildings.building_id' as a choice column, we apply the filters 
+    and then drop columns that are no longer needed before merging the tables. 
+    
+    """
+    obs = orca.get_table('obs')
+    obs['aid'] = obs.get_column('choice')
+    
+    m.out_choosers = 'obs'
+    m.out_chooser_filters = 'aid > 50'
+    m.out_alternatives = 'alts'
+    m.out_column = 'aid'
+    
+    m.run()
+
