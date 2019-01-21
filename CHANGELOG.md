@@ -1,12 +1,16 @@
 # UrbanSim Templates change log
 
+### 0.1.1.dev0 (2019-01-20)
+
+- allows join keys to be used as data filters in MNL simulation
+
 ### 0.1 (2019-01-16)
 
 - first production release!
 
 ### 0.1.dev25 (2019-01-15)
 
-- fixes an OLS simulation bug that raised an error when output column didn't exist yet
+- fixes an OLS simulation bug that raised an error when the output column didn't exist yet
 
 - implements `out_transform` for OLS simulation
 
