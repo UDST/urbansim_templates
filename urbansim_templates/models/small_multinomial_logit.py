@@ -374,7 +374,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         choice_ix_1d = choice_ix + (np.arange(num_obs) * num_alts)
         
         choices = long_df._alt_id.values.take(choice_ix_1d)
-                
+
         # Save results to the class object (via df to include indexes)
         long_df['_probability'] = probs
         self.probabilities = long_df[['_obs_id', '_alt_id', '_probability']]
@@ -382,8 +382,8 @@ class SmallMultinomialLogitStep(TemplateStep):
         self.choices = df._choices
 
         # Save to Orca
-        update_column(table = self.out_choosers,
-                      fallback_table = self.choosers,
-                      column = self.out_column,
-                      fallback_column = self.choice_column,
-                      data = self.choices)
+        update_column(table=self.out_tables,
+                      fallback_table=self.tables,
+                      column=self.out_column,
+                      fallback_column=self.choice_column,
+                      data=self.choices)
