@@ -536,8 +536,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.choices = None
         
         if interaction_terms is not None:
-            obs_extra_cols = [self.chooser_size] + list(interaction_terms.index.names)
-            alts_extra_cols = [self.alt_capacity] + list(interaction_terms.index.names)
+            uniq_intx_idx_names = set([idx for intx in interaction_terms for idx in intx.index.names])
+            obs_extra_cols = to_list(self.chooser_size) + list(uniq_intx_idx_names)
+            alts_extra_cols = to_list(self.alt_capacity) + list(uniq_intx_idx_names)
+
         else:
             obs_extra_cols = self.chooser_size
             alts_extra_cols = self.alt_capacity
@@ -576,7 +578,7 @@ class LargeMultinomialLogitStep(TemplateStep):
             return MergedChoiceTable(
                 obs, alts, sample_size=self.alt_sample_size,
                 interaction_terms=interaction_terms)
-        
+
         def probs(mct):
             return self.model.probabilities(mct)
 
@@ -604,4 +606,4 @@ class LargeMultinomialLogitStep(TemplateStep):
                       column = self.out_column, 
                       fallback_column = self.choice_column,
                       data = choices)
-            
+
