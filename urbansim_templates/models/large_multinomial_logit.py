@@ -606,3 +606,4 @@ class LargeMultinomialLogitStep(TemplateStep):
                       column = self.out_column, 
                       fallback_column = self.choice_column,
                       data = choices)
+
