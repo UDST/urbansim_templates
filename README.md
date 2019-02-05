@@ -1,10 +1,10 @@
 [![Build Status](https://travis-ci.org/UDST/urbansim_templates.svg?branch=master)](https://travis-ci.org/UDST/urbansim_templates)
 [![Coverage Status](https://coveralls.io/repos/github/UDST/urbansim_templates/badge.svg?branch=master)](https://coveralls.io/github/UDST/urbansim_templates?branch=master)
-[![Docs Status](https://readthedocs.org/projects/urbansim_templates/badge/?version=latest)](http://docs.udst.org/projects/urbansim-templates/en/latest)
+[![Docs Status](https://readthedocs.org/projects/urbansim_templates/badge/?version=latest)](https://docs.udst.org/projects/urbansim-templates/en/latest)
 
 # UrbanSim Templates
 
-UrbanSim Templates is a Python library that provides building blocks for Orca-based simulation models. It's part of the [Urban Data Science Toolkit](http://docs.udst.org) (UDST).
+UrbanSim Templates is a Python library that provides building blocks for Orca-based simulation models. It's part of the [Urban Data Science Toolkit](https://docs.udst.org) (UDST).
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the [Orca](https://udst.github.io/orca) task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
@@ -21,7 +21,7 @@ conda install urbansim_templates --channel conda-forge
 
 ### Documentation
 
-See the online documentation for much more: [http://docs.udst.org/projects/urbansim-templates](http://docs.udst.org/projects/urbansim-templates/en/latest)
+See the online documentation for much more: [http://docs.udst.org/projects/urbansim-templates](https://docs.udst.org/projects/urbansim-templates/en/latest)
 
 Some additional documentation is available within the repo in `CHANGELOG.md`, `CONTRIBUTING.md`, `/docs/README.md`, and `/tests/README.md`.
 
