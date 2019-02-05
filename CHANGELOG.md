@@ -1,5 +1,10 @@
 # UrbanSim Templates change log
 
+### 0.1.1.dev1 (2019-01-30)
+
+- adds support for passing multiple tables of interaction terms in large MNL
+- enables on-the-fly creation of output columns in small MNL
+
 ### 0.1.1.dev0 (2019-01-20)
 
 - allows join keys to be used as data filters in MNL simulation
