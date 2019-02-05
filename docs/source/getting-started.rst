@@ -4,7 +4,7 @@ Getting started
 Intro
 -----
 
-UrbanSim Templates is a Python library that provides building blocks for Orca-based simulation models. It's part of the `Urban Data Science Toolkit <https://github.com/udst>`__ (UDST).
+UrbanSim Templates is a Python library that provides building blocks for Orca-based simulation models. It's part of the `Urban Data Science Toolkit <http://docs.udst.org>`__ (UDST).
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
@@ -26,7 +26,7 @@ UrbanSim Templates has been tested with Python versions 2.7, 3.5, and 3.6. Insta
 Production releases
 ~~~~~~~~~~~~~~~~~~~
 
-UrbanSim Templates can be installed using the Pip or Conda package managers (NOT YET - COMING SOON). 
+UrbanSim Templates can be installed using the Pip or Conda package managers. 
 
 .. code-block:: python
 
@@ -34,7 +34,7 @@ UrbanSim Templates can be installed using the Pip or Conda package managers (NOT
 
 .. code-block:: python
 
-    conda install urbansim_templates --channel udst
+    conda install urbansim_templates --channel conda-forge
 
 Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus two other UDST libraries: `Orca <http://udst.github.io/orca>`__ and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
 
@@ -48,7 +48,7 @@ When new production releases of UrbanSim Templates come out, you can upgrade lik
 
 .. code-block:: python
 
-    conda update urbansim_templates --channel udst
+    conda update urbansim_templates --channel conda-forge
 
 
 Developer pre-releases
