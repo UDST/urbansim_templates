@@ -1,5 +1,9 @@
 # UrbanSim Templates change log
 
+### 0.1.1 (2019-02-05)
+
+- production release
+
 ### 0.1.1.dev1 (2019-01-30)
 
 - adds support for passing multiple tables of interaction terms in large MNL
