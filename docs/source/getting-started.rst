@@ -18,7 +18,9 @@ UrbanSim Templates was created in 2018 by Sam Maurer (maurer@urbansim.com), who 
 Installation
 ------------
 
-UrbanSim Templates has been tested with Python versions 2.7, 3.5, and 3.6. Installation in Python 3.7 is currently blocked by Orca's PyTables requirement.
+UrbanSim Templates is tested with Python versions 2.7, 3.5, 3.6, and 3.7. 
+
+As of Feb. 2019, there is an installation problem in Python 3.7 when using Pip (because of an issue with Orca's PyTables dependency). Conda should work.
 
 .. note::
     It can be helpful to set up a dedicated Python environment for each project you work on. This lets you use a stable and replicable set of libraries that won't be affected by other projects. Here are some good `environment settings <https://gist.github.com/smmaurer/f3a4f424a4aa877fb73e1cb2567bd89d>`__ for UrbanSim Templates projects.
@@ -26,7 +28,7 @@ UrbanSim Templates has been tested with Python versions 2.7, 3.5, and 3.6. Insta
 Production releases
 ~~~~~~~~~~~~~~~~~~~
 
-UrbanSim Templates can be installed using the Pip or Conda package managers. 
+UrbanSim Templates can be installed using the Pip or Conda package managers. With Conda, you (currently) need to install UrbanSim separately; Pip will handle this automatically.
 
 .. code-block:: python
 
@@ -35,6 +37,7 @@ UrbanSim Templates can be installed using the Pip or Conda package managers.
 .. code-block:: python
 
     conda install urbansim_templates --channel conda-forge
+    conda install urbansim --channel udst
 
 Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus two other UDST libraries: `Orca <http://udst.github.io/orca>`__ and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
 

@@ -9,7 +9,7 @@ UrbanSim Templates is a Python library that provides building blocks for Orca-ba
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the [Orca](https://udst.github.io/orca) task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
 ### Installation
-UrbanSim Templates can be installed using the Pip or Conda package managers:
+UrbanSim Templates can be installed using the Pip or Conda package managers. With Conda, you (currently) need to install UrbanSim separately; Pip will handle this automatically.
 
 ```
 pip install urbansim_templates
@@ -17,6 +17,7 @@ pip install urbansim_templates
 
 ```
 conda install urbansim_templates --channel conda-forge
+conda install urbansim --channel udst
 ```
 
 ### Documentation
