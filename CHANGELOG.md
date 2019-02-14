@@ -1,5 +1,28 @@
 # UrbanSim Templates change log
 
+### 0.1.1 (2019-02-05)
+
+- production release
+
+### 0.1.1.dev1 (2019-01-30)
+
+- adds support for passing multiple tables of interaction terms in large MNL
+- enables on-the-fly creation of output columns in small MNL
+
+### 0.1.1.dev0 (2019-01-20)
+
+- allows join keys to be used as data filters in MNL simulation
+
+### 0.1 (2019-01-16)
+
+- first production release!
+
+### 0.1.dev25 (2019-01-15)
+
+- fixes an OLS simulation bug that raised an error when the output column didn't exist yet
+
+- implements `out_transform` for OLS simulation
+
 ### 0.1.dev24 (2018-12-20)
 
 - fixes a string comparison bug that caused problems with binary logit output in Windows

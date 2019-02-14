@@ -10,6 +10,7 @@ import pandas as pd
 from choicemodels import MultinomialLogit
 import orca
 
+from ..utils import update_column
 from .. import modelmanager
 from .shared import TemplateStep
 
@@ -373,19 +374,16 @@ class SmallMultinomialLogitStep(TemplateStep):
         choice_ix_1d = choice_ix + (np.arange(num_obs) * num_alts)
         
         choices = long_df._alt_id.values.take(choice_ix_1d)
-                
+
         # Save results to the class object (via df to include indexes)
         long_df['_probability'] = probs
         self.probabilities = long_df[['_obs_id', '_alt_id', '_probability']]
         df['_choices'] = choices
         self.choices = df._choices
-       
+
         # Save to Orca
-        if self.out_column is not None:
-            colname = self.out_column
-        else:
-            colname = self.choice_column
-
-        tabname = self._get_out_table()
-        orca.get_table(tabname).update_col_from_series(colname, df._choices, cast=True)
-
+        update_column(table=self.out_tables,
+                      fallback_table=self.tables,
+                      column=self.out_column,
+                      fallback_column=self.choice_column,
+                      data=self.choices)
