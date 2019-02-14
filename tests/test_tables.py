@@ -7,7 +7,7 @@ import pytest
 import orca
 
 from urbansim_templates import modelmanager
-from urbansim_templates.io import Table
+from urbansim_templates.io import TableFromDisk
 from urbansim_templates.utils import validate_template
 
 
@@ -44,7 +44,7 @@ def test_template_validity():
     Run the template through the standard validation check.
     
     """
-    assert validate_template(Table)
+    assert validate_template(TableFromDisk)
 
 
 def test_property_persistence(orca_session):
@@ -71,7 +71,7 @@ def test_validation_index_unique(orca_session):
     d = {'id': [1,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index('id'))
     
-    t = Table(name='tab')
+    t = TableFromDisk(name='tab')
     t.validate()
     
 
@@ -83,7 +83,7 @@ def test_validation_index_not_unique(orca_session):
     d = {'id': [1,1,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index('id'))
     
-    t = Table(name='tab')
+    t = TableFromDisk(name='tab')
     try:
         t.validate()
     except ValueError:
@@ -100,7 +100,7 @@ def test_validation_multiindex_unique(orca_session):
     d = {'id': [1,1,1], 'sub_id': [1,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
     
-    t = Table(name='tab')
+    t = TableFromDisk(name='tab')
     t.validate()
 
 
@@ -113,7 +113,7 @@ def test_validation_multiindex_not_unique(orca_session):
     d = {'id': [1,1,1], 'sub_id': [2,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
     
-    t = Table(name='tab')
+    t = TableFromDisk(name='tab')
     try:
         t.validate()
     except ValueError:
@@ -130,7 +130,7 @@ def test_validation_unnamed_index(orca_session):
     d = {'id': [1,1,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d))  # generates auto index without a name
     
-    t = Table(name='tab')
+    t = TableFromDisk(name='tab')
     try:
         t.validate()
     except ValueError:
@@ -151,7 +151,7 @@ def test_validation_columns_vs_other_indexes(orca_session):
     d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
     orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
 
-    t = Table(name='households')
+    t = TableFromDisk(name='households')
     t.validate()
 
 
@@ -167,7 +167,7 @@ def test_validation_index_vs_other_columns(orca_session):
     d = {'household_id': [1,2,3], 'building_id': [2,3,5]}
     orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
 
-    t = Table(name='buildings')
+    t = TableFromDisk(name='buildings')
     t.validate()
 
 
@@ -184,7 +184,7 @@ def test_validation_with_multiindexes(orca_session):
     d = {'home_tract': [55,55,55], 'work_tract': [17,18,19], 'dist': [1,1,1]}
     orca.add_table('distances', pd.DataFrame(d).set_index(['home_tract','work_tract']))
 
-    t = Table(name='choice_table')
+    t = TableFromDisk(name='choice_table')
     t.validate()
 
 
@@ -193,8 +193,6 @@ def test_validation_with_multiindexes(orca_session):
 
 # test loading an h5 file works
 # test passing cache settings
-
-# call it TableStep?
 
 
 #################################
@@ -206,7 +204,7 @@ def test_csv(orca_session, data):
     Test that loading data from a CSV works.
     
     """
-    t = Table()
+    t = TableFromDisk()
     t.name = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv'
@@ -228,7 +226,7 @@ def test_without_autorun(orca_session, data):
     Confirm that disabling autorun works.
     
     """
-    t = Table()
+    t = TableFromDisk()
     t.name = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv'

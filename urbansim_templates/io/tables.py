@@ -7,7 +7,7 @@ from urbansim_templates import modelmanager, __version__
 
 
 @modelmanager.template
-class Table():
+class TableFromDisk():
     """
     Class for registering data tables. In the initial implementation, data can come from  
     local CSV or HDF5 files.
@@ -27,7 +27,7 @@ class Table():
     
     Usage
     -----
-    Create an empty class instance: `t = Table()`.
+    Create an empty class instance: `t = TableFromDisk()`.
     
     Give it some properties: `t.name = 'buildings'` etc. (These can also be passed when 
     you create the object.)
