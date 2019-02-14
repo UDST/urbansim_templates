@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import os
+
 import orca
 import pandas as pd
 
@@ -51,9 +53,10 @@ class TableFromDisk():
         object is created.
     
     path : str, optional
-        Local file path, either absolute or relative to the ModelManager config directory.
-        
-        TO DO - CROSS PLATFORM SUPPORT?
+        Local file path to load data from, either absolute or relative to the 
+        ModelManager config directory. Path will be normed at runtime using 
+        `os.path.normpath()`, so either a Unix-style or Windows-style path should work 
+        across platforms.
     
     url : str, optional
         Remote url to download file from, NOT YET IMPLEMENTED.
@@ -62,8 +65,9 @@ class TableFromDisk():
         Required for csv source type.
     
     csv_settings : dict, optional
-        Additional parameters to pass to `pd.read_csv()`. Can include functionality like
-        extracting data from a zip file.
+        Additional arguments to pass to `pd.read_csv()`. For example, you can  
+        automatically extract data from a gzip file using {'compression': 'gzip'}. See 
+        Pandas documentation for additional settings.
     
     hdf_key : str, optional
         Name of table to read from the HDF5 file, if there are multiple.
@@ -78,13 +82,15 @@ class TableFromDisk():
         IMPLEMENTED.
     
     cache : bool, optional
-        Passed to `orca.add_table()`.
+        Passed to `orca.table()`. Note that the default is `True`, unlike in the 
+        underlying general-purpose Orca function, because tables read from disk should 
+        not need to be regenerated during the course of a model run.
     
     cache_scope : 'step', 'iteration', or 'forever', optional
-        Passed to `orca.add_table()`.
+        Passed to `orca.table()`. Default is 'forever', as in Orca.
     
     copy_col : bool, optional
-        Passed to `orca.add_table()`.
+        Passed to `orca.table()`. Default is `True`, as in Orca. 
         
     name : str, optional
         Name of the table, for Orca. This will also be used as the name of the model step 
@@ -107,9 +113,9 @@ class TableFromDisk():
             path = None, 
             csv_index_cols = None,
             csv_settings = None, 
-            cache = None, 
-            cache_scope = None, 
-            copy_col = None, 
+            cache = True, 
+            cache_scope = 'forever', 
+            copy_col = True, 
             name = None,
             tags = [], 
             autorun = True):
@@ -197,7 +203,14 @@ class TableFromDisk():
         None
         
         """
-        # TO DO - address cache scope issue
+        if self.source_type is None:
+            raise ValueError("Please provide a source type")
+        
+        if self.name is None:
+            raise ValueError("Please provide a table name")
+        
+        if self.path is None:
+            raise ValueError("Please provide a file path")
         
         if self.source_type == 'csv':
             @orca.table(table_name = self.name, 
@@ -205,7 +218,9 @@ class TableFromDisk():
                         cache_scope = self.cache_scope, 
                         copy_col=self.copy_col)
             def orca_table():
-                df = pd.read_csv(self.path).set_index(self.csv_index_cols)
+                path = os.path.normpath(self.path)
+                kwargs = self.csv_settings
+                df = pd.read_csv(path, **kwargs).set_index(self.csv_index_cols)
                 return df
             
         

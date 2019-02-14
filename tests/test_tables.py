@@ -24,7 +24,7 @@ def orca_session():
 @pytest.fixture
 def data(request):
     """
-    Create data files on disk.
+    Create some data files on disk.
     
     """
     d1 = {'building_id': np.arange(10),
@@ -32,9 +32,11 @@ def data(request):
     
     bldg = pd.DataFrame(d1).set_index('building_id')
     bldg.to_csv('data/buildings.csv')
+    bldg.to_csv('data/buildings.csv.gz', compression='gzip')
     
     def teardown():
         os.remove('data/buildings.csv')
+        os.remove('data/buildings.csv.gz')
     
     request.addfinalizer(teardown)
 
@@ -208,6 +210,51 @@ def test_csv(orca_session, data):
     t.name = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv'
+    t.csv_index_cols = 'building_id'
+    
+    assert 'buildings' not in orca.list_tables()
+    
+    modelmanager.register(t)
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.initialize()
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.remove_step('buildings')
+
+
+def test_csv_extra_settings(orca_session, data):
+    """
+    Test loading data with extra CSV settings, e.g. for compressed files.
+    
+    """
+    t = TableFromDisk()
+    t.name = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data/buildings.csv.gz'
+    t.csv_index_cols = 'building_id'
+    t.csv_settings = {'compression': 'gzip'}
+    
+    assert 'buildings' not in orca.list_tables()
+    
+    modelmanager.register(t)
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.initialize()
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.remove_step('buildings')
+
+
+def test_csv_windows_path(orca_session, data):
+    """
+    Test loading a file with Windows-formatted path.
+    
+    """
+    t = TableFromDisk()
+    t.name = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data\buildings.csv'
     t.csv_index_cols = 'building_id'
     
     assert 'buildings' not in orca.list_tables()
