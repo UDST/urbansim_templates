@@ -58,28 +58,23 @@ class TableFromDisk():
         `os.path.normpath()`, so either a Unix-style or Windows-style path should work 
         across platforms.
     
-    url : str, optional
-        Remote url to download file from, NOT YET IMPLEMENTED.
+    url : str, optional - NOT YET IMPLEMENTED
+        Remote url to download file from.
     
     csv_index_cols : str or list of str, optional
         Required for csv source type.
     
-    csv_settings : dict, optional
-        Additional arguments to pass to `pd.read_csv()`. For example, you can  
-        automatically extract data from a gzip file using {'compression': 'gzip'}. See 
-        Pandas documentation for additional settings.
+    extra_settings : dict, optional
+        Additional arguments to pass to `pd.read_csv()` or `pd.read_hdf()`. For example, 
+        you could automatically extract csv data from a gzip file using {'compression': 
+        'gzip'}, or specify the table identifier within a multi-object hdf store using 
+        {'key': 'table-name'}. See Pandas documentation for additional settings.
     
-    hdf_key : str, optional
-        Name of table to read from the HDF5 file, if there are multiple.
-    
-    filters : str or list of str, optional
+    filters : str or list of str, optional - NOT YET IMPLEMENTED
         Filters to apply before registering the table with Orca.
-        
-        TO DO - IMPLEMENT
     
-    orca_test_spec : dict, optional
-        Data characteristics to be tested when the table is validated, NOT YET 
-        IMPLEMENTED.
+    orca_test_spec : dict, optional - NOT YET IMPLEMENTED
+        Data characteristics to be tested when the table is validated.
     
     cache : bool, optional
         Passed to `orca.table()`. Note that the default is `True`, unlike in the 
@@ -112,7 +107,7 @@ class TableFromDisk():
             source_type = None, 
             path = None, 
             csv_index_cols = None,
-            csv_settings = None, 
+            extra_settings = None, 
             cache = True, 
             cache_scope = 'forever', 
             copy_col = True, 
@@ -124,7 +119,7 @@ class TableFromDisk():
         self.source_type = source_type
         self.path = path
         self.csv_index_cols = csv_index_cols
-        self.csv_settings = csv_settings
+        self.extra_settings = extra_settings
         self.cache = cache
         self.cache_scope = cache_scope
         self.copy_col = copy_col
@@ -157,7 +152,7 @@ class TableFromDisk():
             source_type = d['source_type'],
             path = d['path'],
             csv_index_cols = d['csv_index_cols'],
-            csv_settings = d['csv_settings'],
+            extra_settings = d['extra_settings'],
             cache = d['cache'],
             cache_scope = d['cache_scope'],
             copy_col = d['copy_col'],
@@ -186,7 +181,7 @@ class TableFromDisk():
             'source_type': self.source_type,
             'path': self.path,
             'csv_index_cols': self.csv_index_cols,
-            'csv_settings': self.csv_settings,
+            'extra_settings': self.extra_settings,
             'cache': self.cache,
             'cache_scope': self.cache_scope,
             'copy_col': self.copy_col
@@ -198,13 +193,16 @@ class TableFromDisk():
         """
         Register a data table with Orca.
         
+        Requires values to be set for 'source_type', 'name', and 'path'. CSV data also 
+        requires 'csv_index_cols'. 
+        
         Returns
         -------
         None
         
         """
-        if self.source_type is None:
-            raise ValueError("Please provide a source type")
+        if self.source_type not in ['csv', 'hdf']:
+            raise ValueError("Please provide a source type of 'csv' or 'hdf'")
         
         if self.name is None:
             raise ValueError("Please provide a table name")
@@ -212,15 +210,30 @@ class TableFromDisk():
         if self.path is None:
             raise ValueError("Please provide a file path")
         
+        path = os.path.normpath(self.path)
+        kwargs = self.extra_settings
+        
+        # Table from CSV file
         if self.source_type == 'csv':
+            if self.csv_index_cols is None:
+                raise ValueError("Please provide index column name(s) for the csv")
+        
             @orca.table(table_name = self.name, 
                         cache = self.cache, 
                         cache_scope = self.cache_scope, 
-                        copy_col=self.copy_col)
+                        copy_col = self.copy_col)
             def orca_table():
-                path = os.path.normpath(self.path)
-                kwargs = self.csv_settings
                 df = pd.read_csv(path, **kwargs).set_index(self.csv_index_cols)
+                return df
+            
+        # Table from HDF file
+        elif self.source_type == 'hdf':
+            @orca.table(table_name = self.name, 
+                        cache = self.cache, 
+                        cache_scope = self.cache_scope, 
+                        copy_col = self.copy_col)
+            def orca_table():
+                df = pd.read_hdf(path, **kwargs)
                 return df
             
         
