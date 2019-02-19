@@ -1,6 +1,9 @@
 from __future__ import print_function
 
-import os
+try:
+    import pathlib  # Python 3.4+
+except:
+    import os
 
 import orca
 import pandas as pd
@@ -54,9 +57,11 @@ class TableFromDisk():
     
     path : str, optional
         Local file path to load data from, either absolute or relative to the 
-        ModelManager config directory. Path will be normed at runtime using 
-        `os.path.normpath()`, so either a Unix-style or Windows-style path should work 
-        across platforms.
+        ModelManager config directory. The string you provide will immediately be 
+        normalized to a platform-agnostic format, using `os.path.normpath()` in Python 2 
+        or `pathlib.Path()` in Python 3. It is always safe to provide a Unix-style path, 
+        and you may provide a Windows-style path if you are creating the model step in 
+        Windows. Saved steps will run on any platform. 
     
     url : str, optional - NOT YET IMPLEMENTED
         Remote url to download file from.
@@ -76,15 +81,15 @@ class TableFromDisk():
     orca_test_spec : dict, optional - NOT YET IMPLEMENTED
         Data characteristics to be tested when the table is validated.
     
-    cache : bool, optional
+    cache : bool, default True
         Passed to `orca.table()`. Note that the default is `True`, unlike in the 
         underlying general-purpose Orca function, because tables read from disk should 
         not need to be regenerated during the course of a model run.
     
-    cache_scope : 'step', 'iteration', or 'forever', optional
+    cache_scope : 'step', 'iteration', or 'forever', default 'forever'
         Passed to `orca.table()`. Default is 'forever', as in Orca.
     
-    copy_col : bool, optional
+    copy_col : bool, default True
         Passed to `orca.table()`. Default is `True`, as in Orca. 
         
     name : str, optional
@@ -94,7 +99,7 @@ class TableFromDisk():
     tags : list of str, optional
         Tags, passed to ModelManager.
     
-    autorun : bool, optional (default True)
+    autorun : bool, default True
         Automatically run the step whenever it's registered with ModelManager.
     
     Properties and attributes
@@ -107,7 +112,7 @@ class TableFromDisk():
             source_type = None, 
             path = None, 
             csv_index_cols = None,
-            extra_settings = None, 
+            extra_settings = {}, 
             cache = True, 
             cache_scope = 'forever', 
             copy_col = True, 
@@ -189,6 +194,20 @@ class TableFromDisk():
         return d
     
     
+    @property
+    def path(self):
+        return self.__path
+    @path.setter
+    def path(self, value):
+        if value is not None:
+            try:
+                value = str(pathlib.Path(value))  # Python 3.4+
+            except:
+                value = os.path.normpath(value)
+        self.__path = value
+        print(value)
+            
+
     def run(self):
         """
         Register a data table with Orca.
@@ -210,7 +229,6 @@ class TableFromDisk():
         if self.path is None:
             raise ValueError("Please provide a file path")
         
-        path = os.path.normpath(self.path)
         kwargs = self.extra_settings
         
         # Table from CSV file
@@ -223,7 +241,7 @@ class TableFromDisk():
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
             def orca_table():
-                df = pd.read_csv(path, **kwargs).set_index(self.csv_index_cols)
+                df = pd.read_csv(self.path, **kwargs).set_index(self.csv_index_cols)
                 return df
             
         # Table from HDF file
@@ -233,7 +251,7 @@ class TableFromDisk():
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
             def orca_table():
-                df = pd.read_hdf(path, **kwargs)
+                df = pd.read_hdf(self.path, **kwargs)
                 return df
             
         

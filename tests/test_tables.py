@@ -218,6 +218,7 @@ def test_csv(orca_session, data):
     
     modelmanager.register(t)
     assert 'buildings' in orca.list_tables()
+    _ = orca.get_table('buildings').to_frame()
     
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
@@ -239,6 +240,7 @@ def test_hdf(orca_session, data):
     
     modelmanager.register(t)
     assert 'buildings' in orca.list_tables()
+    _ = orca.get_table('buildings').to_frame()
     
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
@@ -262,6 +264,7 @@ def test_extra_settings(orca_session, data):
     
     modelmanager.register(t)
     assert 'buildings' in orca.list_tables()
+    _ = orca.get_table('buildings').to_frame()
     
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
@@ -269,26 +272,14 @@ def test_extra_settings(orca_session, data):
     modelmanager.remove_step('buildings')
 
 
-def test_windows_path(orca_session, data):
+def test_windows_paths(orca_session, data):
     """
-    Test loading a file with Windows-formatted path.
+    Test in Windows that a Windows-style path is properly normalized.
+    
+    TO DO - implement
     
     """
-    t = TableFromDisk()
-    t.name = 'buildings'
-    t.source_type = 'csv'
-    t.path = 'data\buildings.csv'
-    t.csv_index_cols = 'building_id'
-    
-    assert 'buildings' not in orca.list_tables()
-    
-    modelmanager.register(t)
-    assert 'buildings' in orca.list_tables()
-    
-    modelmanager.initialize()
-    assert 'buildings' in orca.list_tables()
-    
-    modelmanager.remove_step('buildings')
+    pass
 
 
 def test_without_autorun(orca_session, data):
