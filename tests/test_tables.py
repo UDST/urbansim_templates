@@ -33,10 +33,12 @@ def data(request):
     bldg = pd.DataFrame(d1).set_index('building_id')
     bldg.to_csv('data/buildings.csv')
     bldg.to_csv('data/buildings.csv.gz', compression='gzip')
+    bldg.to_hdf('data/buildings.hdf', key='buildings')
     
     def teardown():
         os.remove('data/buildings.csv')
         os.remove('data/buildings.csv.gz')
+        os.remove('data/buildings.hdf')
     
     request.addfinalizer(teardown)
 
@@ -203,7 +205,7 @@ def test_validation_with_multiindexes(orca_session):
 
 def test_csv(orca_session, data):
     """
-    Test that loading data from a CSV works.
+    Test loading data from a CSV file.
     
     """
     t = TableFromDisk()
@@ -223,17 +225,15 @@ def test_csv(orca_session, data):
     modelmanager.remove_step('buildings')
 
 
-def test_csv_extra_settings(orca_session, data):
+def test_hdf(orca_session, data):
     """
-    Test loading data with extra CSV settings, e.g. for compressed files.
+    Test loading data from an HDF file.
     
     """
     t = TableFromDisk()
     t.name = 'buildings'
-    t.source_type = 'csv'
-    t.path = 'data/buildings.csv.gz'
-    t.csv_index_cols = 'building_id'
-    t.csv_settings = {'compression': 'gzip'}
+    t.source_type = 'hdf'
+    t.path = 'data/buildings.hdf'
     
     assert 'buildings' not in orca.list_tables()
     
@@ -246,7 +246,30 @@ def test_csv_extra_settings(orca_session, data):
     modelmanager.remove_step('buildings')
 
 
-def test_csv_windows_path(orca_session, data):
+def test_extra_settings(orca_session, data):
+    """
+    Test loading data with extra settings, e.g. for compressed files.
+    
+    """
+    t = TableFromDisk()
+    t.name = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data/buildings.csv.gz'
+    t.csv_index_cols = 'building_id'
+    t.extra_settings = {'compression': 'gzip'}
+    
+    assert 'buildings' not in orca.list_tables()
+    
+    modelmanager.register(t)
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.initialize()
+    assert 'buildings' in orca.list_tables()
+    
+    modelmanager.remove_step('buildings')
+
+
+def test_windows_path(orca_session, data):
     """
     Test loading a file with Windows-formatted path.
     
