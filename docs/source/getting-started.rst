@@ -105,7 +105,7 @@ The default file location is a ``configs`` folder located in the current working
         In [2]: import urbansim_templates
                 print(urbansim_templates.__version__)
         
-        Out[2]: '0.1.dev12'
+        Out[2]: '0.2.dev0'
 
 
 Creating a model step
