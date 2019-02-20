@@ -1,5 +1,5 @@
-Template APIs
-=============
+Model step template APIs
+========================
 
 The following templates are included in the core package. ModelManager can also work with templates defined elsewhere, as long as they follow the specifications described in the design guidelines.
 
@@ -30,7 +30,6 @@ Large Multinomial Logit
 
 .. autoclass:: urbansim_templates.models.LargeMultinomialLogitStep
    :members:
-
 
 
 Segmented Large Multinomial Logit
