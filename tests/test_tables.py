@@ -7,7 +7,7 @@ import pytest
 import orca
 
 from urbansim_templates import modelmanager
-from urbansim_templates.io import TableFromDisk
+from urbansim_templates.data import TableFromDisk
 from urbansim_templates.utils import validate_template
 
 
