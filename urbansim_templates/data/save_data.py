@@ -15,9 +15,15 @@ class SaveData():
     
     Parameters
     ----------
+    table : str, optional
+        Name of the Orca table. Must be provided before running the step.
+    
+    columns : str or list of str, optional
+        Names of columns to include, in addition to indexes. "None" will return all 
+        columns. 
+    
     output_type : 'csv' or 'hdf', optional
-        This is required to save the table, but does not have to be provided when the 
-        object is created.
+        Type of file to be created. Must be provided before running the step. 
     
     path : str, optional
         Local file path to save the data to, either absolute or relative to the 
@@ -34,13 +40,15 @@ class SaveData():
         documentation for additional settings.
             
     name : str, optional
-        Name of the Orca table. HOW TO NAME THE MODEL STEP?
+        Name of the model step.
     
     tags : list of str, optional
         Tags, passed to ModelManager.
     
     """
     def __init__(self, 
+            table = None,
+            columns = None,
             output_type = None, 
             path = None, 
             extra_settings = {}, 
@@ -48,6 +56,8 @@ class SaveData():
             tags = []):
         
         # Template-specific params
+        self.table = table
+        self.columns = columns
         self.output_type = output_type
         self.path = path
         self.extra_settings = extra_settings
@@ -76,11 +86,13 @@ class SaveData():
         
         """
         obj = cls(
-            output_type = d['output_type'],
-            path = d['path'],
-            extra_settings = d['extra_settings'],
-            name = d['name'],
-            tags = d['tags'],
+            table = d['table'], 
+            columns = d['columns'], 
+            output_type = d['output_type'], 
+            path = d['path'], 
+            extra_settings = d['extra_settings'], 
+            name = d['name'], 
+            tags = d['tags'], 
         )
         return obj
     
@@ -99,6 +111,8 @@ class SaveData():
             'template_version': self.template_version,
             'name': self.name,
             'tags': self.tags,
+            'table': self.table,
+            'columns': self.columns,
             'output_type': self.output_type,
             'path': self.path,
             'extra_settings': self.extra_settings,
@@ -108,10 +122,11 @@ class SaveData():
     
     def run(self):
         """
+        Save a table to disk.
         
-        ``pd.to_hdf()`` requires a ``key`` to identify the table in the HDF store. We'll 
-        use the Orca table name for this, unless you provide a different ``key`` in the
-        ``extra_settings``.
+        Adding a table to an HDF store requires providing a ``key`` that will be used to 
+        identify the table in the store. We'll use the Orca table name, unless you 
+        provide a different ``key`` in the ``extra_settings``.
 
         Returns
         -------
@@ -121,21 +136,21 @@ class SaveData():
         if self.output_type not in ['csv', 'hdf']:
             raise ValueError("Please provide an output type of 'csv' or 'hdf'")
         
-        if self.name is None:
+        if self.table is None:
             raise ValueError("Please provide the table name")
         
         if self.path is None:
             raise ValueError("Please provide a file path")
         
         kwargs = self.extra_settings
-        df = orca.get_table(self.name).to_frame()
+        df = orca.get_table(self.table).to_frame(self.columns)
         
         if self.output_type == 'csv':
             df.to_csv(self.path, **kwargs)
         
         elif self.output_type == 'hdf':
             if 'key' not in kwargs:
-                kwargs['key'] = self.name
+                kwargs['key'] = self.table
             
             df.to_hdf(self.path, **kwargs)
         

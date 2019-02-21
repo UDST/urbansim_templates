@@ -57,14 +57,14 @@ def test_csv(orca_session, data):
     
     """
     t = SaveData()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.output_type = 'csv'
     t.path = 'data/buildings.csv'
     
     t.run()
     
     df = pd.read_csv(t.path).set_index('building_id')
-    assert(df.equals(orca.get_table(t.name).to_frame()))
+    assert(df.equals(orca.get_table(t.table).to_frame()))
     
     os.remove(t.path)
 
@@ -75,14 +75,14 @@ def test_hdf(orca_session, data):
     
     """
     t = SaveData()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.output_type = 'hdf'
     t.path = 'data/buildings.h5'
     
     t.run()
     
     df = pd.read_hdf(t.path)
-    assert(df.equals(orca.get_table(t.name).to_frame()))
+    assert(df.equals(orca.get_table(t.table).to_frame()))
         
     os.remove(t.path)
 
