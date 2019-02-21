@@ -4,6 +4,7 @@ import orca
 import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
+from urbansim_templates.utils import get_data
 
 
 @modelmanager.template
@@ -21,6 +22,10 @@ class SaveData():
     columns : str or list of str, optional
         Names of columns to include, in addition to indexes. "None" will return all 
         columns. 
+    
+    filters : str or list of str, optional
+        Filters to apply to the data before saving. Will be passed to 
+        ``pd.DataFrame.query()``.
     
     output_type : 'csv' or 'hdf', optional
         Type of file to be created. Must be provided before running the step. 
@@ -49,15 +54,17 @@ class SaveData():
     def __init__(self, 
             table = None,
             columns = None,
+            filters = None,
             output_type = None, 
             path = None, 
-            extra_settings = {}, 
+            extra_settings = None, 
             name = None,
             tags = []):
         
         # Template-specific params
         self.table = table
         self.columns = columns
+        self.filters = filters
         self.output_type = output_type
         self.path = path
         self.extra_settings = extra_settings
@@ -88,6 +95,7 @@ class SaveData():
         obj = cls(
             table = d['table'], 
             columns = d['columns'], 
+            filters = d['filters'], 
             output_type = d['output_type'], 
             path = d['path'], 
             extra_settings = d['extra_settings'], 
@@ -113,6 +121,7 @@ class SaveData():
             'tags': self.tags,
             'table': self.table,
             'columns': self.columns,
+            'filters': self.filters,
             'output_type': self.output_type,
             'path': self.path,
             'extra_settings': self.extra_settings,
@@ -124,7 +133,7 @@ class SaveData():
         """
         Save a table to disk.
         
-        Adding a table to an HDF store requires providing a ``key`` that will be used to 
+        Saving a table to an HDF store requires providing a ``key`` that will be used to 
         identify the table in the store. We'll use the Orca table name, unless you 
         provide a different ``key`` in the ``extra_settings``.
 
@@ -143,7 +152,12 @@ class SaveData():
             raise ValueError("Please provide a file path")
         
         kwargs = self.extra_settings
-        df = orca.get_table(self.table).to_frame(self.columns)
+        if kwargs is None:
+            kwargs = dict()
+
+        df = get_data(tables = self.table, 
+                      filters = self.filters, 
+                      extra_columns = self.columns)
         
         if self.output_type == 'csv':
             df.to_csv(self.path, **kwargs)

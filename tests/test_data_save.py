@@ -87,3 +87,32 @@ def test_hdf(orca_session, data):
     os.remove(t.path)
 
     
+def test_columns(orca_session, data):
+    """
+    """
+    pass
+
+
+def test_filters(orca_session, data):
+    """
+    """
+    t = SaveData()
+    t.table = 'buildings'
+    t.filters = 'price < 200000'
+    t.output_type = 'csv'
+    t.path = 'data/buildings.csv'
+    
+    t.run()
+    
+    df = pd.read_csv(t.path).set_index('building_id')
+    assert(len(df) < 10)
+    
+    os.remove(t.path)
+
+
+def test_extra_settings(orca_session, data):
+    """
+    """
+    pass
+
+
