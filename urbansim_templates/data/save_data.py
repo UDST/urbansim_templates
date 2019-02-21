@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import datetime
+
 import orca
 import pandas as pd
 
@@ -35,7 +37,7 @@ class SaveData():
         ModelManager config directory. Please provide a Unix-style path (this will work 
         on any platform, but a Windows-style path won't, and they're hard to normalize 
         automatically). For dynamic file names, you can include the characters ``%RUN%``,
-        ``%ITER%``, or ``%TS%``. These will be replaced by the model run number, the 
+        ``%ITER%``, or ``%TS%``. These will be replaced by the run id, the model 
         iteration value, or a timestamp when the output file is created.
     
     extra_settings : dict, optional
@@ -127,6 +129,41 @@ class SaveData():
             'extra_settings': self.extra_settings,
         }
         return d
+    
+    
+    def get_dynamic_filepath(self):
+        """
+        Substitute run id, model iteration, and/or timestamp into the filename. 
+        
+        For the run id and model iteration, we look for Orca injectables named ``run_id`` 
+        and ``iter_var``, respectively. If none is found, we use ``0``.
+        
+        The timestamp is UTC, formatted as ``YYYYMMDD-HHMMSS``.
+        
+        Returns
+        -------
+        str
+        
+        """
+        if self.path is None:
+            raise ValueError("Please provide a file path")
+
+        run = 0
+        if orca.is_injectable('run_id'):
+            run = orca.get_injectable('run_id')
+        
+        iter = 0
+        if orca.is_injectable('iter_var'):
+            iter = orca.get_injectable('iter_var')
+        
+        ts = datetime.datetime.utcnow().strftime('%Y%m%d-%H%M%S')
+        
+        s = self.path
+        s = s.replace('%RUN%', str(run))
+        s = s.replace('%ITER%', str(iter))
+        s = s.replace('%TS%', ts)
+        
+        return s
     
     
     def run(self):

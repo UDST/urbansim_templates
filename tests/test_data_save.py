@@ -95,6 +95,8 @@ def test_columns(orca_session, data):
 
 def test_filters(orca_session, data):
     """
+    Test applying data filters before table is saved.
+    
     """
     t = SaveData()
     t.table = 'buildings'
@@ -114,5 +116,25 @@ def test_extra_settings(orca_session, data):
     """
     """
     pass
+
+
+def test_dynamic_paths(orca_session):
+    """
+    Test inserting run id, model iteration, or timestamp into path.
+    
+    """
+    t = SaveData()
+    t.path = '%RUN%-%ITER%'
+    
+    assert(t.get_dynamic_filepath() == '0-0')
+    
+    orca.add_injectable('run_id', 5)
+    orca.add_injectable('iter_var', 3)
+    
+    assert(t.get_dynamic_filepath() == '5-3')
+    
+    t.path = '%TS%'
+    s = t.get_dynamic_filepath()
+    assert(len(s) == 15)
 
 
