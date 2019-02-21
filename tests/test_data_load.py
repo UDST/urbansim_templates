@@ -45,7 +45,7 @@ def data(request):
 
 def test_template_validity():
     """
-    Run the template through the standard validation check.
+    Run the templates through the standard validation check.
     
     """
     assert validate_template(TableFromDisk)
@@ -192,10 +192,7 @@ def test_validation_with_multiindexes(orca_session):
     t.validate()
 
 
-# test that parameters make it through a save
 # test validation with stand-alone columns
-
-# test loading an h5 file works
 # test passing cache settings
 
 
