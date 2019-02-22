@@ -195,14 +195,14 @@ class SaveData():
         df = get_data(tables = self.table, 
                       filters = self.filters, 
                       extra_columns = self.columns)
-        
+                
         if self.output_type == 'csv':
-            df.to_csv(self.path, **kwargs)
+            df.to_csv(self.get_dynamic_filepath(), **kwargs)
         
         elif self.output_type == 'hdf':
             if 'key' not in kwargs:
                 kwargs['key'] = self.table
             
-            df.to_hdf(self.path, **kwargs)
+            df.to_hdf(self.get_dynamic_filepath(), **kwargs)
         
         
