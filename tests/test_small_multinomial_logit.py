@@ -28,13 +28,6 @@ def orca_session():
     orca.broadcast(cast='buildings', onto='households', 
                    cast_index=True, onto_on='building_id')
 
-#     d1 = {'a': np.random.random(100),
-#           'b': np.random.random(100),
-#           'choice': np.random.randint(3, size=100)}
-# 
-#     obs = pd.DataFrame(d1)
-#     orca.add_table('obs', obs)    
-
 
 def test_template_validity():
     """
@@ -70,7 +63,6 @@ def test_small_mnl(orca_session):
     
     # TEST SIMULATION
     m.out_column = 'simulated_choice'
-    # orca.get_table('households')['simulated_choice'] = 0
     
     m.run()
     print(orca.get_table('households').to_frame())

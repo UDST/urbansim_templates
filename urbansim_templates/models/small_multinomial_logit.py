@@ -310,7 +310,14 @@ class SmallMultinomialLogitStep(TemplateStep):
         with Orca or ModelManager until the `register()` method is run. 
         
         """
-        long_df = self._to_long(self._get_data())
+        expr_cols = [t[0] for t in list(self.model_expression.items()) \
+                     if t[0] != 'intercept']
+        
+        df = get_data(tables = self.tables,
+                      filters = self.filters,
+                      extra_columns = expr_cols + [self.choice_column])
+
+        long_df = self._to_long(df)
         
         # Set initial coefs to 0 if none provided
         pc = self._get_param_count()
