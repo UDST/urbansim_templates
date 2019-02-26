@@ -64,9 +64,26 @@ You can contact Sam Maurer, the lead developer, at `maurer@urbansim.com`.
 - Tag the release on Github
 
 
+## Patching an earlier release:
+
+- We're not maintaining separate code branches for dev/ production/ major releases, but you can easily recreate them from tags if you need to patch an earlier release
+
+- In Github, create a new branch from the tag for the version you'd like to patch, calling it something like `v1-production`
+
+- Create a second branch from that one, called something like `v1-patch`
+
+- Make your changes in the `v1-patch` branch, and open a PR to `v1-production` to finalize it
+
+- After merging, tag the release on Github and follow the normal distribution procedures
+
+- After the new release is tagged, you can delete the extra branches -- a branch is just a tag pointing to the latest commit in a chain, and the commits will still be there
+
+
 ## Distributing a release on PyPI (for pip installation):
 
 - Register an account at https://pypi.org, ask one of the current maintainers to add you to the project, and `pip install twine`
+
+- Check out the copy of the code you'd like to release
 
 - Run `python setup.py sdist bdist_wheel --universal`
 
