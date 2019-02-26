@@ -59,9 +59,9 @@ You can contact Sam Maurer, the lead developer, at `maurer@urbansim.com`.
 
 - Make sure all the tests are passing, and check if updates are needed to `README.md` or to the documentation
 
-- Open a pull request to the master branch and merge it
+- Open a pull request to the master branch to finalize it
 
-- Tag the release on Github
+- After merging, tag the release on Github and follow the distribution procedures below
 
 
 ## Patching an earlier release:
