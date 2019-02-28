@@ -10,9 +10,9 @@ import pandas as pd
 from choicemodels import MultinomialLogit
 import orca
 
-from ..utils import update_column
-from .. import modelmanager
-from .shared import TemplateStep
+from urbansim_templates import modelmanager
+from urbansim_templates.models import TemplateStep
+from urbansim_templates.utils import get_data, update_column
 
 
 @modelmanager.template
@@ -87,8 +87,6 @@ class SmallMultinomialLogitStep(TemplateStep):
         in the primary output table, it will be created. If not provided, the 
         `choice_column` will be used. Replaces the `out_fname` argument in UrbanSim.
         
-        # TO DO - auto-generation not yet working; column must exist in the primary table
-
     out_filters : str or list of str, optional
         Filters to apply to the data before simulation. If not provided, no filters will
         be applied. Replaces the `predict_filters` argument in UrbanSim.
@@ -312,14 +310,22 @@ class SmallMultinomialLogitStep(TemplateStep):
         with Orca or ModelManager until the `register()` method is run. 
         
         """
-        long_df = self._to_long(self._get_data())
+        expr_cols = [t[0] for t in list(self.model_expression.items()) \
+                     if t[0] != 'intercept']
+        
+        df = get_data(tables = self.tables,
+                      filters = self.filters,
+                      extra_columns = expr_cols + [self.choice_column])
+
+        long_df = self._to_long(df)
         
         # Set initial coefs to 0 if none provided
         pc = self._get_param_count()
         if (self.initial_coefs is None) or (len(self.initial_coefs) != pc):
             self.initial_coefs = np.zeros(pc).tolist()
 
-        model = MultinomialLogit(data=long_df, observation_id_col='_obs_id',
+        model = MultinomialLogit(data=long_df, 
+                                 observation_id_col='_obs_id',
                                  choice_col='_chosen',
                                  model_expression=self.model_expression,
                                  model_labels=self.model_labels,
@@ -352,7 +358,14 @@ class SmallMultinomialLogitStep(TemplateStep):
         model step.
         
         """
-        df = self._get_data('predict')
+        expr_cols = [t[0] for t in list(self.model_expression.items()) \
+                     if t[0] != 'intercept']
+        
+        df = get_data(tables = self.out_tables,
+                      fallback_tables = self.tables,
+                      filters = self.out_filters,
+                      extra_columns = expr_cols)
+
         long_df = self._to_long(df, 'predict')
         
         num_obs = len(df)

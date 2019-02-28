@@ -1,5 +1,9 @@
 # UrbanSim Templates change log
 
+### 0.2.dev1 (2019-02-27)
+
+- fixes a crash in small MNL simulation
+
 ### 0.2.dev0 (2019-02-19)
 
 - adds first data i/o template: `urbansim_templates.io.TableFromDisk()`
