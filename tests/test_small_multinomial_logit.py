@@ -11,12 +11,22 @@ from urbansim_templates.utils import validate_template
 
 @pytest.fixture
 def orca_session():
-    d1 = {'a': np.random.random(100),
-          'b': np.random.random(100),
+    d1 = {'id': np.arange(100),
+          'building_id': np.arange(100),
+          'a': np.random.random(100),
           'choice': np.random.randint(3, size=100)}
+    
+    d2 = {'building_id': np.arange(100),
+          'b': np.random.random(100)}
 
-    obs = pd.DataFrame(d1)
-    orca.add_table('obs', obs)
+    households = pd.DataFrame(d1).set_index('id')
+    orca.add_table('households', households)
+    
+    buildings = pd.DataFrame(d2).set_index('building_id')
+    orca.add_table('buildings', buildings)
+
+    orca.broadcast(cast='buildings', onto='households', 
+                   cast_index=True, onto_on='building_id')
 
 
 def test_template_validity():
@@ -35,7 +45,7 @@ def test_small_mnl(orca_session):
     modelmanager.initialize()
 
     m = SmallMultinomialLogitStep()
-    m.tables = 'obs'
+    m.tables = ['households', 'buildings']
     m.choice_column = 'choice'
     m.model_expression = OrderedDict([
             ('intercept', [1,2]), ('a', [0,2]), ('b', [0,2])])
@@ -50,6 +60,12 @@ def test_small_mnl(orca_session):
     assert(m.model_expression is not None)
     
     print(m.model_expression)
+    
+    # TEST SIMULATION
+    m.out_column = 'simulated_choice'
+    
+    m.run()
+    print(orca.get_table('households').to_frame())
     
     modelmanager.initialize()
     m = modelmanager.get_step('small-mnl-test')
