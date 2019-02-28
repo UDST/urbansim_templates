@@ -1,5 +1,9 @@
 # UrbanSim Templates change log
 
+### 0.1.2 (2019-02-28)
+
+- fixes a crash in small MNL simulation
+
 ### 0.1.1 (2019-02-05)
 
 - production release
