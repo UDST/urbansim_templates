@@ -1,6 +1,5 @@
 # UrbanSim Templates change log
 
-
 ## 0.2 (not yet released)
 
 #### 0.2.dev1 (2019-02-27)
