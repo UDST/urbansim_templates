@@ -76,7 +76,7 @@ You can contact Sam Maurer, the lead developer, at `maurer@urbansim.com`.
 
 - After merging, tag the release on Github and follow the normal distribution procedures
 
-- After the new release is tagged, you can delete the extra branches -- a branch is just a tag pointing to the latest commit in a chain, and the commits will still be there
+- After the new release is tagged, you can delete the extra branches -- a branch is just a pointer to the latest commit in a chain, and these commits will still be accessible via the tag
 
 
 ## Distributing a release on PyPI (for pip installation):
