@@ -211,12 +211,14 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     
 def update_column(table, column, data, fallback_table=None, fallback_column=None):
     """
-    Update an Orca column. If it doesn't exist yet, add it to the table. Values will be 
-    aligned using the indexes if possible.
+    Update an Orca column. If it doesn't exist yet, add it to the wrapped DataFrame. 
+    Values will be aligned using the indexes if possible.
     
-    If the column already exists, new values will be cast to match the existing data 
-    type. New columns may be cast to accommodate missing values (e.g. int to float) if 
-    they don't fully align with the table's index.
+    Data types: If the column already exists, new values will be cast to match the 
+    existing data type. If the column is new, it will retain the data type of the 
+    pd.Series that's passed to this function -- unless it doesn't fully align with the 
+    table's index, in which case it may be cast to allow missing values (e.g. from int 
+    to float).
     
     Parameters
     ----------

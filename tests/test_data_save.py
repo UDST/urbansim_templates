@@ -8,7 +8,7 @@ import orca
 
 from urbansim_templates import modelmanager
 from urbansim_templates.data import SaveTable
-from urbansim_templates.utils import validate_template
+from urbansim_templates.utils import update_column, validate_template
 
 
 @pytest.fixture
@@ -89,8 +89,24 @@ def test_hdf(orca_session, data):
     
 def test_columns(orca_session, data):
     """
+    Test requesting specific columns.
+    
     """
-    pass
+    update_column(table = 'buildings', 
+                  column = 'price2', 
+                  data = (1e6*np.random.random(10)).astype(int))
+    
+    t = SaveTable()
+    t.table = 'buildings'
+    t.columns = 'price2'
+    t.output_type = 'csv'
+    t.path = 'data/buildings.csv'
+    
+    t.run()
+    
+    df = pd.read_csv(t.path).set_index('building_id')
+    assert(list(df.columns) == ['price2'])
+    
 
 
 def test_filters(orca_session, data):
