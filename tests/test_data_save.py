@@ -48,7 +48,23 @@ def test_property_persistence(orca_session):
     Test persistence of properties across registration, saving, and reloading.
     
     """
-    pass
+    t = SaveTable()
+    t.table = 'buildings'
+    t.columns = ['window_panes', 'number_of_chimneys']
+    t.filters = 'number_of_chimneys > 15'
+    t.output_type = 'csv'
+    t.path = 'data/buildings.csv'
+    t.extra_settings = {'make_data_awesome': True}
+    t.name = 'save-buildings-csv'
+    t.tags = ['awesome', 'chimneys']
+    
+    d1 = t.to_dict()
+    modelmanager.register(t)
+    modelmanager.initialize()
+    d2 = modelmanager.get_step(t.name).to_dict()
+    
+    assert d1 == d2
+    modelmanager.remove_step(t.name)
 
 
 def test_csv(orca_session, data):

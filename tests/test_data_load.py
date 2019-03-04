@@ -56,7 +56,26 @@ def test_property_persistence(orca_session):
     Test persistence of properties across registration, saving, and reloading.
     
     """
-    pass
+    t = LoadTable()
+    t.table = 'buildings'
+    t.source_type = 'csv'
+    t.path = 'data/buildings.csv'
+    t.csv_index_cols = 'building_id'
+    t.extra_settings = {'make_data_awesome': True}  # unfortunately not a valid setting
+    t.cache = False
+    t.cache_scope = 'iteration'
+    t.copy_col = False
+    t.name = 'buildings-csv'
+    t.tags = ['awesome', 'data']
+    t.autorun = False
+    
+    d1 = t.to_dict()
+    modelmanager.register(t)
+    modelmanager.initialize()
+    d2 = modelmanager.get_step(t.name).to_dict()
+    
+    assert d1 == d2
+    modelmanager.remove_step(t.name)
 
 
 ######################################
