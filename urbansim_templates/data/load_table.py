@@ -57,9 +57,6 @@ class LoadTable():
         'gzip'}, or specify the table identifier within a multi-object hdf store using 
         {'key': 'table-name'}. See Pandas documentation for additional settings.
     
-    filters : str or list of str, optional - NOT YET IMPLEMENTED
-        Filters to apply before registering the table with Orca.
-    
     orca_test_spec : dict, optional - NOT YET IMPLEMENTED
         Data characteristics to be tested when the table is validated.
     
