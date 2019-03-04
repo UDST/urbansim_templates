@@ -14,7 +14,7 @@ from urbansim_templates import modelmanager, __version__
 
 
 @modelmanager.template
-class LoadData():
+class LoadTable():
     """
     Class for registering data tables from local CSV or HDF5 files.
     

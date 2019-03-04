@@ -10,7 +10,7 @@ from urbansim_templates.utils import get_data
 
 
 @modelmanager.template
-class SaveData():
+class SaveTable():
     """
     Class for saving Orca tables to local CSV or HDF5 files.
     
