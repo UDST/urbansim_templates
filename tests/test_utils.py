@@ -1,6 +1,8 @@
-import orca
+import numpy as np
 import pandas as pd
 import pytest
+
+import orca
 
 from urbansim_templates import utils
 
@@ -115,3 +117,17 @@ def test_update_column_incomplete_series(orca_session):
     assert(orca.get_table(table).to_frame()[column].tolist() == [5,2,10])
     
 
+def test_add_column_incomplete_series(orca_session):
+    """
+    Add an incomplete column to confirm that it's aligned based on the index. (The ints 
+    will be cast to floats to accommodate the missing values.)
+    
+    """
+    table = 'buildings'
+    column = 'pop2'
+    data = pd.Series([10,5], index=[3,1])
+    
+    utils.update_column(table, column, data)
+    stored_data = orca.get_table(table).to_frame()[column].tolist()
+    
+    np.testing.assert_array_equal(stored_data, [5.0, np.nan, 10.0])

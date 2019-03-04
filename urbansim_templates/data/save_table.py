@@ -22,8 +22,8 @@ class SaveTable():
         Name of the Orca table. Must be provided before running the step.
     
     columns : str or list of str, optional
-        Names of columns to include, in addition to indexes. "None" will return all 
-        columns. 
+        Names of columns to include. ``None`` will return all columns. Indexes will 
+        always be included.
     
     filters : str or list of str, optional
         Filters to apply to the data before saving. Will be passed to 
