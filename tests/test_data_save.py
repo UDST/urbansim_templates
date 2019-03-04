@@ -106,7 +106,6 @@ def test_columns(orca_session, data):
     
     df = pd.read_csv(t.path).set_index('building_id')
     assert(list(df.columns) == ['price2'])
-    
 
 
 def test_filters(orca_session, data):

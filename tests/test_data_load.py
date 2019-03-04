@@ -269,16 +269,6 @@ def test_extra_settings(orca_session, data):
     modelmanager.remove_step('buildings')
 
 
-def test_windows_paths(orca_session, data):
-    """
-    Test in Windows that a Windows-style path is properly normalized.
-    
-    TO DO - implement
-    
-    """
-    pass
-
-
 def test_without_autorun(orca_session, data):
     """
     Confirm that disabling autorun works.

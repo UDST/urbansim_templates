@@ -41,11 +41,9 @@ class LoadTable():
     
     path : str, optional
         Local file path to load data from, either absolute or relative to the 
-        ModelManager config directory. The string you provide will immediately be 
-        normalized to a platform-agnostic format, using `os.path.normpath()` in Python 2 
-        or `pathlib.Path()` in Python 3. It is always safe to provide a Unix-style path, 
-        and you may provide a Windows-style path if you are creating the model step in 
-        Windows. Saved steps will run on any platform. 
+        ModelManager config directory. Please provide a Unix-style path (this will work 
+        on any platform, but a Windows-style path won't, and they're hard to normalize 
+        automatically).
     
     url : str, optional - NOT YET IMPLEMENTED
         Remote url to download file from.
@@ -173,19 +171,6 @@ class LoadTable():
         return d
     
     
-    @property
-    def path(self):
-        return self.__path
-    @path.setter
-    def path(self, value):
-        if value is not None:
-            try:
-                value = str(pathlib.Path(value))  # Python 3.4+
-            except:
-                value = os.path.normpath(value)
-        self.__path = value
-            
-
     def run(self):
         """
         Register a data table with Orca.
