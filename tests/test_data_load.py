@@ -75,7 +75,7 @@ def test_validation_index_unique(orca_session):
     d = {'id': [1,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index('id'))
     
-    t = LoadTable(name='tab')
+    t = LoadTable(table='tab')
     t.validate()
     
 
@@ -87,7 +87,7 @@ def test_validation_index_not_unique(orca_session):
     d = {'id': [1,1,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index('id'))
     
-    t = LoadTable(name='tab')
+    t = LoadTable(table='tab')
     try:
         t.validate()
     except ValueError:
@@ -104,7 +104,7 @@ def test_validation_multiindex_unique(orca_session):
     d = {'id': [1,1,1], 'sub_id': [1,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
     
-    t = LoadTable(name='tab')
+    t = LoadTable(table='tab')
     t.validate()
 
 
@@ -117,7 +117,7 @@ def test_validation_multiindex_not_unique(orca_session):
     d = {'id': [1,1,1], 'sub_id': [2,2,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d).set_index(['id', 'sub_id']))
     
-    t = LoadTable(name='tab')
+    t = LoadTable(table='tab')
     try:
         t.validate()
     except ValueError:
@@ -134,7 +134,7 @@ def test_validation_unnamed_index(orca_session):
     d = {'id': [1,1,3], 'value': [4,4,4]}
     orca.add_table('tab', pd.DataFrame(d))  # generates auto index without a name
     
-    t = LoadTable(name='tab')
+    t = LoadTable(table='tab')
     try:
         t.validate()
     except ValueError:
@@ -155,7 +155,7 @@ def test_validation_columns_vs_other_indexes(orca_session):
     d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
     orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
 
-    t = LoadTable(name='households')
+    t = LoadTable(table='households')
     t.validate()
 
 
@@ -171,7 +171,7 @@ def test_validation_index_vs_other_columns(orca_session):
     d = {'household_id': [1,2,3], 'building_id': [2,3,5]}
     orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
 
-    t = LoadTable(name='buildings')
+    t = LoadTable(table='buildings')
     t.validate()
 
 
@@ -188,7 +188,7 @@ def test_validation_with_multiindexes(orca_session):
     d = {'home_tract': [55,55,55], 'work_tract': [17,18,19], 'dist': [1,1,1]}
     orca.add_table('distances', pd.DataFrame(d).set_index(['home_tract','work_tract']))
 
-    t = LoadTable(name='choice_table')
+    t = LoadTable(table='choice_table')
     t.validate()
 
 
@@ -206,7 +206,7 @@ def test_csv(orca_session, data):
     
     """
     t = LoadTable()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv'
     t.csv_index_cols = 'building_id'
@@ -220,7 +220,7 @@ def test_csv(orca_session, data):
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
     
-    modelmanager.remove_step('buildings')
+    modelmanager.remove_step(t.name)
 
 
 def test_hdf(orca_session, data):
@@ -229,7 +229,7 @@ def test_hdf(orca_session, data):
     
     """
     t = LoadTable()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.source_type = 'hdf'
     t.path = 'data/buildings.hdf'
     
@@ -242,7 +242,7 @@ def test_hdf(orca_session, data):
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
     
-    modelmanager.remove_step('buildings')
+    modelmanager.remove_step(t.name)
 
 
 def test_extra_settings(orca_session, data):
@@ -251,7 +251,7 @@ def test_extra_settings(orca_session, data):
     
     """
     t = LoadTable()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv.gz'
     t.csv_index_cols = 'building_id'
@@ -266,7 +266,7 @@ def test_extra_settings(orca_session, data):
     modelmanager.initialize()
     assert 'buildings' in orca.list_tables()
     
-    modelmanager.remove_step('buildings')
+    modelmanager.remove_step(t.name)
 
 
 def test_without_autorun(orca_session, data):
@@ -275,7 +275,7 @@ def test_without_autorun(orca_session, data):
     
     """
     t = LoadTable()
-    t.name = 'buildings'
+    t.table = 'buildings'
     t.source_type = 'csv'
     t.path = 'data/buildings.csv'
     t.csv_index_cols = 'building_id'
@@ -284,7 +284,7 @@ def test_without_autorun(orca_session, data):
     modelmanager.register(t)
     assert 'buildings' not in orca.list_tables()
     
-    modelmanager.remove_step('buildings')
+    modelmanager.remove_step(t.name)
     
     
     

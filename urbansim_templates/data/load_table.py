@@ -35,9 +35,11 @@ class LoadTable():
     
     Parameters
     ----------
+    table : str, optional
+        Name of the Orca table to be created. Must be provided before running the step.
+    
     source_type : 'csv' or 'hdf', optional
-        This is required to load the table, but does not have to be provided when the 
-        object is created.
+        Source type. Must be provided before running the step.
     
     path : str, optional
         Local file path to load data from, either absolute or relative to the 
@@ -72,8 +74,7 @@ class LoadTable():
         Passed to `orca.table()`. Default is `True`, as in Orca. 
         
     name : str, optional
-        Name of the table, for Orca. This will also be used as the name of the model step 
-        that generates the table. 
+        Name of the model step. 
     
     tags : list of str, optional
         Tags, passed to ModelManager.
@@ -83,6 +84,7 @@ class LoadTable():
     
     """
     def __init__(self, 
+            table = None, 
             source_type = None, 
             path = None, 
             csv_index_cols = None,
@@ -95,6 +97,7 @@ class LoadTable():
             autorun = True):
         
         # Template-specific params
+        self.table = table
         self.source_type = source_type
         self.path = path
         self.csv_index_cols = csv_index_cols
@@ -128,6 +131,7 @@ class LoadTable():
         
         """
         obj = cls(
+            table = d['table'],
             source_type = d['source_type'],
             path = d['path'],
             csv_index_cols = d['csv_index_cols'],
@@ -157,6 +161,7 @@ class LoadTable():
             'name': self.name,
             'tags': self.tags,
             'autorun': self.autorun,
+            'table': self.table,
             'source_type': self.source_type,
             'path': self.path,
             'csv_index_cols': self.csv_index_cols,
@@ -172,7 +177,7 @@ class LoadTable():
         """
         Register a data table with Orca.
         
-        Requires values to be set for ``source_type``, ``name``, and ``path``. CSV data 
+        Requires values to be set for ``table``, ``source_type``, and ``path``. CSV data 
         also requires ``csv_index_cols``. 
         
         Returns
@@ -180,11 +185,11 @@ class LoadTable():
         None
         
         """
+        if self.table is None:
+            raise ValueError("Please provide a table name")
+        
         if self.source_type not in ['csv', 'hdf']:
             raise ValueError("Please provide a source type of 'csv' or 'hdf'")
-        
-        if self.name is None:
-            raise ValueError("Please provide a table name")
         
         if self.path is None:
             raise ValueError("Please provide a file path")
@@ -196,7 +201,7 @@ class LoadTable():
             if self.csv_index_cols is None:
                 raise ValueError("Please provide index column name(s) for the csv")
         
-            @orca.table(table_name = self.name, 
+            @orca.table(table_name = self.table, 
                         cache = self.cache, 
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
@@ -206,7 +211,7 @@ class LoadTable():
             
         # Table from HDF file
         elif self.source_type == 'hdf':
-            @orca.table(table_name = self.name, 
+            @orca.table(table_name = self.table, 
                         cache = self.cache, 
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
@@ -247,10 +252,10 @@ class LoadTable():
         # messages. We should update orca_test to support both, probably.
         
         # Register table if needed
-        if not orca.is_table(self.name):
+        if not orca.is_table(self.table):
             self.run()
         
-        idx = orca.get_table(self.name).index
+        idx = orca.get_table(self.table).index
         
         # Check index has a name
         if list(idx.names) == [None]:
@@ -261,8 +266,8 @@ class LoadTable():
             raise ValueError("Index not unique")
         
         # Compare columns to indexes of other tables, and vice versa
-        combinations = [(self.name, t) for t in orca.list_tables() if self.name != t] \
-                + [(t, self.name) for t in orca.list_tables() if self.name != t]
+        combinations = [(self.table, t) for t in orca.list_tables() if self.table != t] \
+                + [(t, self.table) for t in orca.list_tables() if self.table != t]
         
         for t1, t2 in combinations:
             col_names = orca.get_table(t1).columns
