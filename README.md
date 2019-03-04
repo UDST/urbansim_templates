@@ -22,7 +22,7 @@ conda install urbansim --channel udst
 
 ### Documentation
 
-See the online documentation for much more: [http://docs.udst.org/projects/urbansim-templates](https://docs.udst.org/projects/urbansim-templates/en/latest)
+See the online documentation for much more: https://urbansim-templates.readthedocs.io
 
 Some additional documentation is available within the repo in `CHANGELOG.md`, `CONTRIBUTING.md`, `/docs/README.md`, and `/tests/README.md`.
 
