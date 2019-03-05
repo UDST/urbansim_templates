@@ -22,6 +22,6 @@ Contents
    getting-started
    modelmanager
    model-steps
-   data-io
+   data-templates
    utilities
    development

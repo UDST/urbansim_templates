@@ -16,7 +16,7 @@ from urbansim_templates import modelmanager, __version__
 @modelmanager.template
 class LoadTable():
     """
-    Class for registering data tables from local CSV or HDF5 files.
+    Class for registering data tables from local CSV or HDF files.
     
     An instance of this template class stores *instructions for loading a data table*, 
     packaged into an Orca step. Running the instructions registers the table with Orca. 
@@ -54,24 +54,25 @@ class LoadTable():
         Required for csv source type.
     
     extra_settings : dict, optional
-        Additional arguments to pass to `pd.read_csv()` or `pd.read_hdf()`. For example, 
-        you could automatically extract csv data from a gzip file using {'compression': 
-        'gzip'}, or specify the table identifier within a multi-object hdf store using 
-        {'key': 'table-name'}. See Pandas documentation for additional settings.
+        Additional arguments to pass to ``pd.read_csv()`` or ``pd.read_hdf()``. For 
+        example, you could automatically extract csv data from a gzip file using 
+        {'compression': 'gzip'}, or specify the table identifier within a multi-object 
+        hdf store using {'key': 'table-name'}. See Pandas documentation for additional 
+        settings.
     
     orca_test_spec : dict, optional - NOT YET IMPLEMENTED
         Data characteristics to be tested when the table is validated.
     
     cache : bool, default True
-        Passed to `orca.table()`. Note that the default is `True`, unlike in the 
+        Passed to ``orca.table()``. Note that the default is True, unlike in the 
         underlying general-purpose Orca function, because tables read from disk should 
         not need to be regenerated during the course of a model run.
     
     cache_scope : 'step', 'iteration', or 'forever', default 'forever'
-        Passed to `orca.table()`. Default is 'forever', as in Orca.
+        Passed to ``orca.table()``. Default is 'forever', as in Orca.
     
     copy_col : bool, default True
-        Passed to `orca.table()`. Default is `True`, as in Orca. 
+        Passed to ``orca.table()``. Default is True, as in Orca. 
         
     name : str, optional
         Name of the model step. 

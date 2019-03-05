@@ -36,15 +36,15 @@ class SaveTable():
         Local file path to save the data to, either absolute or relative to the 
         ModelManager config directory. Please provide a Unix-style path (this will work 
         on any platform, but a Windows-style path won't, and they're hard to normalize 
-        automatically). For dynamic file names, you can include the characters ``%RUN%``,
-        ``%ITER%``, or ``%TS%``. These will be replaced by the run id, the model 
-        iteration value, or a timestamp when the output file is created.
+        automatically). For dynamic file names, you can include the characters "%RUN%",
+        "%ITER%", or "%TS%". These will be replaced by the run id, the model iteration 
+        value, or a timestamp when the output file is created.
     
     extra_settings : dict, optional
-        Additional arguments to pass to `pd.to_csv()` or `pd.to_hdf()`. For example, you
-        could automatically compress csv data using {'compression': 'gzip'}, or specify 
-        a custom table name for an hdf store using {'key': 'table-name'}. See Pandas 
-        documentation for additional settings.
+        Additional arguments to pass to ``pd.to_csv()`` or ``pd.to_hdf()``. For example, 
+        you could automatically compress csv data using {'compression': 'gzip'}, or 
+        specify a custom table name for an hdf store using {'key': 'table-name'}. See 
+        Pandas documentation for additional settings.
             
     name : str, optional
         Name of the model step.
