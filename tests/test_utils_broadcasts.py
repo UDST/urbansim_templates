@@ -15,6 +15,56 @@ def orca_session():
     orca.clear_all()
 
 
+def test_validation_table_not_registered(orca_session):
+    """
+    Table validation should raise a ValueError if the table isn't registered.
+    
+    """
+    try:
+        validate_table('tab')
+    except ValueError as e:
+        print(e)
+        return
+    
+    pytest.fail()  # fail is ValueError wasn't raised
+
+
+def test_validation_index_unnamed(orca_session):
+    """
+    Table validation should raise a ValueError if index is unnamed.
+    
+    """
+    d = {'id': [1,1,3], 'value': [4,4,4]}
+    orca.add_table('tab', pd.DataFrame(d))  # generates auto index without a name
+    
+    try:
+        validate_table('tab')
+    except ValueError as e:
+        print(e)
+        return
+    
+    pytest.fail()  # fail if ValueError wasn't raised
+    
+
+def test_validation_duplicate_colnames(orca_session):
+    """
+    Table validation should raise a ValueError if columns share a name with index.
+    
+    """
+    d = {'id1': [1,1,3], 'id2': [3,3,9], 'value': [4,4,4]}
+    df = pd.DataFrame(d).set_index(['id1', 'id2'])
+    df['id2'] = [10,10,10]  # column with same name as one of the multi-index levels    
+    orca.add_table('tab', df)
+    
+    try:
+        validate_table('tab')
+    except ValueError as e:
+        print(e)
+        return
+    
+    pytest.fail()  # fail if ValueError wasn't raised
+    
+
 def test_validation_index_unique(orca_session):
     """
     Table validation should pass if the index is unique.
@@ -40,7 +90,8 @@ def test_validation_index_not_unique(orca_session):
     
     try:
         validate_table('tab')
-    except ValueError:
+    except ValueError as e:
+        print(e)
         return
     
     pytest.fail()  # fail if ValueError wasn't raised
@@ -68,27 +119,12 @@ def test_validation_multiindex_not_unique(orca_session):
     
     try:
         validate_table('tab')
-    except ValueError:
+    except ValueError as e:
+        print(e)
         return
     
     pytest.fail()  # fail if ValueError wasn't raised
 
-
-def test_validation_unnamed_index(orca_session):
-    """
-    Table validation should raise a ValueError if index is unnamed.
-    
-    """
-    d = {'id': [1,1,3], 'value': [4,4,4]}
-    orca.add_table('tab', pd.DataFrame(d))  # generates auto index without a name
-    
-    try:
-        validate_table('tab')
-    except ValueError:
-        return
-    
-    pytest.fail()  # fail if ValueError wasn't raised
-    
 
 def test_validation_columns_vs_other_indexes(orca_session):
     """

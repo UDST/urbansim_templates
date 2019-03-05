@@ -126,7 +126,7 @@ def validate_table(table):
     # messages. We should update orca_test to support both, probably.
     
     if not orca.is_table(table):
-        raise ValueError("Table not yet registered with Orca")
+        raise ValueError("Table not registered with Orca: '{}'".format(table))
     
     idx = orca.get_table(table).index
     
@@ -134,9 +134,12 @@ def validate_table(table):
     if list(idx.names) == [None]:
         raise ValueError("Index column has no name")
     
-    # CHECK INDEX NAME DISTINCT FROM COLUMN NAMES
+    # Check for unique column names
+    for name in list(idx.names):
+        if name in list(orca.get_table(table).columns):
+            raise ValueError("Index names and column names overlap: '{}'".format(name))
     
-    # Check index is unique
+    # Check for unique index values
     if len(idx.unique()) < len(idx):    
         raise ValueError("Index not unique")
     
