@@ -14,9 +14,9 @@ from urbansim_templates import modelmanager, __version__
 
 
 @modelmanager.template
-class TableFromDisk():
+class LoadTable():
     """
-    Class for registering data tables from local CSV or HDF5 files.
+    Class for registering data tables from local CSV or HDF files.
     
     An instance of this template class stores *instructions for loading a data table*, 
     packaged into an Orca step. Running the instructions registers the table with Orca. 
@@ -31,21 +31,21 @@ class TableFromDisk():
     be able to use it as a join key. Following these naming conventions eliminates the 
     need for Orca "broadcasts".
     
-    All the parameters can also be set as properties of the class instance.
+    All the parameters can also be set as properties after creating the class instance.
     
     Parameters
     ----------
+    table : str, optional
+        Name of the Orca table to be created. Must be provided before running the step.
+    
     source_type : 'csv' or 'hdf', optional
-        This is required to load the table, but does not have to be provided when the 
-        object is created.
+        Source type. Must be provided before running the step.
     
     path : str, optional
         Local file path to load data from, either absolute or relative to the 
-        ModelManager config directory. The string you provide will immediately be 
-        normalized to a platform-agnostic format, using `os.path.normpath()` in Python 2 
-        or `pathlib.Path()` in Python 3. It is always safe to provide a Unix-style path, 
-        and you may provide a Windows-style path if you are creating the model step in 
-        Windows. Saved steps will run on any platform. 
+        ModelManager config directory. Please provide a Unix-style path (this will work 
+        on any platform, but a Windows-style path won't, and they're hard to normalize 
+        automatically).
     
     url : str, optional - NOT YET IMPLEMENTED
         Remote url to download file from.
@@ -54,31 +54,28 @@ class TableFromDisk():
         Required for csv source type.
     
     extra_settings : dict, optional
-        Additional arguments to pass to `pd.read_csv()` or `pd.read_hdf()`. For example, 
-        you could automatically extract csv data from a gzip file using {'compression': 
-        'gzip'}, or specify the table identifier within a multi-object hdf store using 
-        {'key': 'table-name'}. See Pandas documentation for additional settings.
-    
-    filters : str or list of str, optional - NOT YET IMPLEMENTED
-        Filters to apply before registering the table with Orca.
+        Additional arguments to pass to ``pd.read_csv()`` or ``pd.read_hdf()``. For 
+        example, you could automatically extract csv data from a gzip file using 
+        {'compression': 'gzip'}, or specify the table identifier within a multi-object 
+        hdf store using {'key': 'table-name'}. See Pandas documentation for additional 
+        settings.
     
     orca_test_spec : dict, optional - NOT YET IMPLEMENTED
         Data characteristics to be tested when the table is validated.
     
     cache : bool, default True
-        Passed to `orca.table()`. Note that the default is `True`, unlike in the 
+        Passed to ``orca.table()``. Note that the default is True, unlike in the 
         underlying general-purpose Orca function, because tables read from disk should 
         not need to be regenerated during the course of a model run.
     
     cache_scope : 'step', 'iteration', or 'forever', default 'forever'
-        Passed to `orca.table()`. Default is 'forever', as in Orca.
+        Passed to ``orca.table()``. Default is 'forever', as in Orca.
     
     copy_col : bool, default True
-        Passed to `orca.table()`. Default is `True`, as in Orca. 
+        Passed to ``orca.table()``. Default is True, as in Orca. 
         
     name : str, optional
-        Name of the table, for Orca. This will also be used as the name of the model step 
-        that generates the table. 
+        Name of the model step. 
     
     tags : list of str, optional
         Tags, passed to ModelManager.
@@ -88,6 +85,7 @@ class TableFromDisk():
     
     """
     def __init__(self, 
+            table = None, 
             source_type = None, 
             path = None, 
             csv_index_cols = None,
@@ -100,6 +98,7 @@ class TableFromDisk():
             autorun = True):
         
         # Template-specific params
+        self.table = table
         self.source_type = source_type
         self.path = path
         self.csv_index_cols = csv_index_cols
@@ -133,6 +132,7 @@ class TableFromDisk():
         
         """
         obj = cls(
+            table = d['table'],
             source_type = d['source_type'],
             path = d['path'],
             csv_index_cols = d['csv_index_cols'],
@@ -162,6 +162,7 @@ class TableFromDisk():
             'name': self.name,
             'tags': self.tags,
             'autorun': self.autorun,
+            'table': self.table,
             'source_type': self.source_type,
             'path': self.path,
             'csv_index_cols': self.csv_index_cols,
@@ -173,24 +174,11 @@ class TableFromDisk():
         return d
     
     
-    @property
-    def path(self):
-        return self.__path
-    @path.setter
-    def path(self, value):
-        if value is not None:
-            try:
-                value = str(pathlib.Path(value))  # Python 3.4+
-            except:
-                value = os.path.normpath(value)
-        self.__path = value
-            
-
     def run(self):
         """
         Register a data table with Orca.
         
-        Requires values to be set for ``source_type``, ``name``, and ``path``. CSV data 
+        Requires values to be set for ``table``, ``source_type``, and ``path``. CSV data 
         also requires ``csv_index_cols``. 
         
         Returns
@@ -198,11 +186,11 @@ class TableFromDisk():
         None
         
         """
+        if self.table is None:
+            raise ValueError("Please provide a table name")
+        
         if self.source_type not in ['csv', 'hdf']:
             raise ValueError("Please provide a source type of 'csv' or 'hdf'")
-        
-        if self.name is None:
-            raise ValueError("Please provide a table name")
         
         if self.path is None:
             raise ValueError("Please provide a file path")
@@ -214,7 +202,7 @@ class TableFromDisk():
             if self.csv_index_cols is None:
                 raise ValueError("Please provide index column name(s) for the csv")
         
-            @orca.table(table_name = self.name, 
+            @orca.table(table_name = self.table, 
                         cache = self.cache, 
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
@@ -224,7 +212,7 @@ class TableFromDisk():
             
         # Table from HDF file
         elif self.source_type == 'hdf':
-            @orca.table(table_name = self.name, 
+            @orca.table(table_name = self.table, 
                         cache = self.cache, 
                         cache_scope = self.cache_scope, 
                         copy_col = self.copy_col)
@@ -265,10 +253,10 @@ class TableFromDisk():
         # messages. We should update orca_test to support both, probably.
         
         # Register table if needed
-        if not orca.is_table(self.name):
+        if not orca.is_table(self.table):
             self.run()
         
-        idx = orca.get_table(self.name).index
+        idx = orca.get_table(self.table).index
         
         # Check index has a name
         if list(idx.names) == [None]:
@@ -279,8 +267,8 @@ class TableFromDisk():
             raise ValueError("Index not unique")
         
         # Compare columns to indexes of other tables, and vice versa
-        combinations = [(self.name, t) for t in orca.list_tables() if self.name != t] \
-                + [(t, self.name) for t in orca.list_tables() if self.name != t]
+        combinations = [(self.table, t) for t in orca.list_tables() if self.table != t] \
+                + [(t, self.table) for t in orca.list_tables() if self.table != t]
         
         for t1, t2 in combinations:
             col_names = orca.get_table(t1).columns
@@ -308,4 +296,3 @@ class TableFromDisk():
         return True
     
     
-        

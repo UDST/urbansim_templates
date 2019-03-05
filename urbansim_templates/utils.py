@@ -211,29 +211,31 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     
 def update_column(table, column, data, fallback_table=None, fallback_column=None):
     """
-    Update an Orca column. If it doesn't exist yet, add it to the table.
+    Update an Orca column. If it doesn't exist yet, add it to the wrapped DataFrame. 
+    Values will be aligned using the indexes if possible.
     
-    If the column already exists, 'data' will be cast to match the column's data type. If 
-    the column needs to be created, it will be given the same data type as 'data'.
-    
-    Require an index?
+    Data types: If the column already exists, new values will be cast to match the 
+    existing data type. If the column is new, it will retain the data type of the 
+    pd.Series that's passed to this function -- unless it doesn't fully align with the 
+    table's index, in which case it may be cast to allow missing values (e.g. from int 
+    to float).
     
     Parameters
     ----------
     table : str or list of str
-        Name of an Orca table. If list, the first element will be used.
+        Name of Orca table to update. If list, the first element will be used.
     
     column : str
-        Name of a column in the table. Cannot be an index.
+        Name of existing column to update, or new column to create. Cannot be an index.
         
     data : pd.Series
-        Should either align with the index of the table, or have the same number of rows.
+        Column of data to update or add. 
         
     fallback_table : str or list of str
-        Name of Orca table to use if 'table' evaluates to None.
+        Name of Orca table to use if ``table`` evaluates to None.
     
     fallback_column : str
-        Name of Orca column to use if 'column' evaluates to None.
+        Name of Orca column to use if ``column`` evaluates to None.
         
     Returns
     -------
@@ -252,10 +254,10 @@ def update_column(table, column, data, fallback_table=None, fallback_column=None
     dfw = orca.get_table(table)
     
     if column not in dfw.columns:
-        dfw.update_col(column, data)
+        dfw.update_col(column, data)  # adds column
     
     else:
-        dfw.update_col_from_series(column, data, cast=True)
+        dfw.update_col_from_series(column, data, cast=True)  # updates existing column
     
 
 ########################

@@ -2,6 +2,11 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev2 (2019-03-04)
+
+- adds template for saving data: `urbansim_templates.data.SaveTable()`
+- renames `TableFromDisk()` to `urbansim_templates.data.LoadTable()`
+
 #### 0.2.dev1 (2019-02-27)
 
 - fixes a crash in small MNL simulation
