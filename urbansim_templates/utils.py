@@ -75,6 +75,113 @@ def validate_template(cls):
     return True
 
 
+#####################################
+## REPLACEMENT FOR ORCA BROADCASTS ##
+#####################################
+
+"""
+These utilities provide functionality for merging tables using implicit join keys instead 
+of Orca broadcasts. See Github issue #78 for discussion of the rationale.
+
+"""
+
+def validate_table(table):
+    """
+    Check some basic expectations about an Orca table:
+    
+    - Confirm that it includes a unique, named index column (a.k.a. primary key) or set 
+      of columns (multi-index, a.k.a. composite key). If not, raise a ValueError.
+    
+    - Confirm that none of the other columns in the table share names with the index(es). 
+      If they do, raise a ValueError.
+    
+    - If the table contains columns whose names match the index columns of other tables 
+      registered with Orca, check whether they make sense as join keys. This prints a 
+      status message with the number of presumptive foreign-key values that are found in 
+      the primary/composite key, for evaluation by the user. 
+    
+    - Perform the same check for columns in _other_ tables whose names match the index 
+      column(s) of _this_ table.
+      
+    - It doesn't currently compare indexes to indexes. (Maybe it should?)
+      
+    Running this will trigger loading all registered Orca tables, which may take a while. 
+    Stand-alone columns will not be loaded unless their names match an index column. 
+    
+    Doesn't currently incorporate ``orca_test`` validation, but it might be added.
+    
+    Parameters
+    ----------
+    table : str
+        Name of Orca table to validate.
+    
+    Returns
+    -------
+    bool
+    
+    """
+    # There are a couple of reasons we're not using the orca_test library here:
+    # (a) orca_test doesn't currently support MultiIndexes, and (b) the primary-key/
+    # foreign-key comparisons aren't asserting anything, just printing status 
+    # messages. We should update orca_test to support both, probably.
+    
+    if not orca.is_table(table):
+        raise ValueError("Table not yet registered with Orca")
+    
+    idx = orca.get_table(table).index
+    
+    # Check index has a name
+    if list(idx.names) == [None]:
+        raise ValueError("Index column has no name")
+    
+    # CHECK INDEX NAME DISTINCT FROM COLUMN NAMES
+    
+    # Check index is unique
+    if len(idx.unique()) < len(idx):    
+        raise ValueError("Index not unique")
+    
+    # Compare columns to indexes of other tables, and vice versa
+    combinations = [(table, t) for t in orca.list_tables() if table != t] \
+            + [(t, table) for t in orca.list_tables() if table != t]
+    
+    for t1, t2 in combinations:
+        col_names = orca.get_table(t1).columns
+        idx = orca.get_table(t2).index
+        
+        if set(idx.names).issubset(col_names):
+            vals = orca.get_table(t1).to_frame(idx.names).drop_duplicates()
+            
+            # Easier to compare multi-column values to multi-column index if we 
+            # turn the values into an index as well
+            vals = vals.reset_index().set_index(idx.names).index
+            vals_in_idx = sum(vals.isin(idx))
+            
+            if len(idx.names) == 1:
+                idx_str = idx.names[0]
+            else:
+                idx_str = '[{}]'.format(','.join(idx.names))
+            
+            print("'{}.{}': {} of {} unique values are found in '{}.{}' ({}%)"\
+                    .format(t1, idx_str, 
+                            vals_in_idx, len(vals), 
+                            t2, idx_str, 
+                            round(100*vals_in_idx/len(vals))))
+
+    return True
+
+
+def validate_all_tables():
+    """
+    """
+    pass
+
+
+def merge_tables():
+    """
+    """
+    pass
+
+
 ###############################
 ## TEMPLATE HELPER FUNCTIONS ##
 ###############################
