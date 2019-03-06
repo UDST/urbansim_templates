@@ -192,9 +192,34 @@ def validate_all_tables():
         validate_table(t, reciprocal=False)
 
 
-def merge_tables():
+def merge_tables(tables, coumns=None):
     """
+    
+    accept either orca table names or dataframes?
+    
+    Parameters
+    ----------
+    tables : list of str, or list of pd.DataFrame
+        Two or more tables to merge.
+    
+    columns : list of str, optional
+        
+    
     """
+    
+    
+    # given df1 and df2, merge them
+    
+    # TO DO - filter for necessary columns
+    join_keys = list(df1.index.names)
+    # TO DO - check that join keys exist in second table
+    merged = pd.merge(df1, df2, on=join_keys)  # indexes by name requires Pandas 0.23
+    
+    
+    
+    
+    while len(tables) < 1:
+    
     pass
 
 
