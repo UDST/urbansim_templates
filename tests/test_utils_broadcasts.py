@@ -3,7 +3,7 @@ import pytest
 
 import orca
 
-from urbansim_templates.utils import validate_table
+from urbansim_templates.utils import validate_table, validate_all_tables
 
 
 @pytest.fixture
@@ -156,6 +156,22 @@ def test_validation_index_vs_other_columns(orca_session):
     validate_table('buildings')
 
 
+def test_validation_reciprocal_false(orca_session):
+    """
+    This combination should not produce any column comparisons.
+    
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,5]}
+    orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
+
+    print("Begin reciprocal test")
+    validate_table('buildings', reciprocal=False)
+    print("End reciprocal test")
+
+
 def test_validation_with_multiindexes(orca_session):
     """
     Here, table validation should compare 'choice_table.[home_tract,work_tract]' to
@@ -170,4 +186,17 @@ def test_validation_with_multiindexes(orca_session):
     orca.add_table('distances', pd.DataFrame(d).set_index(['home_tract','work_tract']))
 
     validate_table('choice_table')
+
+
+def test_validate_all_tables(orca_session):
+    """
+    
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    orca.add_table('buildings', pd.DataFrame(d).set_index('building_id'))
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,5]}
+    orca.add_table('households', pd.DataFrame(d).set_index('household_id'))
+
+    validate_all_tables()
 

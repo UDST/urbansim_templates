@@ -85,7 +85,7 @@ of Orca broadcasts. See Github issue #78 for discussion of the rationale.
 
 """
 
-def validate_table(table):
+def validate_table(table, reciprocal=True):
     """
     Check some basic expectations about an Orca table:
     
@@ -114,6 +114,10 @@ def validate_table(table):
     ----------
     table : str
         Name of Orca table to validate.
+    
+    reciprocal : bool, default True
+        Whether to also check how columns of other tables align with this one's index. 
+        If False, only check this table's columns against other tables' indexes. 
     
     Returns
     -------
@@ -144,8 +148,10 @@ def validate_table(table):
         raise ValueError("Index not unique")
     
     # Compare columns to indexes of other tables, and vice versa
-    combinations = [(table, t) for t in orca.list_tables() if table != t] \
-            + [(t, table) for t in orca.list_tables() if table != t]
+    combinations = [(table, t) for t in orca.list_tables() if table != t]
+    
+    if reciprocal:
+        combinations += [(t, table) for t in orca.list_tables() if table != t]
     
     for t1, t2 in combinations:
         col_names = orca.get_table(t1).columns
@@ -175,8 +181,15 @@ def validate_table(table):
 
 def validate_all_tables():
     """
+    Validate all tables registered with Orca. See ``validate_table()`` above.
+    
+    Returns
+    -------
+    bool
+    
     """
-    pass
+    for t in orca.list_tables():
+        validate_table(t, reciprocal=False)
 
 
 def merge_tables():
