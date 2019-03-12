@@ -171,6 +171,10 @@ class ColumnFromExpression():
         # not end with an opening parenthesis.
         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
         
+        # TO DO - make sure requesting indexes by name doesn't raise an error from Orca
+        # - probably should just check which of the elements in the list Orca thinks are 
+        #   valid columns, and only request those
+        
         @orca.column(table_name = self.table, 
                      column_name = self.column_name, 
                      cache = self.cache, 
