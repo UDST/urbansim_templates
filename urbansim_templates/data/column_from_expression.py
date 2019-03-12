@@ -14,7 +14,7 @@ class ColumnFromExpression():
     only when the column is requested for a specific operation. 
     
     The expression will be passed to ``pd.eval()`` and can refer to other columns in the 
-    table. See the Pandas documentation for further details.
+    same table. See the Pandas documentation for further details.
     
     All the parameters can also be set as properties after creating the template 
     instance.
@@ -22,30 +22,30 @@ class ColumnFromExpression():
     Parameters
     ----------
     column_name : str, optional
-        Name of the Orca column to be registered. Must be provided to run the template.
+        Name of the Orca column to be registered. Required before running.
     
     table : str, optional
-        Name of the Orca table the column will be associated with. Must be provided to 
-        run the template.
+        Name of the Orca table the column will be associated with. Required before 
+        running.
     
     expression : str, optional
-        Expression for calculating values of the column. Must be provided to run the  
-        template.
+        Expression for calculating values of the column. Required before running.
     
     cache : bool, default False
-        Passed to ``orca.column()``.
+        Whether to cache column values after they are calculated.
     
     cache_scope : 'step', 'iteration', or 'forever', default 'forever'
-        Passed to ``orca.table()``.
+        How long to cache column values for (ignored if ``cache`` is False).
     
     name : str, optional
         Name of the template instance and associated model step. 
     
     tags : list of str, optional
-        Tags, passed to ModelManager.
+        Tags to associate with the template instance.
     
     autorun : bool, default True
-        Automatically run the template whenever it's registered with ModelManager.
+        Whether to run automatically when the template instance is registered with 
+        ModelManager.
     
     """
     def __init__(self, 
