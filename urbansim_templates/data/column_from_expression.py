@@ -159,7 +159,7 @@ class ColumnFromExpression():
         if self.column_name is None:
             raise ValueError("Please provide a column name")
         
-        if self.table not in ['csv', 'hdf']:
+        if self.table is None:
             raise ValueError("Please provide a table")
         
         if self.expression is None:

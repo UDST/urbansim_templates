@@ -50,12 +50,18 @@ def test_expression(orca_session):
     c = ColumnFromExpression()
     c.column_name = 'c'
     c.table = 'obs'
-    c.expression = 'a + sqrt(b)'
+    c.expression = 'a * 5 + sqrt(b)'
     
     c.run()
-    series = orca.get_column('obs', 'c')
+    series = orca.get_table('obs').get_column('c')
     print(series)
     
+
+def test_data_type_and_missing_values(orca_session):
+    """
+    """
+    pass
+
 
 def test_modelmanager_registration(orca_session):
     """
@@ -63,3 +69,10 @@ def test_modelmanager_registration(orca_session):
     
     """
     pass
+
+
+def test_expression_with_standalone_columns(orca_session):
+    """
+    """
+    pass
+
