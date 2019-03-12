@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import re
+
 import orca
 import pandas as pd
 
@@ -13,7 +15,7 @@ class ColumnFromExpression():
     column will be associated with an existing table. Values will be calculated lazily, 
     only when the column is requested for a specific operation. 
     
-    The expression will be passed to ``pd.eval()`` and can refer to other columns in the 
+    The expression will be passed to ``df.eval()`` and can refer to other columns in the 
     same table. See the Pandas documentation for further details.
     
     All the parameters can also be set as properties after creating the template 
@@ -29,7 +31,16 @@ class ColumnFromExpression():
         running.
     
     expression : str, optional
-        Expression for calculating values of the column. Required before running.
+        String describing operations on existing columns of the table, for example 
+        "a/log(b+c)". Required before running. Supports arithmetic and math functions 
+        including sqrt, abs, log, log1p, exp, and expm1 -- see Pandas ``df.eval()`` 
+        documentation for further details.
+    
+    data_type : str, optional
+        Python type or ``numpy.dtype`` to cast the column's values into.
+    
+    missing_values : str or numeric, optional
+        Value to use for rows that would otherwise be missing.
     
     cache : bool, default False
         Whether to cache column values after they are calculated.
@@ -52,6 +63,8 @@ class ColumnFromExpression():
             column_name = None, 
             table = None, 
             expression = None, 
+            data_type = None, 
+            missing_values = None, 
             cache = False, 
             cache_scope = 'forever', 
             name = None,
@@ -62,6 +75,8 @@ class ColumnFromExpression():
         self.column_name = column_name
         self.table = table
         self.expression = expression
+        self.data_type = data_type
+        self.missing_values = missing_values
         self.cache = cache
         self.cache_scope = cache_scope
         
@@ -93,6 +108,8 @@ class ColumnFromExpression():
             column_name = d['column_name'],
             table = d['table'],
             expression = d['expression'],
+            data_type = d['data_type'],
+            missing_values = d['missing_values'],
             cache = d['cache'],
             cache_scope = d['cache_scope'],
             name = d['name'],
@@ -120,6 +137,8 @@ class ColumnFromExpression():
             'column_name': self.column_name,
             'table': self.table,
             'expression': self.expression,
+            'data_type': self.data_type,
+            'missing_values': self.missing_values,
             'cache': self.cache,
             'cache_scope': self.cache_scope,
         }
@@ -146,11 +165,26 @@ class ColumnFromExpression():
         if self.expression is None:
             raise ValueError("Please provide an expression")
         
+        # Some column names in the expression may not be part of the core DataFrame, so 
+        # we'll need to request them from Orca explicitly. Identify tokens that begin 
+        # with a letter and contain any number of alphanumerics or underscores, but do 
+        # not end with an opening parenthesis.
+        cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
+        
         @orca.column(table_name = self.table, 
                      column_name = self.column_name, 
                      cache = self.cache, 
                      cache_scope = self.cache_scope)
         def orca_column():
-            pass
+            df = orca.get_table(self.table).to_frame(columns=cols)            
+            series = df.eval(self.expression)
+            
+            if self.missing_values is not None:
+                series = series.fillna(self.missing_values)
+            
+            if self.data_type is not None:
+                series = series.astype(self.data_type)
+            
+            return series
         
     
