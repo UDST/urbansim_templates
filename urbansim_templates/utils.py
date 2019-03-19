@@ -192,18 +192,40 @@ def validate_all_tables():
         validate_table(t, reciprocal=False)
 
 
-def merge_tables(tables, coumns=None):
+def merge_tables(tables, columns=None):
     """
+    Merge multiple tables into a single DataFrame. Tables will be merged from right to 
+    left following ModelManager table schema rules -- so they should generally be listed 
+    from finer-grained to coarser-grained.
     
-    accept either orca table names or dataframes?
+    For example, suppose we merge ``[buildings, zones]`` where ``zones`` has an index 
+    named ``zone_id``. The algorithm will look for a column or index with the same name 
+    in the ``buildings`` table, and use it to merge the ``zones`` columns onto the 
+    ``buildings`` table. Multi-indexes require all the index columns to be present in the 
+    target table. 
+    
+    The input tables are expected to be DataFrame-like: ``pd.DataFrame``, 
+    ``orca.DataFrameWrapper``, etc (what operations?). We don't currently support 
+    accessing Orca tables by name gere, although it might be added. The function will 
+    return a new ``pd.DataFrame``.
+    
+    If you provide a list of ``columns``, only these will be returned. The index(es) of 
+    the left-most table will always be included. 
+
+    If column names overlap, other than for join keys, the tables can't be automatically 
+    merged. If the duplicate column names are incidental and not needed in the final 
+    output, you can merge the tables by providing a ``columns`` list that excludes them.
     
     Parameters
     ----------
-    tables : list of str, or list of pd.DataFrame
+    tables : list of pd.DataFrame or similar
         Two or more tables to merge.
     
     columns : list of str, optional
-        
+    
+    Returns
+    -------
+    pd.DataFrame
     
     """
     
