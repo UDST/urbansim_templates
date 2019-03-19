@@ -229,15 +229,18 @@ def merge_tables(tables, columns=None):
     
     """
     
+    source = tables[1]  # TO DO: adapt to handle multiple tables
+    target = tables[0]
     
-    # given df1 and df2, merge them
+    keys = list(source.index.names)
+
+    # TO DO: filter for appropriate columns
+    # TO DO: check that join keys exist in the target table
+
+    # pandas 0.23+ required to merge on index or column names interchangeably
+    merged = pd.merge(df1, df2, how='left', on=keys)
     
-    # TO DO - filter for necessary columns
-    join_keys = list(df1.index.names)
-    # TO DO - check that join keys exist in second table
-    merged = pd.merge(df1, df2, on=join_keys)  # indexes by name requires Pandas 0.23
-    
-    
+    return merged
     
 
 
