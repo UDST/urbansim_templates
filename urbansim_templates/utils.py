@@ -217,10 +217,6 @@ def merge_tables(tables, coumns=None):
     
     
     
-    
-    while len(tables) < 1:
-    
-    pass
 
 
 ###############################
