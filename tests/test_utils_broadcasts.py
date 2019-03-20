@@ -236,8 +236,29 @@ def test_merge_tables_limit_columns():
     print(merged)
     
     
-# Merge tables and remove columns that otherwise would cause merge to fail
+def test_merge_tables_duplicate_column_names():
+    """
+    Confirm tables can be merged with overlapping column names, as long as they're not 
+    included in the list of columns to retain.
     
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4], 'dupe': [1,1,1,1]}
+    buildings = pd.DataFrame(d).set_index('building_id')
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4], 'dupe': [1,1,1]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    # Duplicate columns should raise a ValueError
+    try:
+        merged = merge_tables([households, buildings])
+        pytest.fail()
+    except ValueError as e:
+        print(e)
+    
+    # Excluding the duplicated name should make things ok
+    merged = merge_tables([households, buildings], columns=['value'])
+    
+    print(merged)    
     
     
     

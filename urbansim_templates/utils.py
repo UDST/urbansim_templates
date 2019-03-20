@@ -228,15 +228,6 @@ def merge_tables(tables, columns=None):
     pd.DataFrame
     
     """
-    
-    def trim_columns(df, columns):
-        """
-        columns may contain duplicate names or names not in df.
-        
-        """
-        overlap = set(columns) & set(df.columns)
-        return df[list(overlap)]
-    
     source = tables[1]  # TO DO: adapt to handle multiple tables
     target = tables[0]
     
@@ -263,6 +254,25 @@ def merge_tables(tables, columns=None):
 ###############################
 ## TEMPLATE HELPER FUNCTIONS ##
 ###############################
+
+def trim_columns(df, columns):
+    """
+    Limit a DataFrame to columns that appear in a list of strings. List may contain 
+    duplicates or names not in the DataFrame. Index(es) of the DataFrame will be retained.
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+    columns : list of str
+    
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    overlap = set(columns) & set(df.columns)
+    return df[list(overlap)]
+    
 
 def to_list(items):
     """
