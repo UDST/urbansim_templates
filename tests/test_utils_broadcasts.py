@@ -1,9 +1,14 @@
+"""
+Tests for the utilities for merging tables using implicit join keys instead of Orca 
+broadcasts.
+
+"""
 import pandas as pd
 import pytest
 
 import orca
 
-from urbansim_templates.utils import validate_table, validate_all_tables
+from urbansim_templates.utils import validate_table, validate_all_tables, merge_tables
 
 
 @pytest.fixture
@@ -200,3 +205,40 @@ def test_validate_all_tables(orca_session):
 
     validate_all_tables()
 
+
+def test_merge_tables():
+    """
+    Merge tables.
+    
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    buildings = pd.DataFrame(d).set_index('building_id')
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, buildings])
+    print(merged)
+    
+    
+def test_merge_tables_limit_columns():
+    """
+    Merge tables and remove some of the columns.
+    
+    """
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    buildings = pd.DataFrame(d).set_index('building_id')
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, buildings], columns=['value'])
+    print(merged)
+    
+    
+# Merge tables and remove columns that otherwise would cause merge to fail
+    
+    
+    
+    
+    

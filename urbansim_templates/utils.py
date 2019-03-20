@@ -206,7 +206,7 @@ def merge_tables(tables, columns=None):
     
     The input tables are expected to be DataFrame-like: ``pd.DataFrame``, 
     ``orca.DataFrameWrapper``, etc (what operations?). We don't currently support 
-    accessing Orca tables by name gere, although it might be added. The function will 
+    accessing Orca tables by name here, although it might be added. The function will 
     return a new ``pd.DataFrame``.
     
     If you provide a list of ``columns``, only these will be returned. The index(es) of 
@@ -229,16 +229,32 @@ def merge_tables(tables, columns=None):
     
     """
     
+    def trim_columns(df, columns):
+        """
+        columns may contain duplicate names or names not in df.
+        
+        """
+        overlap = set(columns) & set(df.columns)
+        return df[list(overlap)]
+    
     source = tables[1]  # TO DO: adapt to handle multiple tables
     target = tables[0]
     
     keys = list(source.index.names)
 
-    # TO DO: filter for appropriate columns
-    # TO DO: check that join keys exist in the target table
+    if columns is not None:
+        source = trim_columns(source, columns)
+        target = trim_columns(target, columns + keys)
+    
+    # TO DO: check that join keys exist in the target table, to provide helpful error
 
-    # pandas 0.23+ required to merge on index or column names interchangeably
-    merged = pd.merge(df1, df2, how='left', on=keys)
+    # pandas 0.23+ required to join on index or column names interchangeably
+    merged = target.join(source, on=keys, how='left')
+    
+    
+    # final filter in case last set of join keys is not needed
+    if columns is not None:
+        merged = trim_columns(merged, columns)
     
     return merged
     
