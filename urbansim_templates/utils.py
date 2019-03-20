@@ -229,20 +229,21 @@ def merge_tables(tables, columns=None):
     pd.DataFrame
     
     """
-    source = tables[1]  # TO DO: adapt to handle multiple tables
-    target = tables[0]
+    while len(tables) > 1:
+        source = tables[-1]
+        target = tables[-2]
     
-    keys = list(source.index.names)
+        keys = list(source.index.names)
 
-    if columns is not None:
-        source = trim_columns(source, columns)
-        target = trim_columns(target, columns + keys)
+        if columns is not None:
+            source = trim_columns(source, columns)
+            target = trim_columns(target, columns + keys)
     
-    # TO DO: check that join keys exist in the target table
-    merged = target.join(source, on=keys, how='left')  # pandas 0.23+ for on=keys
+        # TO DO: confirm join keys exist in the target table
     
+        merged = target.join(source, on=keys, how='left')  # pandas 0.23+ for on=keys
+        tables = tables[:-2] + [merged]
     
-    # final filter in case last set of join keys is not needed
     if columns is not None:
         merged = trim_columns(merged, columns)
     
@@ -256,7 +257,7 @@ def merge_tables(tables, columns=None):
 
 def trim_columns(df, columns):
     """
-    Limit a DataFrame to columns that appear in a list of strings. List may contain 
+    Limit a DataFrame to columns that appear in a list of names. List may contain 
     duplicates or names not in the DataFrame. Index(es) of the DataFrame will be retained.
     
     Parameters

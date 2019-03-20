@@ -206,9 +206,9 @@ def test_validate_all_tables(orca_session):
     validate_all_tables()
 
 
-def test_merge_tables():
+def test_merge_two_tables():
     """
-    Merge tables.
+    Merge two tables.
     
     """
     d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
@@ -221,18 +221,40 @@ def test_merge_tables():
     print(merged)
     
     
-def test_merge_tables_limit_columns():
+def test_merge_three_tables():
     """
-    Merge tables and remove some of the columns.
+    Merge three tables.
     
     """
-    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    d = {'zone_id': [1], 'size': [1]}
+    zones = pd.DataFrame(d).set_index('zone_id')
+
+    d = {'building_id': [1,2,3,4], 'zone_id': [1,1,1,1], 'height': [4,4,4,4]}
     buildings = pd.DataFrame(d).set_index('building_id')
 
     d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
     households = pd.DataFrame(d).set_index('household_id')
     
-    merged = merge_tables([households, buildings], columns=['value'])
+    merged = merge_tables([households, buildings, zones])
+    print(merged)
+    
+    
+def test_merge_tables_limit_columns():
+    """
+    Merge tables and remove some of the columns.
+    
+    """
+    d = {'zone_id': [1], 'size': [1]}
+    zones = pd.DataFrame(d).set_index('zone_id')
+
+    d = {'building_id': [1,2,3,4], 'zone_id': [1,1,1,1], 'height': [4,4,4,4]}
+    buildings = pd.DataFrame(d).set_index('building_id')
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, buildings, zones], 
+                          columns=['zone_id', 'height', 'size'])
     print(merged)
     
     
@@ -261,6 +283,5 @@ def test_merge_tables_duplicate_column_names():
     print(merged)    
     
     
-# test multiple tables
 # test multi-indexes    
     
