@@ -261,5 +261,6 @@ def test_merge_tables_duplicate_column_names():
     print(merged)    
     
     
-    
+# test multiple tables
+# test multi-indexes    
     

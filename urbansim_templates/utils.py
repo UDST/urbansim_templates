@@ -204,24 +204,25 @@ def merge_tables(tables, columns=None):
     ``buildings`` table. Multi-indexes require all the index columns to be present in the 
     target table. 
     
-    The input tables are expected to be DataFrame-like: ``pd.DataFrame``, 
-    ``orca.DataFrameWrapper``, etc (what operations?). We don't currently support 
-    accessing Orca tables by name here, although it might be added. The function will 
-    return a new ``pd.DataFrame``.
+    The input tables must be provided as DataFrames; we don't currently support accessing 
+    Orca tables by name here, although it might be added. The function will return a new 
+    ``pd.DataFrame``.
     
-    If you provide a list of ``columns``, only these will be returned. The index(es) of 
-    the left-most table will always be included. 
+    If you provide a list of ``columns``, the output table will be limited to columns in 
+    this list, plus the index(es) of the left-most table.
 
-    If column names overlap, other than for join keys, the tables can't be automatically 
-    merged. If the duplicate column names are incidental and not needed in the final 
-    output, you can merge the tables by providing a ``columns`` list that excludes them.
+    If tables contain columns with identical names (other than the join keys), the tables 
+    can't be automatically merged. If these columns are just incidental and not needed in 
+    the final output, you can merge the tables by providing a ``columns`` list that 
+    excludes them.
     
     Parameters
     ----------
-    tables : list of pd.DataFrame or similar
+    tables : list of pd.DataFrame
         Two or more tables to merge.
     
     columns : list of str, optional
+        Names of columns to retain in the final output.
     
     Returns
     -------
@@ -237,10 +238,8 @@ def merge_tables(tables, columns=None):
         source = trim_columns(source, columns)
         target = trim_columns(target, columns + keys)
     
-    # TO DO: check that join keys exist in the target table, to provide helpful error
-
-    # pandas 0.23+ required to join on index or column names interchangeably
-    merged = target.join(source, on=keys, how='left')
+    # TO DO: check that join keys exist in the target table
+    merged = target.join(source, on=keys, how='left')  # pandas 0.23+ for on=keys
     
     
     # final filter in case last set of join keys is not needed
