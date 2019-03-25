@@ -208,9 +208,6 @@ def merge_tables(tables, columns=None):
     will be used as the join key. Multi-indexes are fine, but all of the index columns 
     need to be present in the target table.
     
-    For now, this function only accepts DataFrames. In the future we might support 
-    accessing Orca tables by name here. The function will return a new ``pd.DataFrame``.
-        
     If you provide a list of ``columns``, the output table will be limited to columns in 
     this list, plus the index(es) of the left-most table. Column names not found will be 
     ignored.
@@ -224,17 +221,11 @@ def merge_tables(tables, columns=None):
     (e.g. if some identifiers from the target table aren't found in the source table), 
     data may be cast to a type that allows missing values. For better control over this, 
     see ``urbansim_templates.data.ColumnFromBroadcast()``.
-    
-    TO DO: The merged 
-    
-    TO DO: We should add a case where if tables are merged index-to-index, it's an outer
-    join rather than a left join. This is what people would expect if they were merging 
-    something like two nodes tables that contained different subsets of nodes, i think.
-    
+        
     Parameters
     ----------
-    tables : list of pd.DataFrame
-        Two or more tables to merge.
+    tables : list of str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+        Two or more tables to merge. Types can be mixed and matched.
     
     columns : list of str, optional
         Names of columns to retain in the final output.
@@ -313,9 +304,29 @@ def get_df(table, columns=None):
 
 def all_cols(table):
     """
+    Returns a list of all column names in a table, including index(es). Input can be an 
+    Orca table name, ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or 
+    ``pd.DataFrame``.
+    
+    Parameters
+    ----------
+    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+    
+    Returns
+    -------
+    list of str
+    
     """
-    # all_cols += list(dfw.index.names) + list(dfw.columns)
-    pass
+    if type(table) not in [str, 
+                           orca.DataFrameWrapper, 
+                           orca.TableFuncWrapper, 
+                           pd.DataFrame]:
+        raise ValueError("Table has unsupported type: {}".format(type(table)))
+
+    if type(table) == str:
+        table = orca.get_table(table)
+    
+    return list(table.index.names) + list(table.columns)
     
 
 def trim_cols(df, columns=None):

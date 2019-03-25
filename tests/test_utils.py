@@ -102,6 +102,55 @@ def test_get_df_unsupported_type(df):
 
 
 ###############################
+## all_cols
+
+def test_all_cols_dataframe(df):
+    """
+    Confirm that all_cols() works with DataFrame input.
+    
+    """
+    cols = utils.all_cols(df)
+    assert sorted(cols) == sorted(['id', 'val1', 'val2'])
+
+
+def test_all_cols_orca(df):
+    """
+    Confirm that all_cols() works with Orca input.
+    
+    """
+    orca.add_table('df', df)
+    cols = utils.all_cols('df')
+    assert sorted(cols) == sorted(['id', 'val1', 'val2'])
+
+
+def test_all_cols_extras(df):
+    """
+    Confirm that all_cols() includes columns not part of the Orca core table.
+    
+    """
+    orca.add_table('df', df)
+    orca.add_column('df', 'newcol', pd.Series())
+    cols = utils.all_cols('df')
+    assert sorted(cols) == sorted(['id', 'val1', 'val2', 'newcol'])
+
+
+def test_all_cols_unsupported_type(df):
+    """
+    Confirm that all_cols() raises an error for an unsupported type.
+    
+    """
+    try:
+        cols = utils.all_cols([df])
+    except ValueError as e:
+        print(e)
+        return
+    
+    pytest.fail()
+
+
+
+
+###############################
 ## get_data
 
 @pytest.fixture
