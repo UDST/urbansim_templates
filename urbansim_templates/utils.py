@@ -198,19 +198,30 @@ def merge_tables(tables, columns=None):
     """
     Merge multiple tables into a single DataFrame. 
     
-    Tables should be listed in order from finer-grained to coarser-grained. If there are 
-    more than two tables, the last one will be merged onto the next-to-last, continuing 
-    until all the data is merged into the first table. In each merge stage, we'll refer 
-    to the right-hand table as the "source" and the left-hand one as the "target".
+    All the data will eventually be merged onto the first table in the list. In each 
+    merge stage, we'll refer to the right-hand table as the "source" and the left-hand 
+    one as the "target". 
     
-    Tables are merged using ModelManager schema rules. The source table must have a 
+    Tables are merged using ModelManager schema rules: The source table must have a 
     unique index, and the target table must have a column with a matching name, which 
     will be used as the join key. Multi-indexes are fine, but all of the index columns 
     need to be present in the target table.
     
+    The last table in the list is the initial source. The algorithm searches backward
+    through the list for a table that qualifies as a target. The source table is left-
+    merged onto the target, and then the algorithm continues with the second-to-last 
+    table as the new source. 
+    
+    Example 1: Tables A and B share join keys. Tables B and C share join keys. Merging 
+    [A, B, C] will left-join C onto B, and then left-join the result onto A. 
+    
+    Example 2: Tables A and B share join keys. Tables A and C also share join keys, but 
+    tables B and C don't. Merging [A, B, C] will left-join C onto A, and then left-join 
+    B onto the result of the first join.
+    
     If you provide a list of ``columns``, the output table will be limited to columns in 
-    this list, plus the index(es) of the left-most table. Column names not found will be 
-    ignored.
+    this list. The index(es) of the left-most table will always be retained, but it's a 
+    good practice to list them anyway. Column names not found will be ignored.
 
     If two tables contain columns with identical names (other than join keys), they can't  
     be automatically merged. If the columns are just incidental and not needed in the 
@@ -235,26 +246,32 @@ def merge_tables(tables, columns=None):
     pd.DataFrame
     
     """
-    # TO DO: the merges should not be strictly in order. We should search left until we 
-    # find a table with a matching identifier.
-    
     while len(tables) > 1:
-        source = tables[-1]
-        target = tables[-2]
-    
+        # last table becomes the source
+        source = get_df(tables[-1], columns)
         keys = list(source.index.names)
+        
+        # search for target table
+        target_position = None
+        for i in range(len(tables)-2, -1, -1):
+            if set(keys).issubset(set(all_cols(tables[i]))):
+                target_position = i
+                target_columns = columns + keys if columns is not None else None
+                target = get_df(tables[i], target_columns)
+                break
+        
+        if target_position is None:
+            msg = "Could not find a target to merge table {} onto".format(len(tables))
+            raise ValueError(msg)
 
-        if columns is not None:
-            source = trim_cols(source, columns)
-            target = trim_cols(target, columns + keys)
-    
-        # TO DO: confirm join keys exist in the target table
-    
+        # merge source onto target
         merged = target.join(source, on=keys, how='left')  # pandas 0.23+ for on=keys
-        tables = tables[:-2] + [merged]
-    
-    if columns is not None:
-        merged = trim_cols(merged, columns)
+        
+        tables = tables[:-1]
+        tables[target_position] = merged
+
+    # drop final merge keys if not needed
+    merged = trim_cols(merged, columns)
     
     return merged
     

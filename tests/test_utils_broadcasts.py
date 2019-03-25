@@ -9,6 +9,7 @@ import pytest
 import orca
 
 from urbansim_templates.utils import validate_table, validate_all_tables, merge_tables
+from urbansim_templates.utils import all_cols
 
 
 @pytest.fixture
@@ -19,6 +20,9 @@ def orca_session():
     """
     orca.clear_all()
 
+
+###############################
+## validate_tables()
 
 def test_validation_table_not_registered(orca_session):
     """
@@ -206,6 +210,9 @@ def test_validate_all_tables(orca_session):
     validate_all_tables()
 
 
+###############################
+## merge_tables()
+
 def test_merge_two_tables():
     """
     Merge two tables.
@@ -218,7 +225,7 @@ def test_merge_two_tables():
     households = pd.DataFrame(d).set_index('household_id')
     
     merged = merge_tables([households, buildings])
-    print(merged)
+    assert sorted(all_cols(merged)) == sorted(['household_id', 'building_id', 'value'])
     
     
 def test_merge_three_tables():
@@ -236,7 +243,27 @@ def test_merge_three_tables():
     households = pd.DataFrame(d).set_index('household_id')
     
     merged = merge_tables([households, buildings, zones])
-    print(merged)
+    assert sorted(all_cols(merged)) == sorted(
+            ['household_id', 'building_id', 'zone_id', 'height', 'size'])
+    
+    
+def test_merge_three_tables_out_of_order():
+    """
+    Merge three tables, where the second and third are each merged onto the first.
+    
+    """
+    d = {'zone_id': [1], 'size': [1]}
+    zones = pd.DataFrame(d).set_index('zone_id')
+
+    d = {'building_id': [1,2,3,4], 'height': [4,4,4,4]}
+    buildings = pd.DataFrame(d).set_index('building_id')
+
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4], 'zone_id': [1,1,1]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, buildings, zones])
+    assert sorted(all_cols(merged)) == sorted(
+            ['household_id', 'building_id', 'zone_id', 'height', 'size'])
     
     
 def test_merge_tables_limit_columns():
@@ -255,7 +282,8 @@ def test_merge_tables_limit_columns():
     
     merged = merge_tables([households, buildings, zones], 
                           columns=['zone_id', 'height', 'size'])
-    print(merged)
+    assert sorted(all_cols(merged)) == sorted(
+            ['household_id', 'zone_id', 'height', 'size'])
     
     
 def test_merge_tables_duplicate_column_names():
@@ -279,8 +307,7 @@ def test_merge_tables_duplicate_column_names():
     
     # Excluding the duplicated name should make things ok
     merged = merge_tables([households, buildings], columns=['value'])
-    
-    print(merged)    
+    assert sorted(all_cols(merged)) == sorted(['household_id', 'value'])
     
     
 def test_merge_tables_multiindex():
@@ -295,13 +322,14 @@ def test_merge_tables_multiindex():
     households = pd.DataFrame(d).set_index('household_id')
     
     merged = merge_tables([households, units])
-    print(merged)
+    assert sorted(all_cols(merged)) == sorted(
+            ['household_id', 'building_id', 'unit_id', 'value'])
     
     
 def test_merge_tables_missing_values():
     """
     If the target table includes identifiers not found in the source table, missing 
-    values should be inserted..
+    values should be inserted, changing the data type.
     
     """
     d = {'building_id': [1,1,2,2], 'unit_id': [1,2,1,2], 'value': [4,4,4,4]}
@@ -311,6 +339,7 @@ def test_merge_tables_missing_values():
     households = pd.DataFrame(d).set_index('household_id')
     
     merged = merge_tables([households, units])
-    print(merged)
+    assert units.value.dtype == 'int64'
+    assert merged.values.dtype == 'float64'
     
 
