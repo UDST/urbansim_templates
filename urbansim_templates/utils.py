@@ -210,7 +210,8 @@ def merge_tables(tables, columns=None):
     accessing Orca tables by name here. The function will return a new ``pd.DataFrame``.
         
     If you provide a list of ``columns``, the output table will be limited to columns in 
-    this list, plus the index(es) of the left-most table.
+    this list, plus the index(es) of the left-most table. Column names not found will be 
+    ignored.
 
     If two tables contain columns with identical names (other than join keys), they can't  
     be automatically merged. If the columns are just incidental and not needed in the 
@@ -221,6 +222,12 @@ def merge_tables(tables, columns=None):
     (e.g. if some identifiers from the target table aren't found in the source table), 
     data may be cast to a type that allows missing values. For better control over this, 
     see ``urbansim_templates.data.ColumnFromBroadcast()``.
+    
+    TO DO: The merged 
+    
+    TO DO: We should add a case where if tables are merged index-to-index, it's an outer
+    join rather than a left join. This is what people would expect if they were merging 
+    something like two nodes tables that contained different subsets of nodes, i think.
     
     Parameters
     ----------
@@ -235,6 +242,9 @@ def merge_tables(tables, columns=None):
     pd.DataFrame
     
     """
+    # TO DO: the merges should not be strictly in order. We should search left until we 
+    # find a table with a matching identifier.
+    
     while len(tables) > 1:
         source = tables[-1]
         target = tables[-2]
