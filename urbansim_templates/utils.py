@@ -2,6 +2,8 @@ from __future__ import print_function
 
 from datetime import datetime as dt
 
+import pandas as pd
+
 import orca
 from urbansim.models.util import (apply_filter_query, columns_in_filters, 
         columns_in_formula)
@@ -252,8 +254,8 @@ def merge_tables(tables, columns=None):
         keys = list(source.index.names)
 
         if columns is not None:
-            source = trim_columns(source, columns)
-            target = trim_columns(target, columns + keys)
+            source = trim_cols(source, columns)
+            target = trim_cols(target, columns + keys)
     
         # TO DO: confirm join keys exist in the target table
     
@@ -261,7 +263,7 @@ def merge_tables(tables, columns=None):
         tables = tables[:-2] + [merged]
     
     if columns is not None:
-        merged = trim_columns(merged, columns)
+        merged = trim_cols(merged, columns)
     
     return merged
     
@@ -271,23 +273,73 @@ def merge_tables(tables, columns=None):
 ## TEMPLATE HELPER FUNCTIONS ##
 ###############################
 
-def trim_columns(df, columns):
+def get_df(table, columns=None):
     """
-    Limit a DataFrame to columns that appear in a list of names. List may contain 
-    duplicates or names not in the DataFrame. Index(es) of the DataFrame will be retained.
+    Returns a table as a ``pd.DataFrame``. Input can be an Orca table name, 
+    ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or ``pd.DataFrame``.
+    
+    Optionally, columns can be limited to those that appear in a list of names. The list 
+    may contain duplicates or columns not in the table. Index(es) will always be
+    retained, but it's a good practice to list them anyway.
     
     Parameters
     ----------
-    df : pd.DataFrame
-    columns : list of str
+    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+    columns : list of str, optional
     
     Returns
     -------
     pd.DataFrame
     
     """
-    overlap = set(columns) & set(df.columns)
-    return df[list(overlap)]
+    if type(table) not in [str, 
+                           orca.DataFrameWrapper, 
+                           orca.TableFuncWrapper, 
+                           pd.DataFrame]:
+        raise ValueError("Table has unsupported type: {}".format(type(table)))
+    
+    if type(table) == pd.DataFrame:
+        return trim_cols(table, columns)
+    
+    elif type(table) == str:
+        table = orca.get_table(table)
+    
+    if columns is not None:
+        # Orca requires column list to be unique and existing, or None
+        columns = list(set(columns) & set(table.columns))
+    
+    return table.to_frame(columns=columns)
+    
+
+def all_cols(table):
+    """
+    """
+    # all_cols += list(dfw.index.names) + list(dfw.columns)
+    pass
+    
+
+def trim_cols(df, columns=None):
+    """
+    Limit a DataFrame to columns that appear in a list of names. List may contain 
+    duplicates or names not in the DataFrame. Index(es) of the DataFrame will always be 
+    retained, but it's a good practice to list them anyway. If ``columns`` is None, all 
+    columns are retained. Returns the original DataFrame, not a copy. 
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+    columns : list of str, optional
+    
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    if columns is None:
+        return df
+    
+    cols = set(columns) & set(df.columns)  # unique, existing columns
+    return df[list(cols)]
     
 
 def to_list(items):

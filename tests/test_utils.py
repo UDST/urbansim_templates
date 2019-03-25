@@ -25,6 +25,85 @@ def test_version_greater_or_equal():
     assert utils.version_greater_or_equal('1.1.3.dev0', '1.1.3') == False
 
 
+###############################
+## get_df
+
+@pytest.fixture
+def df():
+    d = {'id': [1,2,3], 'val1': [4,5,6], 'val2': [7,8,9]}
+    return pd.DataFrame(d).set_index('id')
+
+
+def test_get_df_dataframe(df):
+    """
+    Confirm that get_df() works when passed a DataFrame.
+    
+    """
+    df_out = utils.get_df(df)
+    pd.testing.assert_frame_equal(df, df_out)
+    
+
+def test_get_df_str(df):
+    """
+    Confirm that get_df() works with str input.
+    
+    """
+    orca.add_table('df', df)
+    df_out = utils.get_df('df')
+    pd.testing.assert_frame_equal(df, df_out)
+
+
+def test_get_df_dataframewrapper(df):
+    """
+    Confirm that get_df() works with orca.DataFrameWrapper input.
+    
+    """
+    dfw = orca.DataFrameWrapper('df', df)
+    df_out = utils.get_df(dfw)
+    pd.testing.assert_frame_equal(df, df_out)    
+    
+
+def test_get_df_tablefuncwrapper(df):
+    """
+    Confirm that get_df() works with orca.TableFuncWrapper input.
+    
+    """
+    def df_callable():
+        return df
+    
+    tfw = orca.TableFuncWrapper('df', df_callable)
+    df_out = utils.get_df(tfw)
+    pd.testing.assert_frame_equal(df, df_out)    
+    
+
+def test_get_df_columns(df):
+    """
+    Confirm that get_df() limits columns, and filters out duplicates and invalid ones.
+    
+    """
+    dfw = orca.DataFrameWrapper('df', df)
+    df_out = utils.get_df(dfw, ['id', 'val1', 'val1', 'val3'])
+    pd.testing.assert_frame_equal(df[['val1']], df_out)    
+    
+
+def test_get_df_unsupported_type(df):
+    """
+    Confirm that get_df() raises an error for an unsupported type.
+    
+    """
+    try:
+        df_out = utils.get_df([df])
+    except ValueError as e:
+        print(e)
+        return
+    
+    pytest.fail()
+    
+
+
+###############################
+## get_data
+
 @pytest.fixture
 def orca_session():
     d1 = {'id': [1, 2, 3],
