@@ -196,7 +196,7 @@ def validate_all_tables():
 
 def merge_tables(tables, columns=None):
     """
-    Merge multiple tables into a single DataFrame. 
+    Merge two or more tables into a single DataFrame. 
     
     All the data will eventually be merged onto the first table in the list. In each 
     merge stage, we'll refer to the right-hand table as the "source" and the left-hand 
@@ -209,7 +209,7 @@ def merge_tables(tables, columns=None):
     
     The last table in the list is the initial source. The algorithm searches backward
     through the list for a table that qualifies as a target. The source table is left-
-    merged onto the target, and then the algorithm continues with the second-to-last 
+    joined onto the target, and then the algorithm continues with the second-to-last 
     table as the new source. 
     
     Example 1: Tables A and B share join keys. Tables B and C share join keys. Merging 
@@ -230,8 +230,8 @@ def merge_tables(tables, columns=None):
     
     A note about data types: They will be retained, but if NaN values need to be added 
     (e.g. if some identifiers from the target table aren't found in the source table), 
-    data may be cast to a type that allows missing values. For better control over this, 
-    see ``urbansim_templates.data.ColumnFromBroadcast()``.
+    data may need to be cast to a type that allows missing values. For better control 
+    over this, see ``urbansim_templates.data.ColumnFromBroadcast()``.
         
     Parameters
     ----------
