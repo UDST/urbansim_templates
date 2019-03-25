@@ -217,6 +217,11 @@ def merge_tables(tables, columns=None):
     final output, you can perform the merge by providing a ``columns`` list that excludes 
     them.
     
+    A note about data types: They will be retained, but if NaN values need to be added 
+    (e.g. if some identifiers from the target table aren't found in the source table), 
+    data may be cast to a type that allows missing values. For better control over this, 
+    see ``urbansim_templates.data.ColumnFromBroadcast()``.
+    
     Parameters
     ----------
     tables : list of pd.DataFrame

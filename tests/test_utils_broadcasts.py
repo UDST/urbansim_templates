@@ -283,5 +283,34 @@ def test_merge_tables_duplicate_column_names():
     print(merged)    
     
     
-# test multi-indexes    
+def test_merge_tables_multiindex():
+    """
+    Merge tables where the source table has a multi-index.
     
+    """
+    d = {'building_id': [1,1,2,2], 'unit_id': [1,2,1,2], 'value': [4,4,4,4]}
+    units = pd.DataFrame(d).set_index(['building_id', 'unit_id'])
+
+    d = {'household_id': [1,2,3], 'building_id': [1,1,2], 'unit_id': [1,2,1]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, units])
+    print(merged)
+    
+    
+def test_merge_tables_missing_values():
+    """
+    If the target table includes identifiers not found in the source table, missing 
+    values should be inserted..
+    
+    """
+    d = {'building_id': [1,1,2,2], 'unit_id': [1,2,1,2], 'value': [4,4,4,4]}
+    units = pd.DataFrame(d).set_index(['building_id', 'unit_id'])
+
+    d = {'household_id': [1,2,3], 'building_id': [1,1,3], 'unit_id': [1,2,1]}
+    households = pd.DataFrame(d).set_index('household_id')
+    
+    merged = merge_tables([households, units])
+    print(merged)
+    
+
