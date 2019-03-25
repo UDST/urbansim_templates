@@ -194,27 +194,28 @@ def validate_all_tables():
 
 def merge_tables(tables, columns=None):
     """
-    Merge multiple tables into a single DataFrame. Tables will be merged from right to 
-    left following ModelManager table schema rules -- so they should generally be listed 
-    from finer-grained to coarser-grained.
+    Merge multiple tables into a single DataFrame. 
     
-    For example, suppose we merge ``[buildings, zones]`` where ``zones`` has an index 
-    named ``zone_id``. The algorithm will look for a column or index with the same name 
-    in the ``buildings`` table, and use it to merge the ``zones`` columns onto the 
-    ``buildings`` table. Multi-indexes require all the index columns to be present in the 
-    target table. 
+    Tables should be listed in order from finer-grained to coarser-grained. If there are 
+    more than two tables, the last one will be merged onto the next-to-last, continuing 
+    until all the data is merged into the first table. In each merge stage, we'll refer 
+    to the right-hand table as the "source" and the left-hand one as the "target".
     
-    The input tables must be provided as DataFrames; we don't currently support accessing 
-    Orca tables by name here, although it might be added. The function will return a new 
-    ``pd.DataFrame``.
+    Tables are merged using ModelManager schema rules. The source table must have a 
+    unique index, and the target table must have a column with a matching name, which 
+    will be used as the join key. Multi-indexes are fine, but all of the index columns 
+    need to be present in the target table.
     
+    For now, this function only accepts DataFrames. In the future we might support 
+    accessing Orca tables by name here. The function will return a new ``pd.DataFrame``.
+        
     If you provide a list of ``columns``, the output table will be limited to columns in 
     this list, plus the index(es) of the left-most table.
 
-    If tables contain columns with identical names (other than the join keys), the tables 
-    can't be automatically merged. If these columns are just incidental and not needed in 
-    the final output, you can merge the tables by providing a ``columns`` list that 
-    excludes them.
+    If two tables contain columns with identical names (other than join keys), they can't  
+    be automatically merged. If the columns are just incidental and not needed in the 
+    final output, you can perform the merge by providing a ``columns`` list that excludes 
+    them.
     
     Parameters
     ----------
