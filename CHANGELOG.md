@@ -2,6 +2,12 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev2 (2019-03-21)
+
+- adds an mct argment to models.segmented_large_multinomial_logit.fit_all()
+- adds an interaction_terms argment to models.segmented_large_multinomial_logit.run_all()
+
+
 #### 0.2.dev2 (2019-03-04)
 
 - adds template for saving data: `urbansim_templates.data.SaveTable()`
