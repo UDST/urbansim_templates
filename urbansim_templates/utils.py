@@ -458,8 +458,8 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     
     colnames = None  # this will get all columns
     if (model_expression is not None) or (extra_columns is not None):
-        colnames = set(columns_in_formula(model_expression) + \
-                       columns_in_filters(filters) + to_list(extra_columns))
+        colnames = list(set(columns_in_formula(model_expression) + \
+                            columns_in_filters(filters) + to_list(extra_columns)))
 
     if not isinstance(tables, list):
         df = get_df(tables, colnames)
