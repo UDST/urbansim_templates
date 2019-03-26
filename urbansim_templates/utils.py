@@ -418,28 +418,15 @@ def update_name(template, name=None):
 def get_data(tables, fallback_tables=None, filters=None, model_expression=None, 
         extra_columns=None):
     """
-    Generate a pd.DataFrame from one or more tables registered with Orca. Templates should 
-    call this function immediately before the data is needed, so that it's as up-to-date 
-    as possible.
+    Generate a ``pd.DataFrame`` for model estimation or simulation. Automatically loads 
+    tables from Orca, merges them, and removes columns not referenced in a model 
+    expression or data filter. Additional columns can be requested.
     
     If filters are provided, the output will include only rows that match the filter
     criteria. 
     
-    Default behavior is for the output to inclue all columns. If a model_expression and/or
-    extra_columns is provided, non-relevant columns will be dropped from the output.
-    Relevant columns include any mentioned in the model expression, filters, or list of 
-    extras. Join keys will *not* be included in the final output even if the data is drawn
-    from multiple tables, unless they appear in the model expression or filters as well.
-    
-    If a named column is not found in the source tables, it will just be skipped. This is 
-    to support use cases where data is assembled separately for choosers and alternatives 
-    and then merged together -- the model expression would include terms from both sets 
-    of tables.
-    
-    Duplicate column names are not recommended -- columns are expected to be unique within 
-    the set of tables they're being drawn from, with the exception of join keys. If column 
-    names are repeated, current behavior is to follow the Orca default and keep the 
-    left-most copy of the column. This may change later and should not be relied on. 
+    See ``urbansim_templates.utils.merge_tables()`` for a detailed description of how 
+    the merges are performed.
     
     Parameters
     ----------
@@ -469,33 +456,17 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     if tables is None:
         tables = fallback_tables
     
-    tables = to_list(tables)
-    colnames = None  # this will get all columns from Orca utilities
-    
+    colnames = None  # this will get all columns
     if (model_expression is not None) or (extra_columns is not None):
         colnames = set(columns_in_formula(model_expression) + \
                        columns_in_filters(filters) + to_list(extra_columns))
-    
-        # skip cols not found in any of the source tables - have to check for this 
-        # explicitly because the orca utilities will raise an error if we request column
-        # names that aren't there
-        all_cols = []
-        for t in tables:
-            dfw = orca.get_table(t)
-            all_cols += list(dfw.index.names) + list(dfw.columns)
-    
-        colnames = [c for c in colnames if c in all_cols]
-    
-    if len(tables) == 1:
-        df = orca.get_table(table_name=tables[0]).to_frame(columns=colnames)
+
+    if not isinstance(tables, list):
+        df = get_df(tables, colnames)
     
     else:
-        df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
-
-    if colnames is not None:
-        if len(df.columns) > len(colnames):
-            df = df[colnames]
-
+        df = merge_tables(tables, colnames)
+    
     df = apply_filter_query(df, filters)
     return df
     
