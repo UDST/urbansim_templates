@@ -2,6 +2,8 @@ from __future__ import print_function
 
 from datetime import datetime as dt
 
+import pandas as pd
+
 import orca
 from urbansim.models.util import (apply_filter_query, columns_in_filters, 
         columns_in_formula)
@@ -75,9 +77,298 @@ def validate_template(cls):
     return True
 
 
+#####################################
+## REPLACEMENT FOR ORCA BROADCASTS ##
+#####################################
+
+"""
+These utilities provide functionality for merging tables using implicit join keys instead 
+of Orca broadcasts. See Github issue #78 for discussion of the rationale.
+
+"""
+
+def validate_table(table, reciprocal=True):
+    """
+    Check some basic expectations about an Orca table:
+    
+    - Confirm that it includes a unique, named index column (a.k.a. primary key) or set 
+      of columns (multi-index, a.k.a. composite key). If not, raise a ValueError.
+    
+    - Confirm that none of the other columns in the table share names with the index(es). 
+      If they do, raise a ValueError.
+    
+    - If the table contains columns whose names match the index columns of other tables 
+      registered with Orca, check whether they make sense as join keys. This prints a 
+      status message with the number of presumptive foreign-key values that are found in 
+      the primary/composite key, for evaluation by the user. 
+    
+    - Perform the same check for columns in _other_ tables whose names match the index 
+      column(s) of _this_ table.
+      
+    - It doesn't currently compare indexes to indexes. (Maybe it should?)
+      
+    Running this will trigger loading all registered Orca tables, which may take a while. 
+    Stand-alone columns will not be loaded unless their names match an index column. 
+    
+    Doesn't currently incorporate ``orca_test`` validation, but it might be added.
+    
+    Parameters
+    ----------
+    table : str
+        Name of Orca table to validate.
+    
+    reciprocal : bool, default True
+        Whether to also check how columns of other tables align with this one's index. 
+        If False, only check this table's columns against other tables' indexes. 
+    
+    Returns
+    -------
+    bool
+    
+    """
+    # There are a couple of reasons we're not using the orca_test library here:
+    # (a) orca_test doesn't currently support MultiIndexes, and (b) the primary-key/
+    # foreign-key comparisons aren't asserting anything, just printing status 
+    # messages. We should update orca_test to support both, probably.
+    
+    if not orca.is_table(table):
+        raise ValueError("Table not registered with Orca: '{}'".format(table))
+    
+    idx = orca.get_table(table).index
+    
+    # Check index has a name
+    if list(idx.names) == [None]:
+        raise ValueError("Index column has no name")
+    
+    # Check for unique column names
+    for name in list(idx.names):
+        if name in list(orca.get_table(table).columns):
+            raise ValueError("Index names and column names overlap: '{}'".format(name))
+    
+    # Check for unique index values
+    if len(idx.unique()) < len(idx):    
+        raise ValueError("Index not unique")
+    
+    # Compare columns to indexes of other tables, and vice versa
+    combinations = [(table, t) for t in orca.list_tables() if table != t]
+    
+    if reciprocal:
+        combinations += [(t, table) for t in orca.list_tables() if table != t]
+    
+    for t1, t2 in combinations:
+        col_names = orca.get_table(t1).columns
+        idx = orca.get_table(t2).index
+        
+        if set(idx.names).issubset(col_names):
+            vals = orca.get_table(t1).to_frame(idx.names).drop_duplicates()
+            
+            # Easier to compare multi-column values to multi-column index if we 
+            # turn the values into an index as well
+            vals = vals.reset_index().set_index(idx.names).index
+            vals_in_idx = sum(vals.isin(idx))
+            
+            if len(idx.names) == 1:
+                idx_str = idx.names[0]
+            else:
+                idx_str = '[{}]'.format(','.join(idx.names))
+            
+            print("'{}.{}': {} of {} unique values are found in '{}.{}' ({}%)"\
+                    .format(t1, idx_str, 
+                            vals_in_idx, len(vals), 
+                            t2, idx_str, 
+                            round(100*vals_in_idx/len(vals))))
+
+    return True
+
+
+def validate_all_tables():
+    """
+    Validate all tables registered with Orca. See ``validate_table()`` above.
+    
+    Returns
+    -------
+    bool
+    
+    """
+    for t in orca.list_tables():
+        validate_table(t, reciprocal=False)
+
+
+def merge_tables(tables, columns=None):
+    """
+    Merge two or more tables into a single DataFrame. 
+    
+    All the data will eventually be merged onto the first table in the list. In each 
+    merge stage, we'll refer to the right-hand table as the "source" and the left-hand 
+    one as the "target". 
+    
+    Tables are merged using ModelManager schema rules: The source table must have a 
+    unique index, and the target table must have a column with a matching name, which 
+    will be used as the join key. Multi-indexes are fine, but all of the index columns 
+    need to be present in the target table.
+    
+    The last table in the list is the initial source. The algorithm searches backward
+    through the list for a table that qualifies as a target. The source table is left-
+    joined onto the target, and then the algorithm continues with the second-to-last 
+    table as the new source. 
+    
+    Example 1: Tables A and B share join keys. Tables B and C share join keys. Merging 
+    [A, B, C] will left-join C onto B, and then left-join the result onto A. 
+    
+    Example 2: Tables A and B share join keys. Tables A and C also share join keys, but 
+    tables B and C don't. Merging [A, B, C] will left-join C onto A, and then left-join 
+    B onto the result of the first join.
+    
+    If you provide a list of ``columns``, the output table will be limited to columns in 
+    this list. The index(es) of the left-most table will always be retained, but it's a 
+    good practice to list them anyway. Column names not found will be ignored.
+
+    If two tables contain columns with identical names (other than join keys), they can't  
+    be automatically merged. If the columns are just incidental and not needed in the 
+    final output, you can perform the merge by providing a ``columns`` list that excludes 
+    them.
+    
+    A note about data types: They will be retained, but if NaN values need to be added 
+    (e.g. if some identifiers from the target table aren't found in the source table), 
+    data may need to be cast to a type that allows missing values. For better control 
+    over this, see ``urbansim_templates.data.ColumnFromBroadcast()``.
+        
+    Parameters
+    ----------
+    tables : list of str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+        Two or more tables to merge. Types can be mixed and matched.
+    
+    columns : list of str, optional
+        Names of columns to retain in the final output.
+    
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    while len(tables) > 1:
+        # last table becomes the source
+        source = get_df(tables[-1], columns)
+        keys = list(source.index.names)
+        
+        # search for target table
+        target_position = None
+        for i in range(len(tables)-2, -1, -1):
+            if set(keys).issubset(set(all_cols(tables[i]))):
+                target_position = i
+                target_columns = columns + keys if columns is not None else None
+                target = get_df(tables[i], target_columns)
+                break
+        
+        if target_position is None:
+            msg = "Could not find a target to merge table {} onto".format(len(tables))
+            raise ValueError(msg)
+
+        # merge source onto target
+        merged = target.join(source, on=keys, how='left')  # pandas 0.23+ for on=keys
+        
+        tables = tables[:-1]
+        tables[target_position] = merged
+
+    # drop final merge keys if not needed
+    merged = trim_cols(merged, columns)
+    
+    return merged
+    
+
+
 ###############################
 ## TEMPLATE HELPER FUNCTIONS ##
 ###############################
+
+def get_df(table, columns=None):
+    """
+    Returns a table as a ``pd.DataFrame``. Input can be an Orca table name, 
+    ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or ``pd.DataFrame``.
+    
+    Optionally, columns can be limited to those that appear in a list of names. The list 
+    may contain duplicates or columns not in the table. Index(es) will always be
+    retained, but it's a good practice to list them anyway.
+    
+    Parameters
+    ----------
+    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+    columns : list of str, optional
+    
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    if type(table) not in [str, 
+                           orca.DataFrameWrapper, 
+                           orca.TableFuncWrapper, 
+                           pd.DataFrame]:
+        raise ValueError("Table has unsupported type: {}".format(type(table)))
+    
+    if type(table) == pd.DataFrame:
+        return trim_cols(table, columns)
+    
+    elif type(table) == str:
+        table = orca.get_table(table)
+    
+    if columns is not None:
+        # Orca requires column list to be unique and existing, or None
+        columns = list(set(columns) & set(table.columns))
+    
+    return table.to_frame(columns=columns)
+    
+
+def all_cols(table):
+    """
+    Returns a list of all column names in a table, including index(es). Input can be an 
+    Orca table name, ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or 
+    ``pd.DataFrame``.
+    
+    Parameters
+    ----------
+    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame
+    
+    Returns
+    -------
+    list of str
+    
+    """
+    if type(table) not in [str, 
+                           orca.DataFrameWrapper, 
+                           orca.TableFuncWrapper, 
+                           pd.DataFrame]:
+        raise ValueError("Table has unsupported type: {}".format(type(table)))
+
+    if type(table) == str:
+        table = orca.get_table(table)
+    
+    return list(table.index.names) + list(table.columns)
+    
+
+def trim_cols(df, columns=None):
+    """
+    Limit a DataFrame to columns that appear in a list of names. List may contain 
+    duplicates or names not in the DataFrame. Index(es) of the DataFrame will always be 
+    retained, but it's a good practice to list them anyway. If ``columns`` is None, all 
+    columns are retained. Returns the original DataFrame, not a copy. 
+    
+    Parameters
+    ----------
+    df : pd.DataFrame
+    columns : list of str, optional
+    
+    Returns
+    -------
+    pd.DataFrame
+    
+    """
+    if columns is None:
+        return df
+    
+    cols = set(columns) & set(df.columns)  # unique, existing columns
+    return df[list(cols)]
+    
 
 def to_list(items):
     """
@@ -127,28 +418,15 @@ def update_name(template, name=None):
 def get_data(tables, fallback_tables=None, filters=None, model_expression=None, 
         extra_columns=None):
     """
-    Generate a pd.DataFrame from one or more tables registered with Orca. Templates should 
-    call this function immediately before the data is needed, so that it's as up-to-date 
-    as possible.
+    Generate a ``pd.DataFrame`` for model estimation or simulation. Automatically loads 
+    tables from Orca, merges them, and removes columns not referenced in a model 
+    expression or data filter. Additional columns can be requested.
     
     If filters are provided, the output will include only rows that match the filter
     criteria. 
     
-    Default behavior is for the output to inclue all columns. If a model_expression and/or
-    extra_columns is provided, non-relevant columns will be dropped from the output.
-    Relevant columns include any mentioned in the model expression, filters, or list of 
-    extras. Join keys will *not* be included in the final output even if the data is drawn
-    from multiple tables, unless they appear in the model expression or filters as well.
-    
-    If a named column is not found in the source tables, it will just be skipped. This is 
-    to support use cases where data is assembled separately for choosers and alternatives 
-    and then merged together -- the model expression would include terms from both sets 
-    of tables.
-    
-    Duplicate column names are not recommended -- columns are expected to be unique within 
-    the set of tables they're being drawn from, with the exception of join keys. If column 
-    names are repeated, current behavior is to follow the Orca default and keep the 
-    left-most copy of the column. This may change later and should not be relied on. 
+    See ``urbansim_templates.utils.merge_tables()`` for a detailed description of how 
+    the merges are performed.
     
     Parameters
     ----------
@@ -178,33 +456,17 @@ def get_data(tables, fallback_tables=None, filters=None, model_expression=None,
     if tables is None:
         tables = fallback_tables
     
-    tables = to_list(tables)
-    colnames = None  # this will get all columns from Orca utilities
-    
+    colnames = None  # this will get all columns
     if (model_expression is not None) or (extra_columns is not None):
-        colnames = set(columns_in_formula(model_expression) + \
-                       columns_in_filters(filters) + to_list(extra_columns))
-    
-        # skip cols not found in any of the source tables - have to check for this 
-        # explicitly because the orca utilities will raise an error if we request column
-        # names that aren't there
-        all_cols = []
-        for t in tables:
-            dfw = orca.get_table(t)
-            all_cols += list(dfw.index.names) + list(dfw.columns)
-    
-        colnames = [c for c in colnames if c in all_cols]
-    
-    if len(tables) == 1:
-        df = orca.get_table(table_name=tables[0]).to_frame(columns=colnames)
+        colnames = list(set(columns_in_formula(model_expression) + \
+                            columns_in_filters(filters) + to_list(extra_columns)))
+
+    if not isinstance(tables, list):
+        df = get_df(tables, colnames)
     
     else:
-        df = orca.merge_tables(target=tables[0], tables=tables, columns=colnames)
-
-    if colnames is not None:
-        if len(df.columns) > len(colnames):
-            df = df[colnames]
-
+        df = merge_tables(tables, colnames)
+    
     df = apply_filter_query(df, filters)
     return df
     
