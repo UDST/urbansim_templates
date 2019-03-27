@@ -20,16 +20,6 @@ class LoadTable():
     
     An instance of this template class stores *instructions for loading a data table*, 
     packaged into an Orca step. Running the instructions registers the table with Orca. 
-    Saved table registration steps will be run automatically when you initialize 
-    ModelManager, replacing the ``datasources.py`` scripts used in previous versions of 
-    UrbanSim. 
-    
-    Tables should include a unique index, or a set of columns that jointly represent a 
-    unique index. 
-    
-    If a column has the same name as the index of another table, ModelManager expects to 
-    be able to use it as a join key. Following these naming conventions eliminates the 
-    need for Orca "broadcasts".
     
     All the parameters can also be set as properties after creating the class instance.
     
@@ -51,7 +41,7 @@ class LoadTable():
         Remote url to download file from.
     
     csv_index_cols : str or list of str, optional
-        Required for csv source type.
+        Required for tables loaded from csv.
     
     extra_settings : dict, optional
         Additional arguments to pass to ``pd.read_csv()`` or ``pd.read_hdf()``. For 
