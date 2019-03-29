@@ -1,8 +1,8 @@
 Data template APIs
 ==================
 
-Discussion
-----------
+Usage
+-----
 
 Data templates help you load tables into `Orca <https://udst.github.io/orca>`__ or save tables or subsets of tables to disk. 
 
@@ -75,15 +75,22 @@ From Orca's perspective, tables set up using the :mod:`~urbansim_templates.data.
 Unlike the templates, Orca relies on user-specified "`broadcast <http://udst.github.io/orca/core.html#merge-api>`__" relationships to perform automatic merging of tables. :mod:`~urbansim_templates.data.LoadTable` does not register any broadcasts, because they're not needed if tables follow the schema rules above. So if you use these tables in non-template model steps, you may need to add broadcasts separately.
 
 
-LoadTable API
--------------
+LoadTable()
+-----------
 
 .. autoclass:: urbansim_templates.data.LoadTable
    :members:
 
 
-SaveTable API
--------------
+SaveTable()
+-----------
 
 .. autoclass:: urbansim_templates.data.SaveTable
+   :members:
+
+
+ColumnFromExpression()
+----------------------
+
+.. autoclass:: urbansim_templates.data.ColumnFromExpression
    :members:

@@ -2,6 +2,10 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev5 (2019-03-29)
+
+- adds new template: `urbansim_templates.data.ColumnFromExpression`
+
 #### 0.2.dev4 (2019-03-26)
 
 - adds new data management utilities: `utils.validate_table()`, `utils.validate_all_tables()`, `utils.merge_tables()`
