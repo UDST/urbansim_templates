@@ -3,7 +3,6 @@ from __future__ import print_function
 import re
 
 import orca
-import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
 from urbansim_templates.utils import merge_tables
