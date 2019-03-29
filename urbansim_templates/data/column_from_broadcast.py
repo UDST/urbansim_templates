@@ -6,7 +6,7 @@ import orca
 import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
-from urbansim_templates.utils import get_df
+from urbansim_templates.utils import merge_tables
 
 
 @modelmanager.template
@@ -179,32 +179,28 @@ class ColumnFromBroadcast():
         if self.source_column is None:
             raise ValueError("Please provide a source column")
         
-
-
-
-
-        # Some column names in the expression may not be part of the core DataFrame, so 
-        # we'll need to request them from Orca explicitly. This regex pulls out column 
-        # names into a list, by identifying tokens in the expression that begin with a 
-        # letter and contain any number of alphanumerics or underscores, but do not end 
-        # with an opening parenthesis. This will also pick up constants, like "pi", but  
-        # invalid column names will be ignored when we request them from get_df().
-#         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
-#         
-#         @orca.column(table_name = self.table, 
-#                      column_name = self.column_name, 
-#                      cache = self.cache, 
-#                      cache_scope = self.cache_scope)
-#         def orca_column():
-#             df = get_df(self.table, columns=cols)
-#             series = df.eval(self.expression)
-#             
-#             if self.missing_values is not None:
-#                 series = series.fillna(self.missing_values)
-#             
-#             if self.data_type is not None:
-#                 series = series.astype(self.data_type)
-#             
-#             return series
+        tables = [self.destination_table, self.source_table]
+        
+        if isinstance(self.source_table, list):
+            tables = self.source_table
+            
+        # TO DO: move this to a utility
+        cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.source_column)
+        
+        @orca.column(table_name = self.destination_table, 
+                     column_name = self.column_name, 
+                     cache = self.cache, 
+                     cache_scope = self.cache_scope)
+        def orca_column():
+            df = merge_tables(tables, columns=cols)
+            series = df.eval(self.source_column)
+            
+            if self.missing_values is not None:
+                series = series.fillna(self.missing_values)
+            
+            if self.data_type is not None:
+                series = series.astype(self.data_type)
+            
+            return series
         
     
