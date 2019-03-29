@@ -14,9 +14,9 @@ class ColumnFromExpression():
     """
     Template to register a column of derived data with Orca, based on an expression. The 
     column will be associated with an existing table. Values will be calculated lazily, 
-    only when the column is requested for a specific operation. 
+    only when the column is needed for a specific operation. 
     
-    The expression will be passed to ``df.eval()`` and can refer to other columns in the 
+    The expression will be passed to ``df.eval()`` and can refer to any columns in the 
     same table. See the Pandas documentation for further details.
     
     All the parameters can also be set as properties after creating the template 
