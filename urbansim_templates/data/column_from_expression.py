@@ -6,6 +6,7 @@ import orca
 import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
+from urbansim_templates.utils import get_df
 
 
 @modelmanager.template
@@ -166,21 +167,18 @@ class ColumnFromExpression():
             raise ValueError("Please provide an expression")
         
         # Some column names in the expression may not be part of the core DataFrame, so 
-        # we'll need to request them from Orca explicitly. Identify tokens that begin 
-        # with a letter and contain any number of alphanumerics or underscores, but do 
-        # not end with an opening parenthesis.
+        # we'll need to request them from Orca explicitly. This regex pulls out column 
+        # names into a list, by identifying tokens in the expression that begin with a 
+        # letter and contain any number of alphanumerics or underscores, but do not end 
+        # with an opening parenthesis.
         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
-        
-        # TO DO - make sure requesting indexes by name doesn't raise an error from Orca
-        # - probably should just check which of the elements in the list Orca thinks are 
-        #   valid columns, and only request those
         
         @orca.column(table_name = self.table, 
                      column_name = self.column_name, 
                      cache = self.cache, 
                      cache_scope = self.cache_scope)
         def orca_column():
-            df = orca.get_table(self.table).to_frame(columns=cols)            
+            df = get_df(self.table, columns=cols)
             series = df.eval(self.expression)
             
             if self.missing_values is not None:
