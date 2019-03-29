@@ -142,58 +142,6 @@ class TemplateStep(object):
         self.__out_tables = self._normalize_table_param(out_tables)
 
 
-    def _get_data(self, task='fit'):
-        """
-        DEPRECATED - this should be replaced by the more general utils.get_data()
-        
-        Generate a data table for estimation or prediction, relying on functionality from
-        Orca and UrbanSim.models.util. This should be performed immediately before 
-        estimation or prediction so that it reflects the current data state.
-        
-        The output includes only the necessary columns: those mentioned in the model
-        expression or filters, plus (it appears) the index of each merged table. Relevant 
-        filter queries are applied.
-        
-        Parameters
-        ----------
-        task : 'fit' or 'predict'
-        
-        Returns
-        -------
-        DataFrame
-        
-        """
-        # TO DO - verify input data
-        
-        if isinstance(self.model_expression, str):
-            expr_cols = util.columns_in_formula(self.model_expression)
-        
-        if (task == 'fit'):
-            tables = self.tables
-            columns = expr_cols + util.columns_in_filters(self.filters)
-            filters = self.filters
-        
-        elif (task == 'predict'):
-            if self.out_tables is not None:
-                tables = self.out_tables
-            else:
-                tables = self.tables
-                
-            columns = expr_cols + util.columns_in_filters(self.out_filters)
-            if self.out_column is not None:
-                columns += [self.out_column]
-            
-            filters = self.out_filters
-        
-        if isinstance(tables, list):
-            df = orca.merge_tables(target=tables[0], tables=tables, columns=columns)
-        else:
-            df = orca.get_table(tables).to_frame(columns)
-            
-        df = util.apply_filter_query(df, filters)
-        return df
-
-
     def _get_out_column(self):
         """
         Return name of the column to save data to. This is 'out_column' if it exsits,

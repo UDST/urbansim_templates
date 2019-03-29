@@ -9,7 +9,7 @@ Sphinx reads from the source files, plus the docstrings in the code, and renders
 For now we're building the docs manually, which gives us maximum control:
 
 ```
-sphinx-build -b html source_dir build_dir
+sphinx-build -b html source build
 ```
 
 Building the docs requires the python libraries `sphinx`, `numpydoc`, and `sphinx_rtd_theme`, plus the baseline requirements for `urbansim_templates`. You should rebuild the docs for each release. Rendered files won't appear online until they're merged into the master branch, but you can preview them locally. 

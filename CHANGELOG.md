@@ -2,6 +2,18 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev4 (2019-03-26)
+
+- adds new data management utilities: `utils.validate_table()`, `utils.validate_all_tables()`, `utils.merge_tables()`
+- updates `utils.get_data()` to use the new merge tool
+- updates `BinaryLogitStep` and `OLSRegressionStep` to use the shared to use `utils.get_data()`, removing any reliance on Orca broadcasts
+- raises the `pandas` requirement to 0.23
+
+#### 0.2.dev3 (2019-03-21)
+
+- adds an `mct` argment to `SegmentedLargeMultinomialLogitStep.fit_all()`
+- adds an `interaction_terms` argument to `SegmentedLargeMultinomialLogitStep.run_all()`
+
 #### 0.2.dev2 (2019-03-04)
 
 - adds template for saving data: `urbansim_templates.data.SaveTable()`

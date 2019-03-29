@@ -9,6 +9,7 @@ from statsmodels.api import Logit
 import orca
 
 from .. import modelmanager
+from ..utils import get_data
 from .shared import TemplateStep
 
 
@@ -180,8 +181,12 @@ class BinaryLogitStep(TemplateStep):
         # https://github.com/statsmodels/statsmodels/issues/3931
         from scipy import stats
         stats.chisqprob = lambda chisq, df: stats.chi2.sf(chisq, df)
+        
+        df = get_data(tables = self.tables, 
+                      filters = self.filters, 
+                      model_expression = self.model_expression)
 
-        m = Logit.from_formula(data=self._get_data(), formula=self.model_expression)
+        m = Logit.from_formula(data=df, formula=self.model_expression)
         results = m.fit()
 
         self.name = self._generate_name()        
@@ -219,8 +224,11 @@ class BinaryLogitStep(TemplateStep):
         """
         # TO DO - verify that params are in place for prediction
         
-        df = self._get_data('predict')
-        
+        df = get_data(tables = self.out_tables, 
+                      fallback_tables = self.tables,
+                      filters = self.out_filters, 
+                      model_expression = self.model_expression)
+
         dm = patsy.dmatrices(data=df, formula_like=self.model_expression,
                              return_type='dataframe')[1]  # right-hand-side design matrix
         

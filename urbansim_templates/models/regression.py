@@ -9,7 +9,7 @@ from urbansim.models import RegressionModel
 from urbansim.utils import yamlio
 
 from .. import modelmanager
-from ..utils import update_column
+from ..utils import get_data, update_column
 from .shared import TemplateStep
 
 
@@ -170,7 +170,11 @@ class OLSRegressionStep(TemplateStep):
                 fit_filters=self.filters, predict_filters=self.out_filters,
                 ytransform=self.out_transform, name=self.name)
 
-        results = self.model.fit(self._get_data())
+        df = get_data(tables = self.tables,
+                      filters = self.filters,
+                      model_expression = self.model_expression)
+        
+        results = self.model.fit(df)
         
         self.name = self._generate_name()
         self.summary_table = str(results.summary())
@@ -194,7 +198,12 @@ class OLSRegressionStep(TemplateStep):
         predicted values are written to Orca.
         
         """
-        values = self.model.predict(self._get_data('predict'))
+        df = get_data(tables = self.out_tables,
+                      fallback_tables = self.tables,
+                      filters = self.out_filters,
+                      model_expression = self.model_expression)
+        
+        values = self.model.predict(df)
         self.predicted_values = values
         
         if self.out_transform is not None:
