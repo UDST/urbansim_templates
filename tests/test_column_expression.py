@@ -157,11 +157,35 @@ def test_modelmanager_registration(orca_session):
     Check that modelmanager registration and auto-run work as expected.
     
     """
-    pass
+    c = ColumnFromExpression()
+    c.column_name = 'c'
+    c.table = 'obs'
+    c.expression = 'a + b'
+    
+    modelmanager.register(c)
+    modelmanager.remove_step(c.name)
+    assert('c' in orca.get_table('obs').columns)
 
 
 def test_expression_with_standalone_columns(orca_session):
     """
+    Check that expression can assemble data from stand-alone columns that are not part 
+    of the core DataFrame wrapped by a table.
+    
     """
-    pass
+    c = ColumnFromExpression()
+    c.column_name = 'c'
+    c.table = 'obs'
+    c.expression = 'a + b'
+    
+    modelmanager.register(c)
+    modelmanager.remove_step(c.name)
+
+    d = ColumnFromExpression()
+    d.column_name = 'd'
+    d.table = 'obs'
+    d.expression = 'a + c'
+    
+    d.run()
+    assert('d' in orca.get_table('obs').columns)
 

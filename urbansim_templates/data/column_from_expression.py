@@ -170,7 +170,8 @@ class ColumnFromExpression():
         # we'll need to request them from Orca explicitly. This regex pulls out column 
         # names into a list, by identifying tokens in the expression that begin with a 
         # letter and contain any number of alphanumerics or underscores, but do not end 
-        # with an opening parenthesis.
+        # with an opening parenthesis. This will also pick up constants, like "pi", but  
+        # invalid column names will be ignored when we request them from get_df().
         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
         
         @orca.column(table_name = self.table, 
