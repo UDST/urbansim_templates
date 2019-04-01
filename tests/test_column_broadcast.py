@@ -18,78 +18,29 @@ def orca_session():
     orca.clear_all()
     modelmanager.initialize()
 
-    d1 = {'id': np.arange(5), 
-          'a': np.random.random(5),
-          'b': np.random.choice(np.arange(20), size=5)}
+    d = {'building_id': [1,2,3,4], 'value': [4,4,4,4]}
+    df = pd.DataFrame(d).set_index('building_id')
+    orca.add_table('buildings', df)
 
-    df = pd.DataFrame(d1).set_index('id')
-    orca.add_table('obs', df)
-    
-    # TO DO: add another table
-
-
-def test_template_validity():
-    """
-    Check template conforms to basic spec.
-    
-    """
-    assert validate_template(ColumnFromBroadcast)
+    d = {'household_id': [1,2,3], 'building_id': [2,3,4]}
+    df = pd.DataFrame(d).set_index('household_id')
+    orca.add_table('households', df)
 
 
-# def test_missing_colname(orca_session):
-#     """
-#     Missing column_name should raise a ValueError.
-#     
-#     """
-#     c = ColumnFromExpression()
-#     c.table = 'tab'
-#     c.expression = 'a'
-#     
-#     try:
-#         c.run()
-#     except ValueError as e:
-#         print(e)
-#         return
-#     
-#     pytest.fail()
-# 
-# 
-# def test_missing_table(orca_session):
-#     """
-#     Missing table should raise a ValueError.
-#     
-#     """
-#     c = ColumnFromExpression()
-#     c.column_name = 'col'
-#     c.expression = 'a'
-#     
-#     try:
-#         c.run()
-#     except ValueError as e:
-#         print(e)
-#         return
-#     
-#     pytest.fail()
-# 
-# 
-# def test_missing_expression(orca_session):
-#     """
-#     Missing expression should raise a ValueError.
-#     
-#     """
-#     c = ColumnFromExpression()
-#     c.column_name = 'col'
-#     c.table = 'tab'
-#     
-#     try:
-#         c.run()
-#     except ValueError as e:
-#         print(e)
-#         return
-#     
-#     pytest.fail()
-# 
-# 
+
+###############################
+## BEHAVIOR OF TEMPLATE
+
+
+
+
+
+
+
+
+
+
+
 # def test_expression(orca_session):
 #     """
 #     Check that column is created and expression evaluated correctly.
@@ -190,4 +141,73 @@ def test_template_validity():
 #     
 #     d.run()
 #     assert('d' in orca.get_table('obs').columns)
+# 
+
+
+
+
+###############################
+## SPEC CONFORMANCE AND BAD DATA INPUTS
+
+def test_template_validity():
+    """
+    Check template conforms to basic spec.
+    
+    """
+    assert validate_template(ColumnFromBroadcast)
+
+
+# def test_missing_colname(orca_session):
+#     """
+#     Missing column_name should raise a ValueError.
+#     
+#     """
+#     c = ColumnFromExpression()
+#     c.table = 'tab'
+#     c.expression = 'a'
+#     
+#     try:
+#         c.run()
+#     except ValueError as e:
+#         print(e)
+#         return
+#     
+#     pytest.fail()
+# 
+# 
+# def test_missing_table(orca_session):
+#     """
+#     Missing table should raise a ValueError.
+#     
+#     """
+#     c = ColumnFromExpression()
+#     c.column_name = 'col'
+#     c.expression = 'a'
+#     
+#     try:
+#         c.run()
+#     except ValueError as e:
+#         print(e)
+#         return
+#     
+#     pytest.fail()
+# 
+# 
+# def test_missing_expression(orca_session):
+#     """
+#     Missing expression should raise a ValueError.
+#     
+#     """
+#     c = ColumnFromExpression()
+#     c.column_name = 'col'
+#     c.table = 'tab'
+#     
+#     try:
+#         c.run()
+#     except ValueError as e:
+#         print(e)
+#         return
+#     
+#     pytest.fail()
+# 
 # 
