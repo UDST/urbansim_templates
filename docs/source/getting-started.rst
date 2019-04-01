@@ -18,9 +18,7 @@ UrbanSim Templates was created in 2018 by Sam Maurer (maurer@urbansim.com), who 
 Installation
 ------------
 
-UrbanSim Templates is tested with Python versions 2.7, 3.5, 3.6, and 3.7. 
-
-As of Feb. 2019, there is an installation problem in Python 3.7 when using Pip (because of an issue with Orca's PyTables dependency). Conda should work.
+UrbanSim Templates is tested with Python versions 2.7, 3.5, 3.6, and 3.7, across Mac, Linux, and Windows. Support for Python 2.7 will probably be removed in an upcoming release. 
 
 .. note::
     It can be helpful to set up a dedicated Python environment for each project you work on. This lets you use a stable and replicable set of libraries that won't be affected by other projects. Here are some good `environment settings <https://gist.github.com/smmaurer/f3a4f424a4aa877fb73e1cb2567bd89d>`__ for UrbanSim Templates projects.

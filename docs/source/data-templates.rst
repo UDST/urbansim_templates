@@ -16,7 +16,7 @@ Example
     t = LoadTable()
     t.table = 'buildings'  # a name for the Orca table
     t.source_type = 'csv'
-    t.path = 'buildings.csv'
+    t.path = '../data/buildings.csv'
     t.csv_index_cols = 'building_id'
     t.name = 'load_buildings'  # a name for the model step that sets up the table
 
@@ -38,7 +38,7 @@ Registration does two things: (a) it saves the configured template to disk as a 
     import orca
     orca.run(['load_buildings'])
 
-Strictly speaking, running the model step doesn't load the data, it just sets up an Orca table with instructions for loading the data when it's needed. (This is called lazy evaluation.)
+Strictly speaking, running the template/step doesn't load the data, it just sets up an Orca table with instructions for loading the data when it's needed. (This is called lazy evaluation.)
 
 .. code-block:: python
 

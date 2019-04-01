@@ -26,4 +26,4 @@ See the online documentation for much more: https://urbansim-templates.readthedo
 
 Some additional documentation is available within the repo in `CHANGELOG.md`, `CONTRIBUTING.md`, `/docs/README.md`, and `/tests/README.md`.
 
-There's discussion of current and planned features in the [Pull requests](https://github.com/udst/urbansim_templates/pulls?utf8=✓&q=is%3Apr) and [Issues](https://github.com/udst/urbansim_templates/issues?utf8=✓&q=is%3Aissue), both open and closed.
+There's discussion of current and planned features in the open and closed [Pull requests](https://github.com/udst/urbansim_templates/pulls?utf8=✓&q=is%3Apr) and [Issues](https://github.com/udst/urbansim_templates/issues?utf8=✓&q=is%3Aissue).
