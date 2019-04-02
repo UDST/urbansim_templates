@@ -42,12 +42,10 @@ class ExpressionSettings():
 class ColumnFromExpression():
     """
     Template to register a column of derived data with Orca, based on an expression. The 
-    column will be associated with an existing table. Values will be calculated lazily, 
-    only when the column is needed for a specific operation. 
-    
-    The expression will be passed to ``df.eval()`` and can refer to any columns in the 
-    same table. See the Pandas documentation for further details.
-    
+    expression can refer to any columns in the same table, and will be evaluated using
+    ``df.eval()``. Values will be calculated lazily, only when the column is needed for
+    a specific operation.
+        
     Parameters
     ----------
     meta : :mod:`~urbansim_templates.shared.CoreTemplateSettings`, optional
@@ -76,7 +74,7 @@ class ColumnFromExpression():
     def from_dict(cls, d):
         
         if 'meta' not in d:
-            return ColumnFromExpression.from_dict_0_2_dev5(d)
+            return cls.from_dict_0_2_dev5(d)
         
         return cls(
             meta = CoreTemplateSettings.from_dict(d['meta']),
@@ -91,16 +89,19 @@ class ColumnFromExpression():
         
         """
         return cls(
-            column_name = d['column_name'],
-            table = d['table'],
-            expression = d['expression'],
-            data_type = d['data_type'],
-            missing_values = d['missing_values'],
-            cache = d['cache'],
-            cache_scope = d['cache_scope'],
-            name = d['name'],
-            tags = d['tags'],
-            autorun = d['autorun'])
+            meta = CoreTemplateSettings(
+                name = d['name'],
+                tags = d['tags'],
+                autorun = d['autorun']),
+            data = ExpressionSettings(
+                table = d['table'],
+                expression = d['expression']),
+            output = OutputColumnSettings(
+                column_name = d['column_name'],
+                data_type = d['data_type'],
+                missing_values = d['missing_values'],
+                cache = d['cache'],
+                cache_scope = d['cache_scope']))
     
     
     def to_dict(self):
