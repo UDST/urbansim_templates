@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 from urbansim_templates import __version__
 
 
@@ -77,7 +75,7 @@ class CoreTemplateSettings():
             template = d['template'],
             template_version = d['template_version'],
         )
-        return d
+        return obj
     
     
     def to_dict(self):
@@ -98,4 +96,5 @@ class CoreTemplateSettings():
             'template_version': self.template_version,
             'modelmanager_version': self.modelmanager_version,
         }
+        return d
 
