@@ -6,6 +6,7 @@ import orca
 import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
+from urbansim_templates.shared import CoreTemplateSettings
 from urbansim_templates.utils import get_df
 
 
@@ -19,11 +20,13 @@ class ColumnFromExpression():
     The expression will be passed to ``df.eval()`` and can refer to any columns in the 
     same table. See the Pandas documentation for further details.
     
-    All the parameters can also be set as properties after creating the template 
-    instance.
+    Parameters can be passed to the constructor or set as attributes.
     
     Parameters
     ----------
+    meta : :mod:`~urbansim_templates.shared.CoreTemplateSettings`, optional
+        Stores a name for the configured template and other standard settings.
+    
     column_name : str, optional
         Name of the Orca column to be registered. Required before running.
     
@@ -48,31 +51,25 @@ class ColumnFromExpression():
     
     cache_scope : 'step', 'iteration', or 'forever', default 'forever'
         How long to cache column values for (ignored if ``cache`` is False).
-    
-    name : str, optional
-        Name of the template instance and associated model step. 
-    
-    tags : list of str, optional
-        Tags to associate with the template instance.
-    
-    autorun : bool, default True
-        Whether to run automatically when the template instance is registered with 
-        ModelManager.
-    
-    """
-    def __init__(self, 
-            column_name = None, 
-            table = None, 
-            expression = None, 
-            data_type = None, 
-            missing_values = None, 
-            cache = False, 
-            cache_scope = 'forever', 
-            name = None,
-            tags = [], 
-            autorun = True):
         
-        # Template-specific params
+    """
+    def __init__(self,
+            meta = None,
+            column_name = None,
+            table = None,
+            expression = None,
+            data_type = None,
+            missing_values = None,
+            cache = False,
+            cache_scope = 'forever'):
+        
+        if meta is None:
+            self.meta = CoreTemplateSettings()
+        
+        self.meta.template = self.__class__.__name__
+        self.meta.template_version = __version__
+                
+        # Template-specific settings
         self.column_name = column_name
         self.table = table
         self.expression = expression
@@ -80,19 +77,37 @@ class ColumnFromExpression():
         self.missing_values = missing_values
         self.cache = cache
         self.cache_scope = cache_scope
+    
+
+    @classmethod
+    def from_dict(cls, d):
+        """
+        Create an object instance from a saved dictionary representation.
         
-        # Standard params
-        self.name = name
-        self.tags = tags
-        self.autorun = autorun
+        Parameters
+        ----------
+        d : dict
         
-        # Automatic params
-        self.template = self.__class__.__name__
-        self.template_version = __version__
+        Returns
+        -------
+        Table
+        
+        """
+        obj = cls(
+            meta = d['meta'],
+            column_name = d['column_name'],
+            table = d['table'],
+            expression = d['expression'],
+            data_type = d['data_type'],
+            missing_values = d['missing_values'],
+            cache = d['cache'],
+            cache_scope = d['cache_scope'],
+        )
+        return obj
     
     
     @classmethod
-    def from_dict(cls, d):
+    def from_dict_0_2_dev5(cls, d):
         """
         Create an object instance from a saved dictionary representation.
         
@@ -130,11 +145,7 @@ class ColumnFromExpression():
         
         """
         d = {
-            'template': self.template,
-            'template_version': self.template_version,
-            'name': self.name,
-            'tags': self.tags,
-            'autorun': self.autorun,
+            'meta': self.meta.to_dict(),
             'column_name': self.column_name,
             'table': self.table,
             'expression': self.expression,
