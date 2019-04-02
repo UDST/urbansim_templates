@@ -8,6 +8,36 @@ from urbansim_templates.shared import CoreTemplateSettings, OutputColumnSettings
 from urbansim_templates.utils import get_df
 
 
+class ExpressionSettings():
+    """
+    Stores custom parameters used by the ColumnFromExpression template. Parameters can be
+    passed to the constructor or set as attributes.
+    
+    Parameters
+    ----------
+    table : str, optional
+        Name of Orca table the expression will be evaluated on. Required before running
+        then template.
+    
+    expression : str, optional
+        String describing operations on existing columns of the table, for example 
+        "a/log(b+c)". Required before running. Supports arithmetic and math functions 
+        including sqrt, abs, log, log1p, exp, and expm1 -- see Pandas ``df.eval()`` 
+        documentation for further details.
+    
+    """
+    def __init__(self, table = None, expression = None):
+        self.table = table
+        self.expression = expression
+    
+    @classmethod
+    def from_dict(cls, d):
+        return cls(table=d['table'], expression=d['expression'])
+
+    def to_dict(self):
+        return {'table': self.table, 'expression': self.expression}
+
+
 @modelmanager.template
 class ColumnFromExpression():
     """
@@ -18,86 +48,49 @@ class ColumnFromExpression():
     The expression will be passed to ``df.eval()`` and can refer to any columns in the 
     same table. See the Pandas documentation for further details.
     
-    Parameters can be passed to the constructor or set as attributes.
-    
     Parameters
     ----------
     meta : :mod:`~urbansim_templates.shared.CoreTemplateSettings`, optional
-        Stores a name for the configured template and other standard settings. For
-        column templates, the default for 'autorun' is True.
+        Standard parameters. This template sets the default value of ``meta.autorun``
+        to True.
     
-    table : str, optional
-        Name of the Orca table the column will be associated with. Required before 
-        running.
-    
-    expression : str, optional
-        String describing operations on existing columns of the table, for example 
-        "a/log(b+c)". Required before running. Supports arithmetic and math functions 
-        including sqrt, abs, log, log1p, exp, and expm1 -- see Pandas ``df.eval()`` 
-        documentation for further details.
-    
+    data : :mod:`~urbansim_templates.data.ExpressionSettings`, optional
+        Special parameters for this template.
+        
     output : :mod:`~urbansim_templates.shared.OutputColumnSettings`, optional
-        Stores settings for the column that will be generated.
+        Parameters for the column that will be generated. This template uses
+        ``data.table`` as the default value for ``output.table``.
         
     """
-    def __init__(self,
-            meta = None,
-            table = None,
-            expression = None,
-            output = None):
+    def __init__(self, meta=None, data=None, output=None):
         
-        if meta is None:
-            self.meta = CoreTemplateSettings(autorun=True)
-        
+        self.meta = CoreTemplateSettings(autorun=True) if meta is None else meta
         self.meta.template = self.__class__.__name__
         self.meta.template_version = __version__
                 
-        # Template-specific settings
-        self.table = table
-        self.expression = expression
-        
-        if output is None:
-            self.output = OutputColumnSettings()
+        self.data = ExpressionSettings() if data is None else data
+        self.output = OutputColumnSettings() if output is None else output
     
 
     @classmethod
     def from_dict(cls, d):
-        """
-        Create an object instance from a saved dictionary representation.
         
-        Parameters
-        ----------
-        d : dict
+        if 'meta' not in d:
+            return ColumnFromExpression.from_dict_0_2_dev5(d)
         
-        Returns
-        -------
-        Table
-        
-        """
-        obj = cls(
-            meta = d['meta'],
-            table = d['table'],
-            expression = d['expression'],
-            output = d['output'],
-        )
-        return obj
+        return cls(
+            meta = CoreTemplateSettings.from_dict(d['meta']),
+            data = ExpressionSettings.from_dict(d['data']),
+            output = OutputColumnSettings.from_dict(d['output']))    
     
     
     @classmethod
     def from_dict_0_2_dev5(cls, d):
         """
-        Create an object instance from a saved dictionary representation.
-        
-        Parameters
-        ----------
-        d : dict
-        
-        Returns
-        -------
-        Table
+        Converter to read saved data from 0.2.dev5 or earlier.
         
         """
-        obj = cls(
+        return cls(
             column_name = d['column_name'],
             table = d['table'],
             expression = d['expression'],
@@ -107,50 +100,34 @@ class ColumnFromExpression():
             cache_scope = d['cache_scope'],
             name = d['name'],
             tags = d['tags'],
-            autorun = d['autorun']
-        )
-        return obj
+            autorun = d['autorun'])
     
     
     def to_dict(self):
-        """
-        Create a dictionary representation of the object.
-        
-        Returns
-        -------
-        dict
-        
-        """
-        d = {
-            'meta': self.meta.to_dict(),
-            'table': self.table,
-            'expression': self.expression,
-            'output': self.output.to_dict(),
-        }
-        return d
+        return {
+            'meta': self.meta.to_dict(), 
+            'data': self.data.to_dict(),
+            'output': self.output.to_dict()}
     
     
     def run(self):
         """
         Run the template, registering a column of derived data with Orca.
         
-        Requires values to be set for ``column_name``, ``table``, and ``expression``.
-        
-        Returns
-        -------
-        None
+        Requires values to be set for ``data.table``, ``data.expression``, and
+        ``output.column_name``.
         
         """
-        if self.output.column_name is None:
-            raise ValueError("Please provide a column name")
-        
-        table = self.table if self.output.table is None else self.output.table
+        table = self.data.table if self.output.table is None else self.output.table
         
         if table is None:
             raise ValueError("Please provide a table")
         
-        if self.expression is None:
+        if self.data.expression is None:
             raise ValueError("Please provide an expression")
+        
+        if self.output.column_name is None:
+            raise ValueError("Please provide a column name")
         
         # Some column names in the expression may not be part of the core DataFrame, so 
         # we'll need to request them from Orca explicitly. This regex pulls out column 
@@ -158,7 +135,7 @@ class ColumnFromExpression():
         # letter and contain any number of alphanumerics or underscores, but do not end 
         # with an opening parenthesis. This will also pick up constants, like "pi", but  
         # invalid column names will be ignored when we request them from get_df().
-        cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
+        cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.data.expression)
         
         @orca.column(table_name = table, 
                      column_name = self.output.column_name, 
@@ -166,7 +143,7 @@ class ColumnFromExpression():
                      cache_scope = self.output.cache_scope)
         def orca_column():
             df = get_df(table, columns=cols)
-            series = df.eval(self.expression)
+            series = df.eval(self.data.expression)
             
             if self.output.missing_values is not None:
                 series = series.fillna(self.output.missing_values)

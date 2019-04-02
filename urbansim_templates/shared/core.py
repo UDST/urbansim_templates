@@ -64,7 +64,7 @@ class CoreTemplateSettings():
         
         Returns
         -------
-        meta : CoreTemplateSettings
+        obj : CoreTemplateSettings
         
         """
         obj = cls(

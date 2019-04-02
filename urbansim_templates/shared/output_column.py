@@ -61,18 +61,16 @@ class OutputColumnSettings():
         
         Returns
         -------
-        meta : OutputColumnSettings
+        obj : OutputColumnSettings
         
         """
-        obj = cls(
+        return cls(
             column_name = d['column_name'],
             table = d['table'],
             data_type = d['data_type'],
             missing_values = d['missing_values'],
             cache = d['cache'],
-            cache_scope = d['cache_scope'],
-        )
-        return obj
+            cache_scope = d['cache_scope'])
     
     
     def to_dict(self):
@@ -84,14 +82,12 @@ class OutputColumnSettings():
         d : dict
         
         """
-        d = {
+        return {
             'column_name': self.column_name,
             'table': self.table,
             'data_type': self.data_type,
             'missing_values': self.missing_values,
             'cache': self.cache,
             'cache_scope': self.cache_scope,
-            'modelmanager_version': self.modelmanager_version,
-        }
-        return d
+            'modelmanager_version': self.modelmanager_version}
 
