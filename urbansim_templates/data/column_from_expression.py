@@ -25,7 +25,8 @@ class ColumnFromExpression():
     Parameters
     ----------
     meta : :mod:`~urbansim_templates.shared.CoreTemplateSettings`, optional
-        Stores a name for the configured template and other standard settings.
+        Stores a name for the configured template and other standard settings. For
+        column templates, the default for 'autorun' is True.
     
     column_name : str, optional
         Name of the Orca column to be registered. Required before running.
@@ -64,7 +65,7 @@ class ColumnFromExpression():
             cache_scope = 'forever'):
         
         if meta is None:
-            self.meta = CoreTemplateSettings()
+            self.meta = CoreTemplateSettings(autorun=True)
         
         self.meta.template = self.__class__.__name__
         self.meta.template_version = __version__
