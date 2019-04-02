@@ -1,12 +1,10 @@
-from __future__ import print_function
-
 import re
 
 import orca
 import pandas as pd
 
 from urbansim_templates import modelmanager, __version__
-from urbansim_templates.shared import CoreTemplateSettings
+from urbansim_templates.shared import CoreTemplateSettings, OutputColumnSettings
 from urbansim_templates.utils import get_df
 
 
@@ -28,9 +26,6 @@ class ColumnFromExpression():
         Stores a name for the configured template and other standard settings. For
         column templates, the default for 'autorun' is True.
     
-    column_name : str, optional
-        Name of the Orca column to be registered. Required before running.
-    
     table : str, optional
         Name of the Orca table the column will be associated with. Required before 
         running.
@@ -41,28 +36,15 @@ class ColumnFromExpression():
         including sqrt, abs, log, log1p, exp, and expm1 -- see Pandas ``df.eval()`` 
         documentation for further details.
     
-    data_type : str, optional
-        Python type or ``numpy.dtype`` to cast the column's values into.
-    
-    missing_values : str or numeric, optional
-        Value to use for rows that would otherwise be missing.
-    
-    cache : bool, default False
-        Whether to cache column values after they are calculated.
-    
-    cache_scope : 'step', 'iteration', or 'forever', default 'forever'
-        How long to cache column values for (ignored if ``cache`` is False).
+    output : :mod:`~urbansim_templates.shared.OutputColumnSettings`, optional
+        Stores settings for the column that will be generated.
         
     """
     def __init__(self,
             meta = None,
-            column_name = None,
             table = None,
             expression = None,
-            data_type = None,
-            missing_values = None,
-            cache = False,
-            cache_scope = 'forever'):
+            output = None):
         
         if meta is None:
             self.meta = CoreTemplateSettings(autorun=True)
@@ -71,13 +53,11 @@ class ColumnFromExpression():
         self.meta.template_version = __version__
                 
         # Template-specific settings
-        self.column_name = column_name
         self.table = table
         self.expression = expression
-        self.data_type = data_type
-        self.missing_values = missing_values
-        self.cache = cache
-        self.cache_scope = cache_scope
+        
+        if output is None:
+            self.output = OutputColumnSettings()
     
 
     @classmethod
@@ -96,13 +76,9 @@ class ColumnFromExpression():
         """
         obj = cls(
             meta = d['meta'],
-            column_name = d['column_name'],
             table = d['table'],
             expression = d['expression'],
-            data_type = d['data_type'],
-            missing_values = d['missing_values'],
-            cache = d['cache'],
-            cache_scope = d['cache_scope'],
+            output = d['output'],
         )
         return obj
     
@@ -147,13 +123,9 @@ class ColumnFromExpression():
         """
         d = {
             'meta': self.meta.to_dict(),
-            'column_name': self.column_name,
             'table': self.table,
             'expression': self.expression,
-            'data_type': self.data_type,
-            'missing_values': self.missing_values,
-            'cache': self.cache,
-            'cache_scope': self.cache_scope,
+            'output': self.output.to_dict(),
         }
         return d
     
@@ -169,10 +141,12 @@ class ColumnFromExpression():
         None
         
         """
-        if self.column_name is None:
+        if self.output.column_name is None:
             raise ValueError("Please provide a column name")
         
-        if self.table is None:
+        table = self.table if self.output.table is None else self.output.table
+        
+        if table is None:
             raise ValueError("Please provide a table")
         
         if self.expression is None:
@@ -186,19 +160,19 @@ class ColumnFromExpression():
         # invalid column names will be ignored when we request them from get_df().
         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
         
-        @orca.column(table_name = self.table, 
-                     column_name = self.column_name, 
-                     cache = self.cache, 
-                     cache_scope = self.cache_scope)
+        @orca.column(table_name = table, 
+                     column_name = self.output.column_name, 
+                     cache = self.output.cache, 
+                     cache_scope = self.output.cache_scope)
         def orca_column():
-            df = get_df(self.table, columns=cols)
+            df = get_df(table, columns=cols)
             series = df.eval(self.expression)
             
-            if self.missing_values is not None:
-                series = series.fillna(self.missing_values)
+            if self.output.missing_values is not None:
+                series = series.fillna(self.output.missing_values)
             
-            if self.data_type is not None:
-                series = series.astype(self.data_type)
+            if self.output.data_type is not None:
+                series = series.astype(self.output.data_type)
             
             return series
         

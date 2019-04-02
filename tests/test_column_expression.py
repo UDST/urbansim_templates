@@ -58,7 +58,7 @@ def test_missing_table(orca_session):
     
     """
     c = ColumnFromExpression()
-    c.column_name = 'col'
+    c.output.column_name = 'col'
     c.expression = 'a'
     
     try:
@@ -76,7 +76,7 @@ def test_missing_expression(orca_session):
     
     """
     c = ColumnFromExpression()
-    c.column_name = 'col'
+    c.output.column_name = 'col'
     c.table = 'tab'
     
     try:
@@ -94,7 +94,7 @@ def test_expression(orca_session):
     
     """
     c = ColumnFromExpression()
-    c.column_name = 'c'
+    c.output.column_name = 'c'
     c.table = 'obs'
     c.expression = 'a * 5 + sqrt(b)'
     
@@ -114,7 +114,7 @@ def test_data_type(orca_session):
     orca.add_table('tab', pd.DataFrame({'a': [0.1, 1.33, 2.4]}))
     
     c = ColumnFromExpression()
-    c.column_name = 'b'
+    c.output.column_name = 'b'
     c.table = 'tab'
     c.expression = 'a'
     c.run()
@@ -122,7 +122,7 @@ def test_data_type(orca_session):
     v1 = orca.get_table('tab').get_column('b').values
     np.testing.assert_equal(v1, [0.1, 1.33, 2.4])
     
-    c.data_type = 'int'
+    c.output.data_type = 'int'
     c.run()
 
     v1 = orca.get_table('tab').get_column('b').values
@@ -137,7 +137,7 @@ def test_missing_values(orca_session):
     orca.add_table('tab', pd.DataFrame({'a': [0.1, np.nan, 2.4]}))
     
     c = ColumnFromExpression()
-    c.column_name = 'b'
+    c.output.column_name = 'b'
     c.table = 'tab'
     c.expression = 'a'
     c.run()
@@ -145,7 +145,7 @@ def test_missing_values(orca_session):
     v1 = orca.get_table('tab').get_column('b').values
     np.testing.assert_equal(v1, [0.1, np.nan, 2.4])
     
-    c.missing_values = 5
+    c.output.missing_values = 5
     c.run()
 
     v1 = orca.get_table('tab').get_column('b').values
@@ -158,7 +158,7 @@ def test_modelmanager_registration(orca_session):
     
     """
     c = ColumnFromExpression()
-    c.column_name = 'c'
+    c.output.column_name = 'c'
     c.table = 'obs'
     c.expression = 'a + b'
     
@@ -174,7 +174,7 @@ def test_expression_with_standalone_columns(orca_session):
     
     """
     c = ColumnFromExpression()
-    c.column_name = 'c'
+    c.output.column_name = 'c'
     c.table = 'obs'
     c.expression = 'a + b'
     
@@ -182,7 +182,7 @@ def test_expression_with_standalone_columns(orca_session):
     modelmanager.remove_step(c.meta.name)
 
     d = ColumnFromExpression()
-    d.column_name = 'd'
+    d.output.column_name = 'd'
     d.table = 'obs'
     d.expression = 'a + c'
     
