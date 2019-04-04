@@ -6,7 +6,7 @@ requirements = [item.strip() for item in requirements]
 
 setup(
     name='urbansim_templates',
-    version='0.2.dev5',
+    version='0.2.dev6',
     description='UrbanSim extension for managing model steps',
     author='UrbanSim Inc.',
     author_email='info@urbansim.com',
