@@ -2,9 +2,15 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev6 (2019-04-04)
+
+- introduces classes for storing common settings: `shared.CoreTemplateSettings`, `shared.OutputColumnSettings`
+- adds new shared functions: `shared.register_column()`, `utils.cols_in_expression()`
+- modifies `ColumnFromExpression` template to divide its parameters into three groups
+
 #### 0.2.dev5 (2019-03-29)
 
-- adds new template: `urbansim_templates.data.ColumnFromExpression`
+- adds new template: `data.ColumnFromExpression`
 
 #### 0.2.dev4 (2019-03-26)
 
@@ -20,8 +26,8 @@
 
 #### 0.2.dev2 (2019-03-04)
 
-- adds template for saving data: `urbansim_templates.data.SaveTable()`
-- renames `TableFromDisk()` to `urbansim_templates.data.LoadTable()`
+- adds template for saving data: `data.SaveTable()`
+- renames `io.TableFromDisk()` to `data.LoadTable()`
 
 #### 0.2.dev1 (2019-02-27)
 
@@ -29,7 +35,7 @@
 
 #### 0.2.dev0 (2019-02-19)
 
-- adds first data i/o template: `urbansim_templates.io.TableFromDisk()`
+- adds first data i/o template: `io.TableFromDisk()`
 - adds support for `autorun` template property
 
 
