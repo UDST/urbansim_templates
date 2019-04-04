@@ -7,7 +7,8 @@ from urbansim_templates.shared import CoreTemplateSettings, OutputColumnSettings
 
 class ExpressionSettings():
     """
-    Stores custom parameters used by the ColumnFromExpression template. Parameters can be
+    Stores custom parameters used by the 
+    :mod:`~urbansim_templates.data.ColumnFromExpression` template. Parameters can be
     passed to the constructor or set as attributes.
     
     Parameters
@@ -38,10 +39,11 @@ class ExpressionSettings():
 @modelmanager.template
 class ColumnFromExpression():
     """
-    Template to register a column of derived data with Orca, based on an expression. The 
-    expression can refer to any columns in the same table, and will be evaluated using
-    ``df.eval()``. Values will be calculated lazily, only when the column is needed for
-    a specific operation.
+    Template to register a column of derived data with Orca, based on an expression. 
+    Parameters may be passed to the constructor, but they are easier to set as
+    attributes. The expression can refer to any columns in the same table, and will be
+    evaluated using ``df.eval()``. Values will be calculated lazily, only when the column
+    is needed for a specific operation.
         
     Parameters
     ----------
@@ -69,7 +71,10 @@ class ColumnFromExpression():
 
     @classmethod
     def from_dict(cls, d):
+        """
+        Create a class instance from a saved dictionary.
         
+        """
         if 'meta' not in d:
             return cls.from_dict_0_2_dev5(d)
         
@@ -82,7 +87,8 @@ class ColumnFromExpression():
     @classmethod
     def from_dict_0_2_dev5(cls, d):
         """
-        Converter to read saved data from 0.2.dev5 or earlier.
+        Converter to read saved data from 0.2.dev5 or earlier. Automatically invoked by
+        ``from_dict()`` as needed.
         
         """
         return cls(
@@ -102,6 +108,10 @@ class ColumnFromExpression():
     
     
     def to_dict(self):
+        """
+        Create a dictionary representation of the object.
+        
+        """
         return {
             'meta': self.meta.to_dict(), 
             'data': self.data.to_dict(),
@@ -110,10 +120,8 @@ class ColumnFromExpression():
     
     def run(self):
         """
-        Run the template, registering a column of derived data with Orca.
-        
-        Requires values to be set for ``data.table``, ``data.expression``, and
-        ``output.column_name``.
+        Run the template, registering a column of derived data with Orca. Requires values
+        to be set for ``data.table``, ``data.expression``, and ``output.column_name``.
         
         """
         if self.data.table is None:

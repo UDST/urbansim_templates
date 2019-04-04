@@ -16,12 +16,11 @@ from urbansim_templates import modelmanager, __version__
 @modelmanager.template
 class LoadTable():
     """
-    Class for registering data tables from local CSV or HDF files.
+    Template for registering data tables from local CSV or HDF files. Parameters can be
+    passed to the constructor or set as attributes.
     
     An instance of this template class stores *instructions for loading a data table*, 
     packaged into an Orca step. Running the instructions registers the table with Orca. 
-    
-    All the parameters can also be set as properties after creating the class instance.
     
     Parameters
     ----------

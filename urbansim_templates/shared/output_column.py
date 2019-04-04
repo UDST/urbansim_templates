@@ -5,8 +5,8 @@ from urbansim_templates import __version__
 
 class OutputColumnSettings():
     """
-    Stores standard parameters and logic used by templates that generate or modify
-    columns. Parameters can be passed to the constructor or set as attributes.
+    Stores standard parameters used by templates that generate or modify columns. 
+    Parameters can be passed to the constructor or set as attributes.
     
     Parameters
     ----------

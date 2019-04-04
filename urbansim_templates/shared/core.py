@@ -28,11 +28,6 @@ class CoreTemplateSettings():
     template_version : str
         Version of the template class package.
     
-    Attributes
-    ----------
-    modelmanager_version : str
-        Version of the ModelManager package that created the CoreTemplateSettings. 
-    
     """
     def __init__(self,
             name = None,
