@@ -1,35 +1,21 @@
-from __future__ import print_function
-
-import re
-
 import orca
 import pandas as pd
 
-from urbansim_templates import modelmanager, __version__
-from urbansim_templates.utils import get_df
+from urbansim_templates import modelmanager, shared, utils, __version__
+from urbansim_templates.shared import CoreTemplateSettings, OutputColumnSettings
 
 
-@modelmanager.template
-class ColumnFromExpression():
+class ExpressionSettings():
     """
-    Template to register a column of derived data with Orca, based on an expression. The 
-    column will be associated with an existing table. Values will be calculated lazily, 
-    only when the column is needed for a specific operation. 
-    
-    The expression will be passed to ``df.eval()`` and can refer to any columns in the 
-    same table. See the Pandas documentation for further details.
-    
-    All the parameters can also be set as properties after creating the template 
-    instance.
+    Stores custom parameters used by the 
+    :mod:`~urbansim_templates.data.ColumnFromExpression` template. Parameters can be
+    passed to the constructor or set as attributes.
     
     Parameters
     ----------
-    column_name : str, optional
-        Name of the Orca column to be registered. Required before running.
-    
     table : str, optional
-        Name of the Orca table the column will be associated with. Required before 
-        running.
+        Name of Orca table the expression will be evaluated on. Required before running
+        then template.
     
     expression : str, optional
         String describing operations on existing columns of the table, for example 
@@ -37,157 +23,128 @@ class ColumnFromExpression():
         including sqrt, abs, log, log1p, exp, and expm1 -- see Pandas ``df.eval()`` 
         documentation for further details.
     
-    data_type : str, optional
-        Python type or ``numpy.dtype`` to cast the column's values into.
-    
-    missing_values : str or numeric, optional
-        Value to use for rows that would otherwise be missing.
-    
-    cache : bool, default False
-        Whether to cache column values after they are calculated.
-    
-    cache_scope : 'step', 'iteration', or 'forever', default 'forever'
-        How long to cache column values for (ignored if ``cache`` is False).
-    
-    name : str, optional
-        Name of the template instance and associated model step. 
-    
-    tags : list of str, optional
-        Tags to associate with the template instance.
-    
-    autorun : bool, default True
-        Whether to run automatically when the template instance is registered with 
-        ModelManager.
-    
     """
-    def __init__(self, 
-            column_name = None, 
-            table = None, 
-            expression = None, 
-            data_type = None, 
-            missing_values = None, 
-            cache = False, 
-            cache_scope = 'forever', 
-            name = None,
-            tags = [], 
-            autorun = True):
-        
-        # Template-specific params
-        self.column_name = column_name
+    def __init__(self, table = None, expression = None):
         self.table = table
         self.expression = expression
-        self.data_type = data_type
-        self.missing_values = missing_values
-        self.cache = cache
-        self.cache_scope = cache_scope
-        
-        # Standard params
-        self.name = name
-        self.tags = tags
-        self.autorun = autorun
-        
-        # Automatic params
-        self.template = self.__class__.__name__
-        self.template_version = __version__
-    
     
     @classmethod
     def from_dict(cls, d):
+        return cls(table=d['table'], expression=d['expression'])
+
+    def to_dict(self):
+        return {'table': self.table, 'expression': self.expression}
+
+
+@modelmanager.template
+class ColumnFromExpression():
+    """
+    Template to register a column of derived data with Orca, based on an expression. 
+    Parameters may be passed to the constructor, but they are easier to set as
+    attributes. The expression can refer to any columns in the same table, and will be
+    evaluated using ``df.eval()``. Values will be calculated lazily, only when the column
+    is needed for a specific operation.
+        
+    Parameters
+    ----------
+    meta : :mod:`~urbansim_templates.shared.CoreTemplateSettings`, optional
+        Standard parameters. This template sets the default value of ``meta.autorun``
+        to True.
+    
+    data : :mod:`~urbansim_templates.data.ExpressionSettings`, optional
+        Special parameters for this template.
+        
+    output : :mod:`~urbansim_templates.shared.OutputColumnSettings`, optional
+        Parameters for the column that will be generated. This template uses
+        ``data.table`` as the default value for ``output.table``.
+        
+    """
+    def __init__(self, meta=None, data=None, output=None):
+        
+        self.meta = CoreTemplateSettings(autorun=True) if meta is None else meta
+        self.meta.template = self.__class__.__name__
+        self.meta.template_version = __version__
+                
+        self.data = ExpressionSettings() if data is None else data
+        self.output = OutputColumnSettings() if output is None else output
+    
+
+    @classmethod
+    def from_dict(cls, d):
         """
-        Create an object instance from a saved dictionary representation.
-        
-        Parameters
-        ----------
-        d : dict
-        
-        Returns
-        -------
-        Table
+        Create a class instance from a saved dictionary.
         
         """
-        obj = cls(
-            column_name = d['column_name'],
-            table = d['table'],
-            expression = d['expression'],
-            data_type = d['data_type'],
-            missing_values = d['missing_values'],
-            cache = d['cache'],
-            cache_scope = d['cache_scope'],
-            name = d['name'],
-            tags = d['tags'],
-            autorun = d['autorun']
-        )
-        return obj
+        if 'meta' not in d:
+            return cls.from_dict_0_2_dev5(d)
+        
+        return cls(
+            meta = CoreTemplateSettings.from_dict(d['meta']),
+            data = ExpressionSettings.from_dict(d['data']),
+            output = OutputColumnSettings.from_dict(d['output']))    
+    
+    
+    @classmethod
+    def from_dict_0_2_dev5(cls, d):
+        """
+        Converter to read saved data from 0.2.dev5 or earlier. Automatically invoked by
+        ``from_dict()`` as needed.
+        
+        """
+        return cls(
+            meta = CoreTemplateSettings(
+                name = d['name'],
+                tags = d['tags'],
+                autorun = d['autorun']),
+            data = ExpressionSettings(
+                table = d['table'],
+                expression = d['expression']),
+            output = OutputColumnSettings(
+                column_name = d['column_name'],
+                data_type = d['data_type'],
+                missing_values = d['missing_values'],
+                cache = d['cache'],
+                cache_scope = d['cache_scope']))
     
     
     def to_dict(self):
         """
         Create a dictionary representation of the object.
         
-        Returns
-        -------
-        dict
-        
         """
-        d = {
-            'template': self.template,
-            'template_version': self.template_version,
-            'name': self.name,
-            'tags': self.tags,
-            'autorun': self.autorun,
-            'column_name': self.column_name,
-            'table': self.table,
-            'expression': self.expression,
-            'data_type': self.data_type,
-            'missing_values': self.missing_values,
-            'cache': self.cache,
-            'cache_scope': self.cache_scope,
-        }
-        return d
+        return {
+            'meta': self.meta.to_dict(), 
+            'data': self.data.to_dict(),
+            'output': self.output.to_dict()}
     
     
     def run(self):
         """
-        Run the template, registering a column of derived data with Orca.
-        
-        Requires values to be set for ``column_name``, ``table``, and ``expression``.
-        
-        Returns
-        -------
-        None
+        Run the template, registering a column of derived data with Orca. Requires values
+        to be set for ``data.table``, ``data.expression``, and ``output.column_name``.
         
         """
-        if self.column_name is None:
-            raise ValueError("Please provide a column name")
-        
-        if self.table is None:
+        if self.data.table is None:
             raise ValueError("Please provide a table")
         
-        if self.expression is None:
+        if self.data.expression is None:
             raise ValueError("Please provide an expression")
         
-        # Some column names in the expression may not be part of the core DataFrame, so 
-        # we'll need to request them from Orca explicitly. This regex pulls out column 
-        # names into a list, by identifying tokens in the expression that begin with a 
-        # letter and contain any number of alphanumerics or underscores, but do not end 
-        # with an opening parenthesis. This will also pick up constants, like "pi", but  
-        # invalid column names will be ignored when we request them from get_df().
-        cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.expression)
+        if self.output.column_name is None:
+            raise ValueError("Please provide a column name")
         
-        @orca.column(table_name = self.table, 
-                     column_name = self.column_name, 
-                     cache = self.cache, 
-                     cache_scope = self.cache_scope)
-        def orca_column():
-            df = get_df(self.table, columns=cols)
-            series = df.eval(self.expression)
-            
-            if self.missing_values is not None:
-                series = series.fillna(self.missing_values)
-            
-            if self.data_type is not None:
-                series = series.astype(self.data_type)
-            
+        settings = self.output
+        
+        if settings.table is None:
+            settings.table = self.data.table
+
+        cols = utils.cols_in_expression(self.data.expression)
+        
+        def build_column():
+            df = utils.get_df(self.data.table, columns=cols)
+            series = df.eval(self.data.expression)
             return series
+
+        shared.register_column(build_column, settings)
         
     

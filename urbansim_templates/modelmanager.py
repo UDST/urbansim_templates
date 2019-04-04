@@ -97,12 +97,14 @@ def build_step(d):
     object
     
     """
+    template = d['meta']['template'] if 'meta' in d else d['template']
+    
     if 'supplemental_objects' in d:
         for i, item in enumerate(d['supplemental_objects']):
             content = load_supplemental_object(d['name'], **item)
             d['supplemental_objects'][i]['content'] = content
     
-    return _templates[d['template']].from_dict(d)
+    return _templates[template].from_dict(d)
     
 
 def load_supplemental_object(step_name, name, content_type, required=True):
@@ -151,25 +153,36 @@ def register(step, save_to_disk=True):
     None
     
     """
-    if step.name is None:
-        step.name = update_name(step.template, step.name)  # TO DO - test this
+    # Currently supporting both step.name and step.meta.name
+    if hasattr(step, 'meta'):
+        # TO DO: move the name updating to CoreTemplateSettings?
+        step.meta.name = update_name(step.meta.template, step.meta.name)
+        name = step.meta.name
+    
+    else:
+        step.name = update_name(step.template, step.name)
+        name = step.name
     
     if save_to_disk:
         save_step_to_disk(step)
     
-    print("Registering model step '{}'".format(step.name))
+    print("Registering model step '{}'".format(name))
     
-    _steps[step.name] = step
+    _steps[name] = step
     
     # Create a callable that runs the model step, and register it with orca
     def run_step():
         return step.run()
         
-    orca.add_step(step.name, run_step)
+    orca.add_step(name, run_step)
     
-    if hasattr(step, 'autorun'):
+    if hasattr(step, 'meta'):
+        if step.meta.autorun:
+            orca.run([name])
+    
+    elif hasattr(step, 'autorun'):
         if step.autorun:
-            orca.run([step.name]) 
+            orca.run([name]) 
         
     
 def list_steps():
@@ -181,9 +194,18 @@ def list_steps():
     list of dicts, ordered by name
     
     """
-    return [{'name': _steps[k].name,
-             'template': type(_steps[k]).__name__,
-             'tags': _steps[k].tags} for k in sorted(_steps.keys())]
+    steps = []
+    for k in sorted(_steps.keys()):
+        if hasattr(_steps[k], 'meta'):
+            steps += [{'name': _steps[k].meta.name,
+                       'template': _steps[k].meta.template,
+                       'tags': _steps[k].meta.tags,
+                       'notes': _steps[k].meta.notes}]
+        else:
+            steps += [{'name': _steps[k].name,
+                       'template': _steps[k].template,
+                       'tags': _steps[k].tags}]
+    return steps
     
 
 def save_step_to_disk(step):
@@ -192,11 +214,13 @@ def save_step_to_disk(step):
     'model-name.yaml' and will be saved to the initialization directory. 
     
     """
+    name = step.meta.name if hasattr(step, 'meta') else step.name
+
     if _disk_store is None:
         print("Please run 'modelmanager.initialize()' before registering new model steps")
         return
     
-    print("Saving '{}.yaml': {}".format(step.name, 
+    print("Saving '{}.yaml': {}".format(name, 
             os.path.join(os.getcwd(), _disk_store)))
     
     d = step.to_dict()
@@ -204,7 +228,7 @@ def save_step_to_disk(step):
     # Save supplemental objects
     if 'supplemental_objects' in d:
         for item in filter(None, d['supplemental_objects']):
-            save_supplemental_object(step.name, **item)
+            save_supplemental_object(name, **item)
             del item['content']
     
     # Save main yaml file
@@ -213,7 +237,7 @@ def save_step_to_disk(step):
     content = OrderedDict(headers)
     content.update({'saved_object': d})
     
-    yamlio.convert_to_yaml(content, os.path.join(_disk_store, step.name+'.yaml'))
+    yamlio.convert_to_yaml(content, os.path.join(_disk_store, name+'.yaml'))
     
 
 def save_supplemental_object(step_name, name, content, content_type, required=True):
