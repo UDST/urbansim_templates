@@ -5,8 +5,24 @@ import pytest
 import orca
 
 from urbansim_templates import modelmanager
-from urbansim_templates.data import ColumnFromExpression
+from urbansim_templates.data import ColumnFromExpression, ExpressionSettings
 from urbansim_templates.utils import validate_template
+
+
+def test_expression_settings_persistence():
+    """
+    Confirm ExpressionSettings properties persist through to_dict() and from_dict().
+    
+    """
+    obj = ExpressionSettings()
+    obj.table = 'table'
+    obj.expression = 'expression'
+
+    d = obj.to_dict()
+    print(d)
+    
+    obj2 = ExpressionSettings.from_dict(d)
+    assert(obj2.to_dict() == d)
 
 
 @pytest.fixture

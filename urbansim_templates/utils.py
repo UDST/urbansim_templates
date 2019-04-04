@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import re
 from datetime import datetime as dt
 
 import pandas as pd
@@ -345,6 +346,27 @@ def all_cols(table):
     
     return list(table.index.names) + list(table.columns)
     
+
+def cols_in_expression(expression):
+    """
+    Extract all possible column names from a ``df.eval()``-style expression. 
+    
+    This is achieved using regex to identify tokens in the expression that begin with a
+    letter and contain any number of alphanumerics or underscores, but do not end with an
+    opening parenthesis. This excludes function names, but would not exclude constants
+    (e.g. "pi"), which are semantically indistinguishable from column names.
+    
+    Parameters
+    ----------
+    expression : str
+    
+    Returns
+    -------
+    cols : list of str
+    
+    """
+    return re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', expression)
+
 
 def trim_cols(df, columns=None):
     """

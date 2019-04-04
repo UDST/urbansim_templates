@@ -1,3 +1,5 @@
+import orca
+
 from urbansim_templates import __version__
 
 
@@ -91,3 +93,36 @@ class OutputColumnSettings():
             'cache_scope': self.cache_scope,
             'modelmanager_version': self.modelmanager_version}
 
+
+######################################
+######################################
+
+
+def register_column(build_column, settings):
+    """
+    Register a callable as an Orca column.
+    
+    Parameters
+    ----------
+    build_column : callable
+        Callable should return a ``pd.Series``. 
+    
+    settings : ColumnOutputSettings
+    
+    """
+    @orca.column(table_name = settings.table, 
+                 column_name = settings.column_name, 
+                 cache = settings.cache, 
+                 cache_scope = settings.cache_scope)
+
+    def orca_column():
+        series = build_column()
+        
+        if settings.missing_values is not None:
+            series = series.fillna(settings.missing_values)
+        
+        if settings.data_type is not None:
+            series = series.astype(settings.data_type)
+        
+        return series
+    
