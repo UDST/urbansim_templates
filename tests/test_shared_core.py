@@ -7,7 +7,7 @@ from urbansim_templates.shared import CoreTemplateSettings
 
 def test_property_persistence():
     """
-    Confirm properties persist through to_dict() and from_dict().
+    Confirm CoreTemplateSettings properties persist through to_dict() and from_dict().
     
     """
     obj = CoreTemplateSettings()

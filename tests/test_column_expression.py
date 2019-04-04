@@ -11,18 +11,44 @@ from urbansim_templates.utils import validate_template
 
 def test_expression_settings_persistence():
     """
-    Confirm ExpressionSettings properties persist through to_dict() and from_dict().
+    Confirm ExpressionSettings properties persist through the constructor, to_dict(),
+    and from_dict().
     
     """
-    obj = ExpressionSettings()
-    obj.table = 'table'
-    obj.expression = 'expression'
+    d = {'table': 'tab', 'expression': 'a + b + c'}
+    obj = ExpressionSettings(table = 'tab', expression = 'a + b + c')
 
-    d = obj.to_dict()
-    print(d)
+    assert(d == obj.to_dict() == ExpressionSettings.from_dict(d).to_dict())
+
+
+def test_legacy_data_loader(orca_session):
+    """
+    Check that loading a saved dict with the legacy format works.
     
-    obj2 = ExpressionSettings.from_dict(d)
-    assert(obj2.to_dict() == d)
+    """
+    d = {
+        'name': 'n',
+        'tags': ['a', 'b'],
+        'autorun': False,
+        'column_name': 'col',
+        'table': 'tab',
+        'expression': 'abc',
+        'data_type': 'int',
+        'missing_values': 5,
+        'cache': True,
+        'cache_scope': 'step'}
+    
+    c = ColumnFromExpression.from_dict(d)
+    assert(c.meta.name == d['name'])
+    assert(c.meta.tags == d['tags'])
+    assert(c.meta.autorun == d['autorun'])
+    assert(c.data.table == d['table'])
+    assert(c.data.expression == d['expression'])
+    assert(c.output.column_name == d['column_name'])
+    assert(c.output.data_type == d['data_type'])
+    assert(c.output.missing_values == d['missing_values'])
+    assert(c.output.cache == d['cache'])
+    assert(c.output.cache_scope == d['cache_scope'])
 
 
 @pytest.fixture
@@ -121,52 +147,6 @@ def test_expression(orca_session):
     val2 = df.a * 5 + np.sqrt(df.b)
     assert(val1.equals(val2))
     
-
-def test_data_type(orca_session):
-    """
-    Check that casting data type works.
-    
-    """
-    orca.add_table('tab', pd.DataFrame({'a': [0.1, 1.33, 2.4]}))
-    
-    c = ColumnFromExpression()
-    c.data.table = 'tab'
-    c.data.expression = 'a'
-    c.output.column_name = 'b'
-    c.run()
-    
-    v1 = orca.get_table('tab').get_column('b').values
-    np.testing.assert_equal(v1, [0.1, 1.33, 2.4])
-    
-    c.output.data_type = 'int'
-    c.run()
-
-    v1 = orca.get_table('tab').get_column('b').values
-    np.testing.assert_equal(v1, [0, 1, 2])
-
-
-def test_missing_values(orca_session):
-    """
-    Check that filling in missing values works.
-    
-    """
-    orca.add_table('tab', pd.DataFrame({'a': [0.1, np.nan, 2.4]}))
-    
-    c = ColumnFromExpression()
-    c.data.table = 'tab'
-    c.data.expression = 'a'
-    c.output.column_name = 'b'
-    c.run()
-    
-    v1 = orca.get_table('tab').get_column('b').values
-    np.testing.assert_equal(v1, [0.1, np.nan, 2.4])
-    
-    c.output.missing_values = 5
-    c.run()
-
-    v1 = orca.get_table('tab').get_column('b').values
-    np.testing.assert_equal(v1, [0.1, 5.0, 2.4])
-
 
 def test_modelmanager_registration(orca_session):
     """

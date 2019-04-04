@@ -116,9 +116,6 @@ class ColumnFromExpression():
         ``output.column_name``.
         
         """
-        
-#         table = self.data.table if self.output.table is None else self.output.table
-        
         if self.data.table is None:
             raise ValueError("Please provide a table")
         
@@ -133,14 +130,6 @@ class ColumnFromExpression():
         if settings.table is None:
             settings.table = self.data.table
 
-        # Some column names in the expression may not be part of the core DataFrame, so 
-        # we'll need to request them from Orca explicitly. This regex pulls out column 
-        # names into a list, by identifying tokens in the expression that begin with a 
-        # letter and contain any number of alphanumerics or underscores, but do not end 
-        # with an opening parenthesis. This will also pick up constants, like "pi", but  
-        # invalid column names will be ignored when we request them from get_df().
-#         cols = re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', self.data.expression)
-        
         cols = utils.cols_in_expression(self.data.expression)
         
         def build_column():
@@ -149,21 +138,5 @@ class ColumnFromExpression():
             return series
 
         shared.register_column(build_column, settings)
-
-#         @orca.column(table_name = table, 
-#                      column_name = self.output.column_name, 
-#                      cache = self.output.cache, 
-#                      cache_scope = self.output.cache_scope)
-#         def orca_column():
-#             df = get_df(table, columns=cols)
-#             series = df.eval(self.data.expression)
-#             
-#             if self.output.missing_values is not None:
-#                 series = series.fillna(self.output.missing_values)
-#             
-#             if self.output.data_type is not None:
-#                 series = series.astype(self.output.data_type)
-#             
-#             return series
         
     
