@@ -11,6 +11,8 @@ from urbansim_templates.utils import validate_template
 
 @pytest.fixture
 def orca_session():
+    orca.clear_all()
+
     d1 = {'id': np.arange(100),
           'building_id': np.arange(100),
           'a': np.random.random(100),
