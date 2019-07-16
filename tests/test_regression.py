@@ -64,3 +64,23 @@ def test_simulation(orca_session):
     
     assert orca.get_table('obs').to_frame()['a_predicted'].equals(m.predicted_values)
 
+
+def test_out_transform(orca_session):
+    """
+    Test transformation of the predicted values.
+    
+    """
+    modelmanager.initialize()
+
+    m = OLSRegressionStep()
+    m.tables = 'obs'
+    m.model_expression = 'a ~ b'
+    m.fit()
+
+    m.out_column = 'a_predicted'
+    m.out_transform = 'np.exp'
+    m.run()
+
+    predictions = m.predicted_values.apply(np.exp)
+
+    assert orca.get_table('obs').to_frame()['a_predicted'].equals(predictions)

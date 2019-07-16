@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import math
 import numpy as np
 import pandas as pd
 from datetime import datetime as dt
@@ -69,11 +70,13 @@ class OLSRegressionStep(TemplateStep):
         side variable from the model expression will be used. Replaces the `out_fname` 
         argument in UrbanSim.
     
-    out_transform : callable, optional
-        Transformation to apply to the predicted values, for example to reverse a 
-        transformation of the left-hand-side variable in the model expression. Replaces
-        the `ytransform` argument in UrbanSim.
-    
+    out_transform : str, optional
+	    Element-wise transformation to apply to the predicted values, for example to
+	    reverse a transformation of the left-hand-side variable in the model expression.
+	    This should be provided as a string containing a function name. Supports anything
+	    from NumPy or Python's built-in math library, for example 'np.exp' or
+	    'math.floor'. Replaces the `ytransform` argument in UrbanSim.
+	    
     out_filters : str or list of str, optional
         Filters to apply to the data before simulation. If not provided, no filters will
         be applied. Replaces the `predict_filters` argument in UrbanSim.
@@ -168,7 +171,7 @@ class OLSRegressionStep(TemplateStep):
         """
         self.model = RegressionModel(model_expression=self.model_expression,
                 fit_filters=self.filters, predict_filters=self.out_filters,
-                ytransform=self.out_transform, name=self.name)
+                ytransform=None, name=self.name)
 
         results = self.model.fit(self._get_data())
         
@@ -198,7 +201,7 @@ class OLSRegressionStep(TemplateStep):
         self.predicted_values = values
         
         if self.out_transform is not None:
-            values = self.out_transform(values)
+            values = values.apply(eval(self.out_transform))
         
         colname = self._get_out_column()
         tabname = self._get_out_table()
