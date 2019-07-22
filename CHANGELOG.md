@@ -1,5 +1,9 @@
 # UrbanSim Templates change log
 
+### 0.1.3 (2019-07-15)
+	
+- fixes a bug with `out_transform` parameter for OLS simulation
+
 ### 0.1.2 (2019-02-28)
 
 - fixes a crash in small MNL simulation
