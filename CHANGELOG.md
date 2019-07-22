@@ -2,6 +2,10 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev7 (2019-07-15)
+
+- fixes a bug with the `out_transform` parameter for `OLSRegressionStep`
+
 #### 0.2.dev6 (2019-04-04)
 
 - introduces classes for storing common settings: `shared.CoreTemplateSettings`, `shared.OutputColumnSettings`
@@ -37,6 +41,11 @@
 
 - adds first data i/o template: `io.TableFromDisk()`
 - adds support for `autorun` template property
+
+
+## 0.1.3 (2019-07-15)
+
+- patch to incorporate the `out_transform` bug fix for `OLSRegressionStep`, from 0.2.dev7
 
 
 ## 0.1.2 (2019-02-28)
