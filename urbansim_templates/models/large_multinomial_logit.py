@@ -536,7 +536,11 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.choices = None
         
         if interaction_terms is not None:
-            uniq_intx_idx_names = set([idx for intx in interaction_terms for idx in intx.index.names])
+            if type(interaction_terms) == list:
+                uniq_intx_idx_names = set([
+                    idx for intx in interaction_terms for idx in intx.index.names])
+            else:
+                uniq_intx_idx_names = interaction_terms.index.names
             obs_extra_cols = to_list(self.chooser_size) + list(uniq_intx_idx_names)
             alts_extra_cols = to_list(self.alt_capacity) + list(uniq_intx_idx_names)
 
