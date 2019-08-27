@@ -486,10 +486,25 @@ class LargeMultinomialLogitStep(TemplateStep):
                 fitted_parameters = self.fitted_parameters)
         del obs[self.choice_column]
         def mct(obs, alts):
-            return MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
+            mct_obj = MergedChoiceTable(obs, alts, sample_size=self.alt_sample_size)
+            if hasattr(self, 'interaction_filter'):
+                mct_obj.interaction_filter = self.interaction_filter
+                """interaction_df = mct_obj._merged_table
+                interaction_df = interaction_df.query(self.interaction_filter)
+                mct_obj._merged_table = interaction_df"""
+            #import pdb; pdb.set_trace()
+            return mct_obj
         
         def probs(mct):
-            return model.probabilities(mct)
+            prob_vals = model.probabilities(mct)
+            if hasattr(self, 'interaction_filter'):
+                interaction_df = mct._merged_table
+                interaction_df['proba'] = prob_vals
+                idx_unaffordable = interaction_df.query(mct.interaction_filter).index
+                interaction_df.proba.loc[idx_unaffordable] = 0.0
+                #interaction_df = interaction_df.query(mct.interaction_filter)
+                prob_vals = interaction_df.proba
+            return prob_vals
 
         if (self.constrained_choices == True):
             choices = iterative_lottery_choices(obs, alts, mct_callable=mct, 

@@ -198,6 +198,11 @@ class TemplateStep(object):
                     out_alt_filter_cols = util.columns_in_filters(self.out_alt_filters)
                     expression_cols = expression_cols + out_alt_filter_cols
 
+            if hasattr(self, 'interaction_filter'):
+                if (self.interaction_filter != None):
+                    interaction_filter_cols = util.columns_in_filters(self.interaction_filter)
+                    expression_cols = expression_cols + interaction_filter_cols
+
             filter_cols = util.columns_in_filters(self.chooser_filters)
             cols = filter_cols + [self.choice_column] + expression_cols + [self.alt_capacity]
             df = orca.get_table(tables).to_frame(cols)
