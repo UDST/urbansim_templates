@@ -463,8 +463,9 @@ class LargeMultinomialLogitStep(TemplateStep):
             df_from_mct = mct.to_frame()
             idx_names = df_from_mct.index.names
             df_from_mct = df_from_mct.reset_index()
-            df_from_mct = apply_filter_query(df_from_mct, self.chooser_filters)
-            mct = MergedChoiceTable.from_df(df_from_mct).set_index(idx_names)
+            df_from_mct = apply_filter_query(
+                df_from_mct, self.chooser_filters).set_index(idx_names)
+            mct = MergedChoiceTable.from_df(df_from_mct)
 
         else:        
             observations = get_data(tables = self.choosers, 
