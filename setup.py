@@ -23,7 +23,7 @@ setup(
         'pandas >= 0.23',
         'patsy >= 0.4',
         'statsmodels >= 0.8, <0.11; python_version <"3.6"',
-        'statsmodels >= 0.8; python_version >="3.6"'
+        'statsmodels >= 0.8; python_version >="3.6"',
         'urbansim >= 3.1'
     ]
 )
