@@ -1,9 +1,5 @@
 from setuptools import setup, find_packages
 
-with open('requirements.txt') as f:
-    requirements = f.readlines()
-requirements = [item.strip() for item in requirements]
-
 setup(
     name='urbansim_templates',
     version='0.2.dev7',
@@ -20,5 +16,14 @@ setup(
         'License :: OSI Approved :: BSD License'
     ],
     packages=find_packages(exclude=['*.tests']),
-    install_requires=requirements
+    install_requires=[
+        'choicemodels >= 0.2.dev4',
+        'numpy >= 1.14',
+        'orca >= 1.4',
+        'pandas >= 0.23',
+        'patsy >= 0.4',
+        'statsmodels >= 0.8, <0.11; python_version <"3.6"',
+        'statsmodels >= 0.8; python_version >="3.6"'
+        'urbansim >= 3.1'
+    ]
 )
