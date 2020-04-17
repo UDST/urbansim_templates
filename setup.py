@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='urbansim_templates',
-    version='0.2.dev7',
+    version='0.2.dev8',
     description='UrbanSim extension for managing model steps',
     author='UrbanSim Inc.',
     author_email='info@urbansim.com',
@@ -19,7 +19,7 @@ setup(
     ],
     packages=find_packages(exclude=['*.tests']),
     install_requires=[
-        'choicemodels >= 0.2.dev4',
+        'choicemodels >= 0.2.2.dev1',
         'numpy >= 1.14',
         'orca >= 1.4',
         'pandas >= 0.23',
