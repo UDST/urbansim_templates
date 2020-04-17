@@ -1,11 +1,13 @@
 from __future__ import print_function
 
 import orca
-from urbansim.models.util import columns_in_formula
+from urbansim.models.util import columns_in_formula, apply_filter_query
+from choicemodels.tools import MergedChoiceTable
 
 from .. import modelmanager
 from ..utils import get_data, update_column, to_list, version_greater_or_equal
 from .shared import TemplateStep
+
 
 
 def check_choicemodels_version():
@@ -458,8 +460,13 @@ class LargeMultinomialLogitStep(TemplateStep):
         from choicemodels.tools import MergedChoiceTable
         
         if (mct is not None):
-            data = mct
-            
+            df_from_mct = mct.to_frame()
+            idx_names = df_from_mct.index.names
+            df_from_mct = df_from_mct.reset_index()
+            df_from_mct = apply_filter_query(
+                df_from_mct, self.chooser_filters).set_index(idx_names)
+            mct = MergedChoiceTable.from_df(df_from_mct)
+
         else:        
             observations = get_data(tables = self.choosers, 
                                     filters = self.chooser_filters,
@@ -606,4 +613,3 @@ class LargeMultinomialLogitStep(TemplateStep):
                       column = self.out_column, 
                       fallback_column = self.choice_column,
                       data = choices)
-

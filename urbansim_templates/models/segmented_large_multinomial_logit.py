@@ -120,31 +120,41 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
         return d
 
 
-    def get_segmentation_column(self):
+    def get_segmentation_column(self, mct=None):
         """
         Get the column of segmentation values from Orca. Chooser and alternative filters
         are applied to identify valid observations.
+
+        Parameters
+        ----------
+        mct : choicemodels.tools.MergedChoiceTable
+            This parameter is a temporary backdoor allowing us to pass in a more
+            complicated choice table than can be generated within the template, for
+            example including sampling weights or interaction terms.
 
         Returns
         -------
         pd.Series
 
         """
-        obs = get_data(tables = self.defaults.choosers,
-                       filters = self.defaults.chooser_filters,
-                       extra_columns = [self.defaults.choice_column,
-                                        self.segmentation_column])
+        if mct is not None:
+            df = mct.to_frame()
+        else:
+            obs = get_data(tables = self.defaults.choosers,
+                           filters = self.defaults.chooser_filters,
+                           extra_columns = [self.defaults.choice_column,
+                                            self.segmentation_column])
 
-        alts = get_data(tables = self.defaults.alternatives,
-                        filters = self.defaults.alt_filters)
+            alts = get_data(tables = self.defaults.alternatives,
+                            filters = self.defaults.alt_filters)
 
-        df = pd.merge(obs, alts, how='inner',
-                      left_on=self.defaults.choice_column, right_index=True)
+            df = pd.merge(obs, alts, how='inner',
+                          left_on=self.defaults.choice_column, right_index=True)
 
         return df[self.segmentation_column]
 
 
-    def build_submodels(self):
+    def build_submodels(self, mct=None):
         """
         Create a submodel for each category of choosers identified in the segmentation
         column. Only categories with at least one observation remaining after applying
@@ -152,11 +162,18 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
 
         Running this method will overwrite any previous submodels.
 
+        Parameters
+        ----------
+        mct : choicemodels.tools.MergedChoiceTable
+            This parameter is a temporary backdoor allowing us to pass in a more
+            complicated choice table than can be generated within the template, for
+            example including sampling weights or interaction terms.
+
         """
         self.submodels = {}
         submodel = LargeMultinomialLogitStep.from_dict(self.defaults.to_dict())
 
-        col = self.get_segmentation_column()
+        col = self.get_segmentation_column(mct=mct)
 
         if (len(col) == 0):
             print("Warning: No valid observations after applying the chooser and "+
@@ -214,7 +231,7 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
 
     def fit_all(self, mct=None):
         """
-        Fit all the submodels. Build the subomdels first, if they don't exist yet. This
+        Fit all the submodels. Build the submodels first, if they don't exist yet. This
         method can be run as many times as desired.
 
         Parameters
@@ -227,7 +244,7 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
 
         """
         if (len(self.submodels) == 0):
-            self.build_submodels()
+            self.build_submodels(mct=mct)
 
         for k, m in self.submodels.items():
             print(' SEGMENT: {0} = {1} '.format(
