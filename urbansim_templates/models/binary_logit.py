@@ -227,7 +227,8 @@ class BinaryLogitStep(TemplateStep):
         df = get_data(tables = self.out_tables, 
                       fallback_tables = self.tables,
                       filters = self.out_filters, 
-                      model_expression = self.model_expression)
+                      model_expression = self.model_expression,
+                      extra_columns = self.out_column)
 
         dm = patsy.dmatrices(data=df, formula_like=self.model_expression,
                              return_type='dataframe')[1]  # right-hand-side design matrix
