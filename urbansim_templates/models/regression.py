@@ -101,6 +101,7 @@ class OLSRegressionStep(TemplateStep):
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
         self.fitted_parameters = None
+        self.residuals = None
         self.model = None
 
     
@@ -189,7 +190,7 @@ class OLSRegressionStep(TemplateStep):
         # code later on to not rely on RegressionModel any more. 
         
         self.fitted_parameters = results.params.tolist()
-        
+        self.residuals = results.resid
         
     def run(self):
         """
