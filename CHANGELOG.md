@@ -2,6 +2,15 @@
 
 ## 0.2 (not yet released)
 
+#### 0.2.dev9 (2020-05-15)
+
+- fixes a bug in `BinaryLogitStep` simulation where the output is not updated correctly
+- adds a `resid` attribute to fitted `OLSRegressionStep` models, for diagnostics
+
+#### 0.2.dev8 (2020-04-17)
+
+- allows segmented large MNL models to be estimated with a `MergedChoiceTable` that's passed in by the user (rather than generated automatically), thus achieving parity with the non-segmented model class
+
 #### 0.2.dev7 (2019-07-15)
 
 - fixes a bug with the `out_transform` parameter for `OLSRegressionStep`
