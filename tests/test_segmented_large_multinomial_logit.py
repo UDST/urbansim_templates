@@ -16,6 +16,8 @@ def orca_session():
     Set up a clean Orca session with a couple of data tables.
     
     """
+    orca.clear_all()
+    
     d1 = {'oid': np.arange(100), 
           'group': np.random.choice(['A','B','C'], size=100),
           'int_group': np.random.choice([3,4], size=100),

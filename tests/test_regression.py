@@ -10,6 +10,8 @@ from urbansim_templates.utils import validate_template
 
 @pytest.fixture
 def orca_session():
+    orca.clear_all()
+    
     d1 = {'a': np.random.random(100),
           'b': np.random.random(100)}
 

@@ -365,7 +365,7 @@ def cols_in_expression(expression):
     cols : list of str
     
     """
-    return re.findall('[a-zA-Z_][a-zA-Z0-9_]*(?!\()', expression)
+    return re.findall(r'[a-zA-Z_][a-zA-Z0-9_]*(?!\()', expression)
 
 
 def trim_cols(df, columns=None):

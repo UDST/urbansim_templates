@@ -1,5 +1,4 @@
 import orca
-import pandas as pd
 
 from urbansim_templates import modelmanager, shared, utils, __version__
 from urbansim_templates.shared import CoreTemplateSettings, OutputColumnSettings
