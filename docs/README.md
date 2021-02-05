@@ -14,7 +14,7 @@ Install the copy of UrbanSim Templates that the documentation is meant to reflec
 
 ```
 pip install . 
-pip install sphinx sphinx_rtd_theme numpydoc
+pip install sphinx sphinx_rtd_theme
 ```
 
 Build the documentation. There should be status messages and warnings, but no errors.
