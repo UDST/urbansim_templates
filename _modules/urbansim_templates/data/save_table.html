@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.data.save_table &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-templates.html">Data management templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.data.save_table</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.data.save_table</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">orca</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">urbansim_templates</span> <span class="kn">import</span> <span class="n">modelmanager</span><span class="p">,</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">urbansim_templates.utils</span> <span class="kn">import</span> <span class="n">get_data</span>
+
+
+<div class="viewcode-block" id="SaveTable"><a class="viewcode-back" href="../../../data-templates.html#urbansim_templates.data.SaveTable">[docs]</a><span class="nd">@modelmanager</span><span class="o">.</span><span class="n">template</span>
+<span class="k">class</span> <span class="nc">SaveTable</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Template for saving Orca tables to local CSV or HDF5 files. Parameters can be passed</span>
+<span class="sd">    to the constructor or set as attributes.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : str, optional</span>
+<span class="sd">        Name of the Orca table. Must be provided before running the step.</span>
+<span class="sd">    </span>
+<span class="sd">    columns : str or list of str, optional</span>
+<span class="sd">        Names of columns to include. ``None`` will return all columns. Indexes will </span>
+<span class="sd">        always be included.</span>
+<span class="sd">    </span>
+<span class="sd">    filters : str or list of str, optional</span>
+<span class="sd">        Filters to apply to the data before saving. Will be passed to </span>
+<span class="sd">        ``pd.DataFrame.query()``.</span>
+<span class="sd">    </span>
+<span class="sd">    output_type : &#39;csv&#39; or &#39;hdf&#39;, optional</span>
+<span class="sd">        Type of file to be created. Must be provided before running the step. </span>
+<span class="sd">    </span>
+<span class="sd">    path : str, optional</span>
+<span class="sd">        Local file path to save the data to, either absolute or relative to the </span>
+<span class="sd">        ModelManager config directory. Please provide a Unix-style path (this will work </span>
+<span class="sd">        on any platform, but a Windows-style path won&#39;t, and they&#39;re hard to normalize </span>
+<span class="sd">        automatically). For dynamic file names, you can include the characters &quot;%RUN%&quot;,</span>
+<span class="sd">        &quot;%ITER%&quot;, or &quot;%TS%&quot;. These will be replaced by the run id, the model iteration </span>
+<span class="sd">        value, or a timestamp when the output file is created.</span>
+<span class="sd">    </span>
+<span class="sd">    extra_settings : dict, optional</span>
+<span class="sd">        Additional arguments to pass to ``pd.to_csv()`` or ``pd.to_hdf()``. For example, </span>
+<span class="sd">        you could automatically compress csv data using {&#39;compression&#39;: &#39;gzip&#39;}, or </span>
+<span class="sd">        specify a custom table name for an hdf store using {&#39;key&#39;: &#39;table-name&#39;}. See </span>
+<span class="sd">        Pandas documentation for additional settings.</span>
+<span class="sd">            </span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Name of the model step.</span>
+<span class="sd">    </span>
+<span class="sd">    tags : list of str, optional</span>
+<span class="sd">        Tags, passed to ModelManager.</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+            <span class="n">table</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">output_type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">extra_settings</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+            <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="p">[]):</span>
+        
+        <span class="c1"># Template-specific params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="n">output_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extra_settings</span> <span class="o">=</span> <span class="n">extra_settings</span>
+        
+        <span class="c1"># Standard params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span>
+        
+        <span class="c1"># Automatic params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template_version</span> <span class="o">=</span> <span class="n">__version__</span>
+    
+    
+<div class="viewcode-block" id="SaveTable.from_dict"><a class="viewcode-back" href="../../../data-templates.html#urbansim_templates.data.SaveTable.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create an object instance from a saved dictionary representation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Table</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">],</span> 
+            <span class="n">columns</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">],</span> 
+            <span class="n">filters</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">],</span> 
+            <span class="n">output_type</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;output_type&#39;</span><span class="p">],</span> 
+            <span class="n">path</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> 
+            <span class="n">extra_settings</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;extra_settings&#39;</span><span class="p">],</span> 
+            <span class="n">name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> 
+            <span class="n">tags</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">],</span> 
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+    
+    
+<div class="viewcode-block" id="SaveTable.to_dict"><a class="viewcode-back" href="../../../data-templates.html#urbansim_templates.data.SaveTable.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dictionary representation of the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;template&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span>
+            <span class="s1">&#39;template_version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_version</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
+            <span class="s1">&#39;table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+            <span class="s1">&#39;columns&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+            <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span>
+            <span class="s1">&#39;output_type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span><span class="p">,</span>
+            <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="s1">&#39;extra_settings&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra_settings</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+    
+    
+<div class="viewcode-block" id="SaveTable.get_dynamic_filepath"><a class="viewcode-back" href="../../../data-templates.html#urbansim_templates.data.SaveTable.get_dynamic_filepath">[docs]</a>    <span class="k">def</span> <span class="nf">get_dynamic_filepath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Substitute run id, model iteration, and/or timestamp into the filename. </span>
+<span class="sd">        </span>
+<span class="sd">        For the run id and model iteration, we look for Orca injectables named ``run_id`` </span>
+<span class="sd">        and ``iter_var``, respectively. If none is found, we use ``0``.</span>
+<span class="sd">        </span>
+<span class="sd">        The timestamp is UTC, formatted as ``YYYYMMDD-HHMMSS``.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide a file path&quot;</span><span class="p">)</span>
+
+        <span class="n">run</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">orca</span><span class="o">.</span><span class="n">is_injectable</span><span class="p">(</span><span class="s1">&#39;run_id&#39;</span><span class="p">):</span>
+            <span class="n">run</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_injectable</span><span class="p">(</span><span class="s1">&#39;run_id&#39;</span><span class="p">)</span>
+        
+        <span class="nb">iter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">orca</span><span class="o">.</span><span class="n">is_injectable</span><span class="p">(</span><span class="s1">&#39;iter_var&#39;</span><span class="p">):</span>
+            <span class="nb">iter</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_injectable</span><span class="p">(</span><span class="s1">&#39;iter_var&#39;</span><span class="p">)</span>
+        
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span>
+        
+        <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%RUN%&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">run</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%ITER%&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">iter</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%TS%&#39;</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">s</span></div>
+    
+    
+<div class="viewcode-block" id="SaveTable.run"><a class="viewcode-back" href="../../../data-templates.html#urbansim_templates.data.SaveTable.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save a table to disk.</span>
+<span class="sd">        </span>
+<span class="sd">        Saving a table to an HDF store requires providing a ``key`` that will be used to </span>
+<span class="sd">        identify the table in the store. We&#39;ll use the Orca table name, unless you </span>
+<span class="sd">        provide a different ``key`` in the ``extra_settings``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;csv&#39;</span><span class="p">,</span> <span class="s1">&#39;hdf&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide an output type of &#39;csv&#39; or &#39;hdf&#39;&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide the table name&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Please provide a file path&quot;</span><span class="p">)</span>
+        
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extra_settings</span>
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> 
+                      <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span> 
+                      <span class="n">extra_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">==</span> <span class="s1">&#39;csv&#39;</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dynamic_filepath</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">==</span> <span class="s1">&#39;hdf&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;key&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span>
+            
+            <span class="n">df</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dynamic_filepath</span><span class="p">(),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        
+        
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

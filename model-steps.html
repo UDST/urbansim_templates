@@ -1,0 +1,1040 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Model step template APIs &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data management templates" href="data-templates.html" />
+    <link rel="prev" title="ModelManager API" href="modelmanager.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model step template APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#ols-regression">OLS Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#binary-logit">Binary Logit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#small-multinomial-logit">Small Multinomial Logit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#large-multinomial-logit">Large Multinomial Logit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#segmented-large-multinomial-logit">Segmented Large Multinomial Logit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#template-step-parent-class">Template Step parent class</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-templates.html">Data management templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Model step template APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/model-steps.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="model-step-template-apis">
+<h1>Model step template APIs<a class="headerlink" href="#model-step-template-apis" title="Permalink to this headline">¶</a></h1>
+<p>The following templates are included in the core package. ModelManager can also work with templates defined elsewhere, as long as they follow the specifications described in the design guidelines.</p>
+<div class="section" id="ols-regression">
+<h2>OLS Regression<a class="headerlink" href="#ols-regression" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.OLSRegressionStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">OLSRegressionStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/regression.html#OLSRegressionStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.OLSRegressionStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for building OLS (ordinary least squares) regression model steps. This extends
+TemplateStep, where some common functionality is defined. Estimation and simulation
+are handled by <cite>urbansim.models.RegressionModel()</cite>.</p>
+<p>Expected usage:
+- create a model object
+- specify some parameters
+- run the <cite>fit()</cite> method
+- iterate as needed</p>
+<p>Then, for simulation:
+- specify some simulation parameters
+- use the <cite>run()</cite> method for interactive testing
+- use <cite>modelmanager.register()</cite> to save the model to Orca and disk
+- registered steps can be accessed via ModelManager and Orca</p>
+<p>All parameters listed in the constructor can be set directly on the class object,
+at any time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to draw data from. The first table is the primary one.
+Any additional tables need to have merge relationships (“broadcasts”) specified
+so that they can be merged unambiguously onto the first table. Among them, the
+tables must contain all variables used in the model expression and filters. The
+left-hand-side variable should be in the primary table. The <cite>tables</cite> parameter is
+required for fitting a model, but it does not have to be provided when the object
+is created.</p></li>
+<li><p><strong>model_expression</strong> (<em>str</em><em>, </em><em>optional</em>) – Patsy formula containing both the left- and right-hand sides of the model
+expression: <a class="reference external" href="http://patsy.readthedocs.io/en/latest/formulas.html">http://patsy.readthedocs.io/en/latest/formulas.html</a>
+This parameter is required for fitting a model, but it does not have to be
+provided when the object is created.</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before fitting the model. These are passed to
+<cite>pd.DataFrame.query()</cite>. Filters are applied after any additional tables are merged
+onto the primary one. Replaces the <cite>fit_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to use for simulation. If not provided, the <cite>tables</cite>
+parameter will be used. Same guidance applies: the tables must be able to be
+merged unambiguously, and must include all columns used in the right-hand-side
+of the model expression and in the <cite>out_filters</cite>.</p></li>
+<li><p><strong>out_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the column to write predicted values to. If it does not already exist
+in the primary output table, it will be created. If not provided, the left-hand-
+side variable from the model expression will be used. Replaces the <cite>out_fname</cite>
+argument in UrbanSim.</p></li>
+<li><p><strong>out_transform</strong> (<em>str</em><em>, </em><em>optional</em>) – Element-wise transformation to apply to the predicted values, for example to
+reverse a transformation of the left-hand-side variable in the model expression.
+This should be provided as a string containing a function name. Supports anything
+from NumPy or Python’s built-in math library, for example ‘np.exp’ or
+‘math.floor’. Replaces the <cite>ytransform</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before simulation. If not provided, no filters will
+be applied. Replaces the <cite>predict_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step, passed to ModelManager. If none is provided, a name is
+generated each time the <cite>fit()</cite> method runs.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.models.OLSRegressionStep.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/regression.html#OLSRegressionStep.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.OLSRegressionStep.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model; save and report results.</p>
+<p>This currently uses the <cite>RegressionModel</cite> class from core UrbanSim. We save the
+model object for prediction and interactive use (<cite>model</cite>, with type
+<cite>urbansim.models.regression.RegressionModel</cite>).</p>
+<p>For example, you can use this to get a latex version of the summary table using
+<cite>m.model.model_fit.summary().as_latex()</cite>. This may change in the future if we
+refactor the template to use StatsModels directly.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.OLSRegressionStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/regression.html#OLSRegressionStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.OLSRegressionStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.OLSRegressionStep" title="urbansim_templates.models.OLSRegressionStep">OLSRegressionStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.OLSRegressionStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/regression.html#OLSRegressionStep.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.OLSRegressionStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the model step: calculate predicted values, transform them as specified, and
+use them to update a column.</p>
+<p>The pre-transformation predicted values are saved to the class object for
+diagnostic use (<cite>predicted_values</cite> with type pd.Series). The post-transformation
+predicted values are written to Orca.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.OLSRegressionStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/regression.html#OLSRegressionStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.OLSRegressionStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="binary-logit">
+<h2>Binary Logit<a class="headerlink" href="#binary-logit" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.BinaryLogitStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">BinaryLogitStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_value_true</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">out_value_false</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/binary_logit.html#BinaryLogitStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.BinaryLogitStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for building binary logit model steps. This extends TemplateStep, where some
+common functionality is defined. Estimation is handled by Statsmodels and simulation
+is handled within this class.</p>
+<p>Expected usage:
+- create a model object
+- specify some parameters
+- run the <cite>fit()</cite> method
+- iterate as needed</p>
+<p>Then, for simulation:
+- specify some simulation parameters
+- use the <cite>run()</cite> method for interactive testing
+- use <cite>modelmanager.register()</cite> to save the model to Orca and disk
+- registered steps can be accessed via ModelManager and Orca</p>
+<p>All parameters listed in the constructor can be set directly on the class object,
+at any time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to draw data from. The first table is the primary one.
+Any additional tables need to have merge relationships (“broadcasts”) specified
+so that they can be merged unambiguously onto the first table. Among them, the
+tables must contain all variables used in the model expression and filters. The
+left-hand-side variable should be in the primary table. The <cite>tables</cite> parameter is
+required for fitting a model, but it does not have to be provided when the object
+is created.</p></li>
+<li><p><strong>model_expression</strong> (<em>str</em><em>, </em><em>optional</em>) – Patsy formula containing both the left- and right-hand sides of the model
+expression: <a class="reference external" href="http://patsy.readthedocs.io/en/latest/formulas.html">http://patsy.readthedocs.io/en/latest/formulas.html</a>
+This parameter is required for fitting a model, but it does not have to be
+provided when the object is created.</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before fitting the model. These are passed to
+<cite>pd.DataFrame.query()</cite>. Filters are applied after any additional tables are merged
+onto the primary one. Replaces the <cite>fit_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to use for simulation. If not provided, the <cite>tables</cite>
+parameter will be used. Same guidance applies: the tables must be able to be
+merged unambiguously, and must include all columns used in the right-hand-side
+of the model expression and in the <cite>out_filters</cite>.</p></li>
+<li><p><strong>out_column</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Name of the column to write simulated choices to. If it does not already exist
+in the primary output table, it will be created. If not provided, the left-hand-
+side variable from the model expression will be used. Replaces the <cite>out_fname</cite>
+argument in UrbanSim.</p>
+<p># TO DO - auto-generation not yet working; column must exist in the primary table</p>
+</p></li>
+<li><p><strong>out_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before simulation. If not provided, no filters will
+be applied. Replaces the <cite>predict_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_value_true</strong> (<em>numeric</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Value to save to the output column corresponding to an affirmative choice.
+Default is 1 (int). Use keyword ‘nothing’ to leave values unchanged.</p></li>
+<li><p><strong>out_value_false</strong> (<em>numeric</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Value to save to the output column corresponding to a negative choice. Default
+is 0 (int). Use keyword ‘nothing’ to leave values unchanged.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step, passed to ModelManager. If none is provided, a name is
+generated each time the <cite>fit()</cite> method runs.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.models.BinaryLogitStep.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/binary_logit.html#BinaryLogitStep.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.BinaryLogitStep.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model; save and report results. This currently uses the Statsmodels
+Logit class with default estimation settings. (It will shift to ChoiceModels
+once more infrastructure is in place.)</p>
+<p>The <cite>fit()</cite> method can be run as many times as desired. Results will not be saved
+with Orca or ModelManager until the <cite>register()</cite> method is run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.BinaryLogitStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/binary_logit.html#BinaryLogitStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.BinaryLogitStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.BinaryLogitStep" title="urbansim_templates.models.BinaryLogitStep">BinaryLogitStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.BinaryLogitStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/binary_logit.html#BinaryLogitStep.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.BinaryLogitStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the model step: calculate simulated choices and use them to update a column.</p>
+<p>For binary logit, we calculate predicted probabilities and then perform a weighted
+random draw to determine the simulated binary outcomes. This is done directly from
+the fitted parameters, because we can’t conveniently regenerate a Statsmodels
+results object from a dictionary representation.</p>
+<p>The predicted probabilities and simulated choices are saved to the class object
+for interactive use (<cite>probabilities</cite> and <cite>choices</cite>, with type pd.Series) but are
+not persisted in the dictionary representation of the model step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.BinaryLogitStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/binary_logit.html#BinaryLogitStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.BinaryLogitStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="small-multinomial-logit">
+<h2>Small Multinomial Logit<a class="headerlink" href="#small-multinomial-logit" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.SmallMultinomialLogitStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">SmallMultinomialLogitStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_labels</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">choice_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">initial_coefs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/small_multinomial_logit.html#SmallMultinomialLogitStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SmallMultinomialLogitStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class for building multinomial logit model steps where the number of alternatives is
+“small”. Estimation is handled by PyLogit via the ChoiceModels API. Simulation is
+handled by PyLogit (probabilities) and ChoiceModels (simulation draws).</p>
+<p>Multinomial logit models can involve a range of different specification and estimation
+mechanics. For now these are separated into two templates. What’s the difference?</p>
+<p>“Small” MNL:
+- data is in a single table (choosers)
+- each alternative can have a different model expression
+- all the alternatives are available to all choosers
+- estimation and simulation use the PyLogit engine (via ChoiceModels)</p>
+<p>“Large” MNL:
+- data is in two tables (choosers and alternatives)
+- each alternative has the same model expression
+- N alternatives are sampled for each chooser
+- estimation and simulation use the ChoiceModels engine (formerly UrbanSim MNL)</p>
+<p>TO DO:
+- Add support for specifying availability of alternatives
+- Add support for sampling weights
+- Add support for on-the-fly interaction calculations (e.g. distance)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to draw data from. The first table is the primary one.
+Any additional tables need to have merge relationships (“broadcasts”) specified
+so that they can be merged unambiguously onto the first table. Among them, the
+tables must contain all variables used in the model expression and filters. The
+index of the primary table should be a unique ID. The <cite>tables</cite> parameter is
+required for fitting a model, but it does not have to be provided when the object
+is created. Reserved column names: ‘_obs_id’, ‘_alt_id’, ‘_chosen’.</p></li>
+<li><p><strong>model_expression</strong> (<em>OrderedDict</em><em>, </em><em>optional</em>) – PyLogit model expression. This parameter is required for fitting a model, but it
+does not have to be provided when the object is created.</p></li>
+<li><p><strong>model_labels</strong> (<em>OrderedDict</em><em>, </em><em>optional</em>) – PyLogit model labels.</p></li>
+<li><p><strong>choice_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the column indicating observed choices, for model estimation. The column
+should contain integers matching the alternatives in the model expression. This
+parameter is required for fitting a model, but it does not have to be provided
+when the object is created.</p></li>
+<li><p><strong>initial_coefs</strong> (<em>list of numerics</em><em>, </em><em>optional</em>) – Starting values for the parameter estimation algorithm, passed to PyLogit. Length
+must be equal to the number of parameters being estimated. If this is not
+provided, zeros will be used.</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before fitting the model. These are passed to
+<cite>pd.DataFrame.query()</cite>. Filters are applied after any additional tables are merged
+onto the primary one. Replaces the <cite>fit_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to use for simulation. If not provided, the <cite>tables</cite>
+parameter will be used. Same guidance applies: the tables must be able to be
+merged unambiguously, and must include all columns used in the model expression
+and in the <cite>out_filters</cite>.</p></li>
+<li><p><strong>out_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the column to write simulated choices to. If it does not already exist
+in the primary output table, it will be created. If not provided, the
+<cite>choice_column</cite> will be used. Replaces the <cite>out_fname</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before simulation. If not provided, no filters will
+be applied. Replaces the <cite>predict_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step, passed to ModelManager. If none is provided, a name is
+generated each time the <cite>fit()</cite> method runs.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.models.SmallMultinomialLogitStep.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/small_multinomial_logit.html#SmallMultinomialLogitStep.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SmallMultinomialLogitStep.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model; save and report results. This uses PyLogit via ChoiceModels.</p>
+<p>The <cite>fit()</cite> method can be run as many times as desired. Results will not be saved
+with Orca or ModelManager until the <cite>register()</cite> method is run.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SmallMultinomialLogitStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/small_multinomial_logit.html#SmallMultinomialLogitStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SmallMultinomialLogitStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.SmallMultinomialLogitStep" title="urbansim_templates.models.SmallMultinomialLogitStep">SmallMultinomialLogitStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SmallMultinomialLogitStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/small_multinomial_logit.html#SmallMultinomialLogitStep.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SmallMultinomialLogitStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the model step: calculate simulated choices and use them to update a column.</p>
+<p>Alternatives that appear in the estimation data but not in the model expression
+will not be available for simulation.</p>
+<p>Predicted probabilities come from PyLogit. Monte Carlo simulation of choices is
+performed directly. (This functionality will move to ChoiceModels.)</p>
+<p>The predicted probabilities and simulated choices are saved to the class object
+for interactive use (<cite>probabilities</cite> with type pd.DataFrame, and <cite>choices</cite> with
+type pd.Series) but are not persisted in the dictionary representation of the
+model step.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SmallMultinomialLogitStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/small_multinomial_logit.html#SmallMultinomialLogitStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SmallMultinomialLogitStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="large-multinomial-logit">
+<h2>Large Multinomial Logit<a class="headerlink" href="#large-multinomial-logit" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">LargeMultinomialLogitStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">choosers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alternatives</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">choice_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chooser_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chooser_sample_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alt_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">alt_sample_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_choosers</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_alternatives</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_chooser_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_alt_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">constrained_choices</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">alt_capacity</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chooser_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">max_iter</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/large_multinomial_logit.html#LargeMultinomialLogitStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for building standard multinomial logit model steps where alternatives are
+interchangeable and all have the same model expression. Supports random sampling of
+alternatives.</p>
+<p>Estimation and simulation are performed using ChoiceModels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>choosers</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to draw choice scenario data from. The first table is the
+primary one. Any additional tables need to have merge relationships (“broadcasts”)
+specified so that they can be merged unambiguously onto the first table. The index
+of the primary table should be a unique ID. In this template, the ‘choosers’ and
+‘alternatives’ parameters replace the ‘tables’ parameter. Both are required for
+fitting a model, but do not have to be provided when the object is created.
+Reserved column names: ‘chosen’.</p></li>
+<li><p><strong>alternatives</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables containing data about alternatives. The first table is the
+primary one. Any additional tables need to have merge relationships (“broadcasts”)
+specified so that they can be merged unambiguously onto the first table. The index
+of the primary table should be a unique ID. In this template, the ‘choosers’ and
+‘alternatives’ parameters replace the ‘tables’ parameter. Both are required for
+fitting a model, but do not have to be provided when the object is created.
+Reserved column names: ‘chosen’.</p></li>
+<li><p><strong>model_expression</strong> (<em>str</em><em>, </em><em>optional</em>) – Patsy-style right-hand-side model expression representing the utility of a
+single alternative. Passed to <cite>choicemodels.MultinomialLogit()</cite>. This parameter
+is required for fitting a model, but does not have to be provided when the object
+is created.</p></li>
+<li><p><strong>choice_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the column indicating observed choices, for model estimation. The column
+should contain integers matching the id of the primary <cite>alternatives</cite> table. This
+parameter is required for fitting a model, but it does not have to be provided
+when the object is created. Not required for simulation.</p></li>
+<li><p><strong>chooser_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the chooser data before fitting the model. These are passed to
+<cite>pd.DataFrame.query()</cite>. Filters are applied after any additional tables are merged
+onto the primary one. Replaces the <cite>fit_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>chooser_sample_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of choosers to sample, for faster model fitting. Sampling is random and may
+vary between model runs.</p></li>
+<li><p><strong>alt_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the alternatives data before fitting the model. These are
+passed to <cite>pd.DataFrame.query()</cite>. Filters are applied after any additional tables
+are merged onto the primary one. Replaces the <cite>fit_filters</cite> argument in UrbanSim.
+Choosers whose chosen alternative is removed by these filters will not be included
+in the model estimation.</p></li>
+<li><p><strong>alt_sample_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Numer of alternatives to sample for each choice scenario. For now, only random
+sampling is supported. If this parameter is not provided, we will use a sample
+size of one less than the total number of alternatives. (ChoiceModels codebase
+currently requires sampling.) The same sample size is used for estimation and
+prediction.</p></li>
+<li><p><strong>out_choosers</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables to draw choice scenario data from, for simulation. If not
+provided, the <cite>choosers</cite> parameter will be used. Same guidance applies. Reserved
+column names: ‘chosen’, ‘join_index’, ‘observation_id’.</p></li>
+<li><p><strong>out_alternatives</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Name(s) of Orca tables containing data about alternatives, for simulation. If not
+provided, the <cite>alternatives</cite> parameter will be used. Same guidance applies.
+Reserved column names: ‘chosen’, ‘join_index’, ‘observation_id’.</p></li>
+<li><p><strong>out_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the column to write simulated choices to. If it does not already exist
+in the primary <cite>out_choosers</cite> table, it will be created. If not provided, the
+<cite>choice_column</cite> will be used. If the column already exists, choices will be cast
+to match its data type. If the column is generated on the fly, it will be given
+the same data type as the index of the alternatives table. Replaces the
+<cite>out_fname</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_chooser_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the chooser data before simulation. If not provided, no
+filters will be applied. Replaces the <cite>predict_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>out_alt_filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the alternatives data before simulation. If not provided, no
+filters will be applied. Replaces the <cite>predict_filters</cite> argument in UrbanSim.</p></li>
+<li><p><strong>constrained_choices</strong> (<em>bool</em><em>, </em><em>optional</em>) – “True” means alternatives have limited capacity. “False” (default) means that
+alternatives can accommodate an unlimited number of choosers.</p></li>
+<li><p><strong>alt_capacity</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of a column in the out_alternatives table that expresses the capacity of
+alternatives. If not provided and constrained_choices is True, each alternative
+is interpreted as accommodating a single chooser.</p></li>
+<li><p><strong>chooser_size</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of a column in the out_choosers table that expresses the size of choosers.
+Choosers might have varying sizes if the alternative capacities are amounts
+rather than counts – e.g. square footage. Chooser sizes must be in the same units
+as alternative capacities. If not provided and constrained_choices is True, each
+chooser has a size of 1.</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em><em> or </em><em>None</em><em>, </em><em>optional</em>) – Maximum number of choice simulation iterations. If None (default), the algorithm
+will iterate until all choosers are matched or no alternatives remain.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step, passed to ModelManager. If none is provided, a name is
+generated each time the <cite>fit()</cite> method runs.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname">All parameters can also be get and set as properties. The following attributes should</code></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt>
+<code class="sig-name descname">be treated as read-only.</code></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.choices">
+<code class="sig-name descname">choices</code><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.choices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Available after the model step is run. List of chosen alternative id’s, indexed
+with the chooser id. Does not persist when the model step is reloaded from
+storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.mergedchoicetable">
+<code class="sig-name descname">mergedchoicetable</code><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.mergedchoicetable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table built for estimation or simulation. Does not persist when the model step is
+reloaded from storage. Not available if choices have capacity constraints,
+because multiple choice tables are generated iteratively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>choicemodels.tools.MergedChoiceTable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.model">
+<code class="sig-name descname">model</code><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Available after a model has been fit. Persists when reloaded from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>choicemodels.MultinomialLogitResults</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.probabilities">
+<code class="sig-name descname">probabilities</code><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.probabilities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Available after the model step is run – but not if choices have capacity
+constraints, which requires probabilities to be calculated multiple times.
+Provides list of probabilities corresponding to the sampled alternatives, indexed
+with the chooser and alternative id’s. Does not persist when the model step is
+reloaded from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mct</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/large_multinomial_logit.html#LargeMultinomialLogitStep.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the model; save and report results. This uses the ChoiceModels estimation
+engine (originally from UrbanSim MNL).</p>
+<p>The <cite>fit()</cite> method can be run as many times as desired. Results will not be saved
+with Orca or ModelManager until the <cite>register()</cite> method is run.</p>
+<p>After sampling alternatives for each chooser, the merged choice table is saved to
+the class object for diagnostic use (<cite>mergedchoicetable</cite> with type
+choicemodels.tools.MergedChoiceTable).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mct</strong> (<em>choicemodels.tools.MergedChoiceTable</em>) – This parameter is a temporary backdoor allowing us to pass in a more
+complicated choice table than can be generated within the template, for
+example including sampling weights or interaction terms.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/large_multinomial_logit.html#LargeMultinomialLogitStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.LargeMultinomialLogitStep" title="urbansim_templates.models.LargeMultinomialLogitStep">LargeMultinomialLogitStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chooser_batch_size</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interaction_terms</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/large_multinomial_logit.html#LargeMultinomialLogitStep.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the model step: simulate choices and use them to update an Orca column.</p>
+<p>The simulated choices are saved to the class object for diagnostics. If choices
+are unconstrained, the choice table and the probabilities of sampled alternatives
+are saved as well.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chooser_batch_size</strong> (<em>int</em>) – This parameter gets passed to
+choicemodels.tools.simulation.iterative_lottery_choices and is a temporary
+workaround for dealing with memory issues that arise from generating massive
+merged choice tables for simulations that involve large numbers of choosers,
+large numbers of alternatives, and large numbers of predictors. It allows the
+user to specify a batch size for simulating choices one chunk at a time.</p></li>
+<li><p><strong>interaction_terms</strong> (<em>pandas.Series</em><em>, </em><em>pandas.DataFrame</em><em>, or </em><em>list of either</em><em>, </em><em>optional</em>) – Additional column(s) of interaction terms whose values depend on the
+combination of observation and alternative, to be merged onto the final data
+table. If passed as a Series or DataFrame, it should include a two-level
+MultiIndex. One level’s name and values should match an index or column from
+the observations table, and the other should match an index or column from the
+alternatives table.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.LargeMultinomialLogitStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/large_multinomial_logit.html#LargeMultinomialLogitStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.LargeMultinomialLogitStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="segmented-large-multinomial-logit">
+<h2>Segmented Large Multinomial Logit<a class="headerlink" href="#segmented-large-multinomial-logit" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">SegmentedLargeMultinomialLogitStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">defaults</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">segmentation_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>This template automatically generates a set of LargeMultinomialLogitStep submodels
+corresponding to “segments” or categories of choosers. The submodels can be directly
+accessed and edited.</p>
+<p>Running ‘build_submodels()’ will create a submodel for each category of choosers
+identified in the segmentation column. The submodels are implemented using filter
+queries.</p>
+<p>Once they are generated, the ‘submodels’ property contains a dict of
+LargeMultinomialLogitStep objects, identified by category name. You can edit their
+properties as needed, fit them individually, etc.</p>
+<p>Editing a property in the ‘defaults’ object will update all the submodels at once,
+while leaving customizations to other properties intact.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>defaults</strong> (<a class="reference internal" href="#urbansim_templates.models.LargeMultinomialLogitStep" title="urbansim_templates.models.LargeMultinomialLogitStep"><em>LargeMultinomialLogitStep</em></a><em>, </em><em>optional</em>) – Object containing initial parameter values for the submodels. Values for
+‘choosers’, ‘alternatives’, and ‘choice_column’ are required to generate
+submodels, but do not have to be provided when the object is created.</p></li>
+<li><p><strong>segmentation_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of a column of categorical values in the ‘defaults.choosers’ table. Any data
+that can be interpreted by Pandas as categorical is valid. This is required to
+generate submodels, but does not have to be provided when the object is created.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags associated with the model step.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.build_submodels">
+<code class="sig-name descname">build_submodels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mct</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.build_submodels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.build_submodels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a submodel for each category of choosers identified in the segmentation
+column. Only categories with at least one observation remaining after applying
+chooser and alternative filters will be included.</p>
+<p>Running this method will overwrite any previous submodels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mct</strong> (<em>choicemodels.tools.MergedChoiceTable</em>) – This parameter is a temporary backdoor allowing us to pass in a more
+complicated choice table than can be generated within the template, for
+example including sampling weights or interaction terms.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.fit_all">
+<code class="sig-name descname">fit_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mct</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.fit_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.fit_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit all the submodels. Build the submodels first, if they don’t exist yet. This
+method can be run as many times as desired.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mct</strong> (<em>choicemodels.tools.MergedChoiceTable</em>) – This parameter is a temporary backdoor allowing us to pass in a more
+complicated choice table than can be generated within the template, for
+example including sampling weights or interaction terms.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep" title="urbansim_templates.models.SegmentedLargeMultinomialLogitStep">SegmentedLargeMultinomialLogitStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.get_segmentation_column">
+<code class="sig-name descname">get_segmentation_column</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mct</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.get_segmentation_column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.get_segmentation_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the column of segmentation values from Orca. Chooser and alternative filters
+are applied to identify valid observations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mct</strong> (<em>choicemodels.tools.MergedChoiceTable</em>) – This parameter is a temporary backdoor allowing us to pass in a more
+complicated choice table than can be generated within the template, for
+example including sampling weights or interaction terms.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method (requied by template spec) that invokes <cite>run_all()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.run_all">
+<code class="sig-name descname">run_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interaction_terms</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.run_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.run_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run all the submodels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>interaction_terms</strong> (<em>pandas.Series</em><em>, </em><em>pandas.DataFrame</em><em>, or </em><em>list of either</em><em>, </em><em>optional</em>) – Additional column(s) of interaction terms whose values depend on the
+combination of observation and alternative, to be merged onto the final data
+table. If passed as a Series or DataFrame, it should include a two-level
+MultiIndex. One level’s name and values should match an index or column from
+the observations table, and the other should match an index or column from the
+alternatives table.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.SegmentedLargeMultinomialLogitStep.update_submodels">
+<code class="sig-name descname">update_submodels</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">param</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/segmented_large_multinomial_logit.html#SegmentedLargeMultinomialLogitStep.update_submodels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.SegmentedLargeMultinomialLogitStep.update_submodels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates a property across all the submodels. This method is bound to the
+<cite>defaults</cite> object and runs automatically when one of its properties is changed.</p>
+<p>Note that the <cite>chooser_filters</cite> and <cite>alt_filters</cite> properties cannot currently be
+updated this way, because they can affect the model segmentation. If you are
+confident the changes are valid, you can edit the submodels directly. Otherwise,
+you can regenerate them using updated defaults by running <cite>build_submodels()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>param</strong> (<em>str</em>) – Property name.</p></li>
+<li><p><strong>value</strong> (<em>anything</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="template-step-parent-class">
+<h2>Template Step parent class<a class="headerlink" href="#template-step-parent-class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.models.TemplateStep">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.models.</code><code class="sig-name descname">TemplateStep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_column</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_transform</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">out_filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/shared.html#TemplateStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.TemplateStep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shared functionality for the template classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Required to fit a model, but doesn’t have to be provided at initialization.</p></li>
+<li><p><strong>model_expression</strong> (<em>str</em><em>, </em><em>optional</em>) – Required to fit a model, but doesn’t have to be provided at initialization.</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str ?</em><em>, </em><em>optional</em>) – Replaces <cite>fit_filters</cite> argument.</p></li>
+<li><p><strong>out_tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>out_column</strong> (<em>str</em><em>, </em><em>optional</em>) – Replaces <cite>out_fname</cite> argument.</p></li>
+<li><p><strong>out_transform</strong> (<em>callable</em><em>, </em><em>optional</em>) – Replaces <cite>ytransform</cite> argument.</p></li>
+<li><p><strong>out_filters</strong> (<em>str</em><em> or </em><em>list of str ?</em><em>, </em><em>optional</em>) – Replaces <cite>predict_filters</cite> argument.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – For ModelManager.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – For ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.models.TemplateStep.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/shared.html#TemplateStep.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.TemplateStep.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<p>Child classes will need to override this method to implement loading of custom
+parameters and estimation results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.models.TemplateStep" title="urbansim_templates.models.TemplateStep">TemplateStep</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.models.TemplateStep.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/models/shared.html#TemplateStep.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.models.TemplateStep.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<p>Child classes will need to override this method to implement saving of custom
+parameters and estimation results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="data-templates.html" class="btn btn-neutral float-right" title="Data management templates" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="modelmanager.html" class="btn btn-neutral float-left" title="ModelManager API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

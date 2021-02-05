@@ -1,0 +1,708 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Shared utilities &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development guide" href="development.html" />
+    <link rel="prev" title="Data management templates" href="data-templates.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-templates.html">Data management templates</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shared utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-urbansim_templates.shared">General template tools API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-0">Column output tools API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-urbansim_templates.utils">Table schemas and merging API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-1">Other helper functions API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-2">Spec validation API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-3">Version management API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Shared utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/utilities.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="shared-utilities">
+<h1>Shared utilities<a class="headerlink" href="#shared-utilities" title="Permalink to this headline">¶</a></h1>
+<p>The utilities are mainly helper functions for templates.</p>
+<div class="section" id="module-urbansim_templates.shared">
+<span id="general-template-tools-api"></span><h2>General template tools API<a class="headerlink" href="#module-urbansim_templates.shared" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.shared.CoreTemplateSettings">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.shared.</code><code class="sig-name descname">CoreTemplateSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">notes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">autorun</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">template</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">template_version</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/core.html#CoreTemplateSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.CoreTemplateSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores standard parameters and logic used by all templates. Parameters can be passed
+to the constructor or set as attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the configured template instance.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags associated with the configured template instance.</p></li>
+<li><p><strong>notes</strong> (<em>str</em><em>, </em><em>optional</em>) – Notes associates with the configured template instance.</p></li>
+<li><p><strong>autorun</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to run the configured template instance automatically when it’s
+registered or loaded by ModelManager. The overall default is False, but the
+default can be overriden at the template level.</p></li>
+<li><p><strong>template</strong> (<em>str</em>) – Name of the template class associated with a configured instance.</p></li>
+<li><p><strong>template_version</strong> (<em>str</em>) – Version of the template class package.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.shared.CoreTemplateSettings.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/core.html#CoreTemplateSettings.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.CoreTemplateSettings.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a class instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>obj</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.shared.CoreTemplateSettings" title="urbansim_templates.shared.CoreTemplateSettings">CoreTemplateSettings</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.shared.CoreTemplateSettings.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/core.html#CoreTemplateSettings.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.CoreTemplateSettings.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>d</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-0">
+<span id="column-output-tools-api"></span><h2>Column output tools API<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.shared.OutputColumnSettings">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.shared.</code><code class="sig-name descname">OutputColumnSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">column_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">table</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">missing_values</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cache</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">cache_scope</span><span class="o">=</span><span class="default_value">'forever'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/output_column.html#OutputColumnSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.OutputColumnSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores standard parameters used by templates that generate or modify columns.
+Parameters can be passed to the constructor or set as attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>column_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the Orca column to be created or modified. Generally required before
+running a configured template.</p></li>
+<li><p><strong>table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of Orca table the column will be associated with. Generally required before
+running the configured template.</p></li>
+<li><p><strong>data_type</strong> (<em>str</em><em>, </em><em>optional</em>) – Python type or <code class="docutils literal notranslate"><span class="pre">numpy.dtype</span></code> to case the column’s values to.</p></li>
+<li><p><strong>missing_values</strong> (<em>str</em><em> or </em><em>numeric</em><em>, </em><em>optional</em>) – Value to use for rows that would otherwise be missing.</p></li>
+<li><p><strong>cache</strong> (<em>bool</em><em>, </em><em>default False</em>) – Whether to cache column values after they are calculated</p></li>
+<li><p><strong>cache_scope</strong> (<em>'step'</em><em>, </em><em>'iteration'</em><em>, or </em><em>'forever'</em><em>, </em><em>default 'forever'</em>) – How long to cache column values for (ignored if <code class="docutils literal notranslate"><span class="pre">cache</span></code> is False).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.shared.OutputColumnSettings.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/output_column.html#OutputColumnSettings.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.OutputColumnSettings.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a class instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>obj</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#urbansim_templates.shared.OutputColumnSettings" title="urbansim_templates.shared.OutputColumnSettings">OutputColumnSettings</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.shared.OutputColumnSettings.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/output_column.html#OutputColumnSettings.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.OutputColumnSettings.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>d</strong></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.shared.register_column">
+<code class="sig-prename descclassname">urbansim_templates.shared.</code><code class="sig-name descname">register_column</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">build_column</span></em>, <em class="sig-param"><span class="n">settings</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/shared/output_column.html#register_column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.shared.register_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a callable as an Orca column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>build_column</strong> (<em>callable</em>) – Callable should return a <code class="docutils literal notranslate"><span class="pre">pd.Series</span></code>.</p></li>
+<li><p><strong>settings</strong> (<em>ColumnOutputSettings</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-urbansim_templates.utils">
+<span id="table-schemas-and-merging-api"></span><h2>Table schemas and merging API<a class="headerlink" href="#module-urbansim_templates.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="urbansim_templates.utils.merge_tables">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">merge_tables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span></em>, <em class="sig-param"><span class="n">columns</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#merge_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.merge_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge two or more tables into a single DataFrame.</p>
+<p>All the data will eventually be merged onto the first table in the list. In each
+merge stage, we’ll refer to the right-hand table as the “source” and the left-hand
+one as the “target”.</p>
+<p>Tables are merged using ModelManager schema rules: The source table must have a
+unique index, and the target table must have a column with a matching name, which
+will be used as the join key. Multi-indexes are fine, but all of the index columns
+need to be present in the target table.</p>
+<p>The last table in the list is the initial source. The algorithm searches backward
+through the list for a table that qualifies as a target. The source table is left-
+joined onto the target, and then the algorithm continues with the second-to-last
+table as the new source.</p>
+<p>Example 1: Tables A and B share join keys. Tables B and C share join keys. Merging
+[A, B, C] will left-join C onto B, and then left-join the result onto A.</p>
+<p>Example 2: Tables A and B share join keys. Tables A and C also share join keys, but
+tables B and C don’t. Merging [A, B, C] will left-join C onto A, and then left-join
+B onto the result of the first join.</p>
+<p>If you provide a list of <code class="docutils literal notranslate"><span class="pre">columns</span></code>, the output table will be limited to columns in
+this list. The index(es) of the left-most table will always be retained, but it’s a
+good practice to list them anyway. Column names not found will be ignored.</p>
+<p>If two tables contain columns with identical names (other than join keys), they can’t
+be automatically merged. If the columns are just incidental and not needed in the
+final output, you can perform the merge by providing a <code class="docutils literal notranslate"><span class="pre">columns</span></code> list that excludes
+them.</p>
+<p>A note about data types: They will be retained, but if NaN values need to be added
+(e.g. if some identifiers from the target table aren’t found in the source table),
+data may need to be cast to a type that allows missing values. For better control
+over this, see <code class="docutils literal notranslate"><span class="pre">urbansim_templates.data.ColumnFromBroadcast()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>list of str</em><em>, </em><em>orca.DataFrameWrapper</em><em>, </em><em>orca.TableFuncWrapper</em><em>, or </em><em>pd.DataFrame</em>) – Two or more tables to merge. Types can be mixed and matched.</p></li>
+<li><p><strong>columns</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Names of columns to retain in the final output.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.validate_all_tables">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">validate_all_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#validate_all_tables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.validate_all_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate all tables registered with Orca. See <code class="docutils literal notranslate"><span class="pre">validate_table()</span></code> above.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.validate_table">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">validate_table</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em>, <em class="sig-param"><span class="n">reciprocal</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#validate_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.validate_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check some basic expectations about an Orca table:</p>
+<ul class="simple">
+<li><p>Confirm that it includes a unique, named index column (a.k.a. primary key) or set
+of columns (multi-index, a.k.a. composite key). If not, raise a ValueError.</p></li>
+<li><p>Confirm that none of the other columns in the table share names with the index(es).
+If they do, raise a ValueError.</p></li>
+<li><p>If the table contains columns whose names match the index columns of other tables
+registered with Orca, check whether they make sense as join keys. This prints a
+status message with the number of presumptive foreign-key values that are found in
+the primary/composite key, for evaluation by the user.</p></li>
+<li><p>Perform the same check for columns in _other_ tables whose names match the index
+column(s) of _this_ table.</p></li>
+<li><p>It doesn’t currently compare indexes to indexes. (Maybe it should?)</p></li>
+</ul>
+<p>Running this will trigger loading all registered Orca tables, which may take a while.
+Stand-alone columns will not be loaded unless their names match an index column.</p>
+<p>Doesn’t currently incorporate <code class="docutils literal notranslate"><span class="pre">orca_test</span></code> validation, but it might be added.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em>) – Name of Orca table to validate.</p></li>
+<li><p><strong>reciprocal</strong> (<em>bool</em><em>, </em><em>default True</em>) – Whether to also check how columns of other tables align with this one’s index.
+If False, only check this table’s columns against other tables’ indexes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-1">
+<span id="other-helper-functions-api"></span><h2>Other helper functions API<a class="headerlink" href="#module-1" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="urbansim_templates.utils.all_cols">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">all_cols</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#all_cols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.all_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all column names in a table, including index(es). Input can be an
+Orca table name, <code class="docutils literal notranslate"><span class="pre">orca.DataFrameWrapper</span></code>, <code class="docutils literal notranslate"><span class="pre">orca.TableFuncWrapper</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>table</strong> (<em>str</em><em>, </em><em>orca.DataFrameWrapper</em><em>, </em><em>orca.TableFuncWrapper</em><em>, or </em><em>pd.DataFrame</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.cols_in_expression">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">cols_in_expression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">expression</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#cols_in_expression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.cols_in_expression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract all possible column names from a <code class="docutils literal notranslate"><span class="pre">df.eval()</span></code>-style expression.</p>
+<p>This is achieved using regex to identify tokens in the expression that begin with a
+letter and contain any number of alphanumerics or underscores, but do not end with an
+opening parenthesis. This excludes function names, but would not exclude constants
+(e.g. “pi”), which are semantically indistinguishable from column names.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expression</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>cols</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.get_data">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tables</span></em>, <em class="sig-param"><span class="n">fallback_tables</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">model_expression</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_columns</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code> for model estimation or simulation. Automatically loads
+tables from Orca, merges them, and removes columns not referenced in a model
+expression or data filter. Additional columns can be requested.</p>
+<p>If filters are provided, the output will include only rows that match the filter
+criteria.</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">urbansim_templates.utils.merge_tables()</span></code> for a detailed description of how
+the merges are performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tables</strong> (<em>str</em><em> or </em><em>list of str</em>) – Orca table(s) to draw data from.</p></li>
+<li><p><strong>fallback_tables</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Table(s) to use if first parameter evaluates to <cite>None</cite>. (This option will be
+removed shortly when estimation and simulation settings are separated.)</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filter(s) to apply to the merged data, using <cite>pd.DataFrame.query()</cite>.</p></li>
+<li><p><strong>model_expression</strong> (<em>str</em><em>, </em><em>optional</em>) – Model expression that will be evaluated using the output data. Only used to drop
+non-relevant columns. PyLogit format is not yet supported.</p></li>
+<li><p><strong>extra_columns</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Columns to include, in addition to any in the model expression and filters. (If
+this and the model_expression are both None, all columns will be included.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.get_df">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">get_df</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em>, <em class="sig-param"><span class="n">columns</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#get_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.get_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a table as a <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>. Input can be an Orca table name,
+<code class="docutils literal notranslate"><span class="pre">orca.DataFrameWrapper</span></code>, <code class="docutils literal notranslate"><span class="pre">orca.TableFuncWrapper</span></code>, or <code class="docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>.</p>
+<p>Optionally, columns can be limited to those that appear in a list of names. The list
+may contain duplicates or columns not in the table. Index(es) will always be
+retained, but it’s a good practice to list them anyway.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em><em>, </em><em>orca.DataFrameWrapper</em><em>, </em><em>orca.TableFuncWrapper</em><em>, or </em><em>pd.DataFrame</em>) – </p></li>
+<li><p><strong>columns</strong> (<em>list of str</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.to_list">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">to_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>In many places we accept either a single string or a list of strings. This function
+normalizes None -&gt; [None], str -&gt; [str], and leaves lists unchanged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>items</strong> (<em>str</em><em>, </em><em>list</em><em>, or </em><em>None</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.trim_cols">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">trim_cols</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">columns</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#trim_cols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.trim_cols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Limit a DataFrame to columns that appear in a list of names. List may contain
+duplicates or names not in the DataFrame. Index(es) of the DataFrame will always be
+retained, but it’s a good practice to list them anyway. If <code class="docutils literal notranslate"><span class="pre">columns</span></code> is None, all
+columns are retained. Returns the original DataFrame, not a copy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – </p></li>
+<li><p><strong>columns</strong> (<em>list of str</em><em>, </em><em>optional</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.update_column">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">update_column</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span></em>, <em class="sig-param"><span class="n">column</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">fallback_table</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fallback_column</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#update_column"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.update_column" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update an Orca column. If it doesn’t exist yet, add it to the wrapped DataFrame.
+Values will be aligned using the indexes if possible.</p>
+<p>Data types: If the column already exists, new values will be cast to match the
+existing data type. If the column is new, it will retain the data type of the
+pd.Series that’s passed to this function – unless it doesn’t fully align with the
+table’s index, in which case it may be cast to allow missing values (e.g. from int
+to float).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em><em> or </em><em>list of str</em>) – Name of Orca table to update. If list, the first element will be used.</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – Name of existing column to update, or new column to create. Cannot be an index.</p></li>
+<li><p><strong>data</strong> (<em>pd.Series</em>) – Column of data to update or add.</p></li>
+<li><p><strong>fallback_table</strong> (<em>str</em><em> or </em><em>list of str</em>) – Name of Orca table to use if <code class="docutils literal notranslate"><span class="pre">table</span></code> evaluates to None.</p></li>
+<li><p><strong>fallback_column</strong> (<em>str</em>) – Name of Orca column to use if <code class="docutils literal notranslate"><span class="pre">column</span></code> evaluates to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.update_name">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">update_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#update_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.update_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a name for a configured model step, based on its template class and the
+current timestamp. But if a custom name has already been provided, return that
+instead. (A name is judged to be custom if it does not contain the class type.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template</strong> (<em>str</em>) – Template class name.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Existing name for the configured model step.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-2">
+<span id="spec-validation-api"></span><h2>Spec validation API<a class="headerlink" href="#module-2" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="urbansim_templates.utils.validate_template">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">validate_template</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#validate_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.validate_template" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether a template class meets the basic expectations for working with
+ModelManager, to aid in development and testing.</p>
+<p>Looks for ‘to_dict’, ‘from_dict’, and ‘run’ methods, and ‘name’, ‘tags’, ‘template’,
+and ‘template_version’ attributes. Checks that an object can be instantiated without
+arguments, plus some additional behaviors. See documentation for a full description
+of ModelManager specs and guidelines.</p>
+<p>There are many behaviors this does NOT check, because we don’t know what particular
+parameters are expected and valid for a given template. For example, saving a
+configured model step and reloading it should produce an equivalent object, but this
+needs to be checked in template-specific unit tests.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cls</strong> (<em>class</em>) – Template class.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-3">
+<span id="version-management-api"></span><h2>Version management API<a class="headerlink" href="#module-3" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="urbansim_templates.utils.parse_version">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">parse_version</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">v</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#parse_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.parse_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a version string into its component parts. String is expected to follow the
+pattern “0.1.1.dev0”, which would be parsed into (0, 1, 1, 0). The first two
+components are required. The third is set to 0 if missing, and the fourth to None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>v</strong> (<em>str</em>) – Version string using syntax described above.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple with format (int, int, int, int or None)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.utils.version_greater_or_equal">
+<code class="sig-prename descclassname">urbansim_templates.utils.</code><code class="sig-name descname">version_greater_or_equal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">b</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/utils.html#version_greater_or_equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.utils.version_greater_or_equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tests whether version string ‘a’ is greater than or equal to version string ‘b’.
+Version syntax should follow the pattern described for <cite>version_parse()</cite>.</p>
+<p>Note that ‘dev’ versions are pre-releases, so ‘0.2’ &lt; ‘0.2.1.dev5’ &lt; ‘0.2.1’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>str</em>) – First version string, formatted as described in <cite>version_parse()</cite>.</p></li>
+<li><p><strong>b</strong> (<em>str</em>) – Second version string, formatted as described in <cite>version_parse()</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="development.html" class="btn btn-neutral float-right" title="Development guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="data-templates.html" class="btn btn-neutral float-left" title="Data management templates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,413 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ModelManager API &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Model step template APIs" href="model-steps.html" />
+    <link rel="prev" title="Getting started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ModelManager API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-urbansim_templates.modelmanager">Core operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#internal-functionality">Internal functionality</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-templates.html">Data management templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>ModelManager API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/modelmanager.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="modelmanager-api">
+<h1>ModelManager API<a class="headerlink" href="#modelmanager-api" title="Permalink to this headline">¶</a></h1>
+<p>ModelManager runs as an extension to the <a class="reference external" href="https://udst.github.io/orca">Orca</a> task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.</p>
+<p>The recommended way to load ModelManager is like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urbansim_templates</span> <span class="kn">import</span> <span class="n">modelmanager</span>
+
+<span class="n">modelmanager</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="module-urbansim_templates.modelmanager">
+<span id="core-operations"></span><h2>Core operations<a class="headerlink" href="#module-urbansim_templates.modelmanager" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.get_step">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">get_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#get_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.get_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the class representation of a registered step, by name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>instance of a template class</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.initialize">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">'configs'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load saved model steps from disk. Each file in the directory will be checked for
+compliance with the ModelManager YAML format and then loaded into memory.</p>
+<p>If run multiple times, steps will be cleared from memory and re-loaded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to config directory, either absolute or relative to the Python working
+directory</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.list_steps">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">list_steps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#list_steps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.list_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of registered steps, with name, template, and tags for each.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list of dicts, ordered by name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.register">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">register</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step</span></em>, <em class="sig-param"><span class="n">save_to_disk</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a model step with ModelManager and Orca. This includes saving it to disk,
+optionally, so it can be automatically loaded in the future.</p>
+<p>Registering a step will overwrite any previously loaded step with the same name. If a
+name has not yet been assigned, one will be generated from the template name and a
+timestamp.</p>
+<p>If the model step includes an attribute ‘autorun’ that’s set to True, the step will
+run after being registered.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>step</strong> (<em>object</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.remove_step">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">remove_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#remove_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.remove_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a model step, by name. It will immediately be removed from ModelManager and
+from disk, but will remain registered in Orca until the current Python process
+terminates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="internal-functionality">
+<h2>Internal functionality<a class="headerlink" href="#internal-functionality" title="Permalink to this headline">¶</a></h2>
+<p>These functions are the building blocks of ModelManager. You probably won’t need to use
+them directly, but they could be useful for debugging or for extending ModelManager’s
+functionality.</p>
+<span class="target" id="module-0"></span><dl class="py function">
+<dt id="urbansim_templates.modelmanager.build_step">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">build_step</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#build_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.build_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a model step object from a saved dictionary. This includes loading supplemental
+objects from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – Representation of a model step.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.get_config_dir">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">get_config_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#get_config_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.get_config_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the config directory, for other services that need to interoperate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.load_supplemental_object">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">load_supplemental_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step_name</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">content_type</span></em>, <em class="sig-param"><span class="n">required</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#load_supplemental_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.load_supplemental_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a supplemental object from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>step_name</strong> (<em>str</em>) – Name of the associated model step.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the supplemental object.</p></li>
+<li><p><strong>content_type</strong> (<em>str</em>) – Currently supports ‘pickle’.</p></li>
+<li><p><strong>required</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the supplemental object is required (not yet supported).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.remove_supplemental_object">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">remove_supplemental_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step_name</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">content_type</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#remove_supplemental_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.remove_supplemental_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a supplemental object from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>step_name</strong> (<em>str</em>) – Name of the associated model step.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the supplemental object.</p></li>
+<li><p><strong>content_type</strong> (<em>str</em>) – Currently supports ‘pickle’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.save_step_to_disk">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">save_step_to_disk</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#save_step_to_disk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.save_step_to_disk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a model step to disk, over-writing the previous file. The file will be named
+‘model-name.yaml’ and will be saved to the initialization directory.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.save_supplemental_object">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">save_supplemental_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step_name</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">content</span></em>, <em class="sig-param"><span class="n">content_type</span></em>, <em class="sig-param"><span class="n">required</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#save_supplemental_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.save_supplemental_object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a supplemental object to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>step_name</strong> (<em>str</em>) – Name of the associated model step.</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Name of the supplemental object.</p></li>
+<li><p><strong>content</strong> (<em>obj</em>) – Object to save.</p></li>
+<li><p><strong>content_type</strong> (<em>str</em>) – Currently supports ‘pickle’.</p></li>
+<li><p><strong>required</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether the supplemental object is required (not yet supported).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="urbansim_templates.modelmanager.template">
+<code class="sig-prename descclassname">urbansim_templates.modelmanager.</code><code class="sig-name descname">template</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/modelmanager.html#template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.modelmanager.template" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a decorator for ModelManager-compliant template classes. Place
+<cite>&#64;modelmanager.template</cite> on the line before a class defintion.</p>
+<p>This makes the class available to ModelManager (e.g. for reading saved steps from
+disk) whenever it’s imported.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="model-steps.html" class="btn btn-neutral float-right" title="Model step template APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

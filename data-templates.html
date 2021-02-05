@@ -1,0 +1,528 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data management templates &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Shared utilities" href="utilities.html" />
+    <link rel="prev" title="Model step template APIs" href="model-steps.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data management templates</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-data-schemas">Recommended data schemas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compatibility-with-orca">Compatibility with Orca</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-loading-api">Data loading API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#column-creation-api">Column creation API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-output-api">Data output API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Data management templates</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/data-templates.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-management-templates">
+<h1>Data management templates<a class="headerlink" href="#data-management-templates" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Data templates help you load tables into <a class="reference external" href="https://udst.github.io/orca">Orca</a>, create columns of derived data, or save tables or subsets of tables to disk.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urbansim_templates.data</span> <span class="kn">import</span> <span class="n">LoadTable</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="n">LoadTable</span><span class="p">()</span>
+<span class="n">t</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="s1">&#39;buildings&#39;</span>  <span class="c1"># a name for the Orca table</span>
+<span class="n">t</span><span class="o">.</span><span class="n">source_type</span> <span class="o">=</span> <span class="s1">&#39;csv&#39;</span>
+<span class="n">t</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;buildings.csv&#39;</span>
+<span class="n">t</span><span class="o">.</span><span class="n">csv_index_cols</span> <span class="o">=</span> <span class="s1">&#39;building_id&#39;</span>
+<span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;load_buildings&#39;</span>  <span class="c1"># a name for the model step that sets up the table</span>
+</pre></div>
+</div>
+<p>You can run this directly using <code class="docutils literal notranslate"><span class="pre">t.run()</span></code>, or register the configured template to be part of a larger workflow:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urbansim_templates</span> <span class="kn">import</span> <span class="n">modelmanager</span>
+
+<span class="n">modelmanager</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Registration does two things: (a) it saves the configured template to disk as a yaml file, and (b) it creates a model step with logic for loading the table. Running the model step is equivalent to running the configured template object:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">t</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># equivalent:</span>
+<span class="kn">import</span> <span class="nn">orca</span>
+<span class="n">orca</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;load_buildings&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Strictly speaking, running the model step doesn’t load the data, it just sets up an Orca table with instructions for loading the data when it’s needed. (This is called lazy evaluation.)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">orca</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s1">&#39;load_buildings&#39;</span><span class="p">])</span>  <span class="c1"># now an Orca table named &#39;buildings&#39; is registered</span>
+
+<span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="s1">&#39;buildings&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>  <span class="c1"># now the data is read from disk</span>
+</pre></div>
+</div>
+<p>Because “running” the table-loading step is costless, it’s done automatically when you register a configured template. It’s also done automatically when you initialize a ModelManager session and table-loading configs are read from yaml. (If you’d like to disable this for a particular table, you can set <code class="docutils literal notranslate"><span class="pre">t.autorun</span> <span class="pre">==</span> <span class="pre">False</span></code>.)</p>
+<div class="section" id="recommended-data-schemas">
+<h3>Recommended data schemas<a class="headerlink" href="#recommended-data-schemas" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="#urbansim_templates.data.LoadTable" title="urbansim_templates.data.LoadTable"><code class="xref py py-mod docutils literal notranslate"><span class="pre">LoadTable</span></code></a> template will work with any data that can be loaded into a Pandas DataFrame. But we highly recommend following stricter data schema rules:</p>
+<ol class="arabic simple">
+<li><p>Each table should include a unique, named index column (a.k.a. primary key) or set of columns (multi-index, a.k.a composite key).</p></li>
+<li><p>If a column is meant to be a join key for another table, it should have the same name as the index of that table.</p></li>
+<li><p>Duplication of column names across tables (except for the join keys) is discouraged, for clarity.</p></li>
+</ol>
+<p>If you follow these rules, tables can be automatically merged on the fly, for example to assemble estimation data or calculate indicators.</p>
+<p>You can use <a class="reference internal" href="utilities.html#urbansim_templates.utils.validate_table" title="urbansim_templates.utils.validate_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">validate_table()</span></code></a> or <a class="reference internal" href="utilities.html#urbansim_templates.utils.validate_all_tables" title="urbansim_templates.utils.validate_all_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">validate_all_tables()</span></code></a> to check whether these expectations are met. When templates merge tables on the fly, they use <a class="reference internal" href="utilities.html#urbansim_templates.utils.merge_tables" title="urbansim_templates.utils.merge_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">merge_tables()</span></code></a>.</p>
+<p>These utility functions work with any Orca table that meets the schema expectations, whether or not it was created with a template.</p>
+</div>
+<div class="section" id="compatibility-with-orca">
+<h3>Compatibility with Orca<a class="headerlink" href="#compatibility-with-orca" title="Permalink to this headline">¶</a></h3>
+<p>From Orca’s perspective, tables set up using the <a class="reference internal" href="#urbansim_templates.data.LoadTable" title="urbansim_templates.data.LoadTable"><code class="xref py py-mod docutils literal notranslate"><span class="pre">LoadTable</span></code></a> template are equivalent to tables that are registered using <code class="docutils literal notranslate"><span class="pre">orca.add_table()</span></code> or the <code class="docutils literal notranslate"><span class="pre">&#64;orca.table</span></code> decorator. Technically, they are <code class="docutils literal notranslate"><span class="pre">orca.TableFuncWrapper</span></code> objects.</p>
+<p>Unlike the templates, Orca relies on user-specified “<a class="reference external" href="http://udst.github.io/orca/core.html#merge-api">broadcast</a>” relationships to perform automatic merging of tables. <a class="reference internal" href="#urbansim_templates.data.LoadTable" title="urbansim_templates.data.LoadTable"><code class="xref py py-mod docutils literal notranslate"><span class="pre">LoadTable</span></code></a> does not register any broadcasts, because they’re not needed if tables follow the schema rules above. So if you use these tables in non-template model steps, you may need to add broadcasts separately.</p>
+</div>
+</div>
+<div class="section" id="data-loading-api">
+<h2>Data loading API<a class="headerlink" href="#data-loading-api" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.data.LoadTable">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.data.</code><code class="sig-name descname">LoadTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">source_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">csv_index_cols</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_settings</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">cache</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cache_scope</span><span class="o">=</span><span class="default_value">'forever'</span></em>, <em class="sig-param"><span class="n">copy_col</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">autorun</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/load_table.html#LoadTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.LoadTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template for registering data tables from local CSV or HDF files. Parameters can be
+passed to the constructor or set as attributes.</p>
+<p>An instance of this template class stores <em>instructions for loading a data table</em>,
+packaged into an Orca step. Running the instructions registers the table with Orca.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the Orca table to be created. Must be provided before running the step.</p></li>
+<li><p><strong>source_type</strong> (<em>'csv'</em><em> or </em><em>'hdf'</em><em>, </em><em>optional</em>) – Source type. Must be provided before running the step.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Local file path to load data from, either absolute or relative to the
+ModelManager config directory. Please provide a Unix-style path (this will work
+on any platform, but a Windows-style path won’t, and they’re hard to normalize
+automatically).</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional - NOT YET IMPLEMENTED</em>) – Remote url to download file from.</p></li>
+<li><p><strong>csv_index_cols</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Required for tables loaded from csv.</p></li>
+<li><p><strong>extra_settings</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional arguments to pass to <code class="docutils literal notranslate"><span class="pre">pd.read_csv()</span></code> or <code class="docutils literal notranslate"><span class="pre">pd.read_hdf()</span></code>. For
+example, you could automatically extract csv data from a gzip file using
+{‘compression’: ‘gzip’}, or specify the table identifier within a multi-object
+hdf store using {‘key’: ‘table-name’}. See Pandas documentation for additional
+settings.</p></li>
+<li><p><strong>orca_test_spec</strong> (<em>dict</em><em>, </em><em>optional - NOT YET IMPLEMENTED</em>) – Data characteristics to be tested when the table is validated.</p></li>
+<li><p><strong>cache</strong> (<em>bool</em><em>, </em><em>default True</em>) – Passed to <code class="docutils literal notranslate"><span class="pre">orca.table()</span></code>. Note that the default is True, unlike in the
+underlying general-purpose Orca function, because tables read from disk should
+not need to be regenerated during the course of a model run.</p></li>
+<li><p><strong>cache_scope</strong> (<em>'step'</em><em>, </em><em>'iteration'</em><em>, or </em><em>'forever'</em><em>, </em><em>default 'forever'</em>) – Passed to <code class="docutils literal notranslate"><span class="pre">orca.table()</span></code>. Default is ‘forever’, as in Orca.</p></li>
+<li><p><strong>copy_col</strong> (<em>bool</em><em>, </em><em>default True</em>) – Passed to <code class="docutils literal notranslate"><span class="pre">orca.table()</span></code>. Default is True, as in Orca.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+<li><p><strong>autorun</strong> (<em>bool</em><em>, </em><em>default True</em>) – Automatically run the step whenever it’s registered with ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.data.LoadTable.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/load_table.html#LoadTable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.LoadTable.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Table</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.LoadTable.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/load_table.html#LoadTable.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.LoadTable.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a data table with Orca.</p>
+<p>Requires values to be set for <code class="docutils literal notranslate"><span class="pre">table</span></code>, <code class="docutils literal notranslate"><span class="pre">source_type</span></code>, and <code class="docutils literal notranslate"><span class="pre">path</span></code>. CSV data
+also requires <code class="docutils literal notranslate"><span class="pre">csv_index_cols</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.LoadTable.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/load_table.html#LoadTable.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.LoadTable.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="column-creation-api">
+<h2>Column creation API<a class="headerlink" href="#column-creation-api" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.data.ColumnFromExpression">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.data.</code><code class="sig-name descname">ColumnFromExpression</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">meta</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ColumnFromExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ColumnFromExpression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template to register a column of derived data with Orca, based on an expression.
+Parameters may be passed to the constructor, but they are easier to set as
+attributes. The expression can refer to any columns in the same table, and will be
+evaluated using <code class="docutils literal notranslate"><span class="pre">df.eval()</span></code>. Values will be calculated lazily, only when the column
+is needed for a specific operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meta</strong> (<a class="reference internal" href="utilities.html#urbansim_templates.shared.CoreTemplateSettings" title="urbansim_templates.shared.CoreTemplateSettings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">CoreTemplateSettings</span></code></a>, optional) – Standard parameters. This template sets the default value of <code class="docutils literal notranslate"><span class="pre">meta.autorun</span></code>
+to True.</p></li>
+<li><p><strong>data</strong> (<a class="reference internal" href="#urbansim_templates.data.ExpressionSettings" title="urbansim_templates.data.ExpressionSettings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ExpressionSettings</span></code></a>, optional) – Special parameters for this template.</p></li>
+<li><p><strong>output</strong> (<a class="reference internal" href="utilities.html#urbansim_templates.shared.OutputColumnSettings" title="urbansim_templates.shared.OutputColumnSettings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">OutputColumnSettings</span></code></a>, optional) – Parameters for the column that will be generated. This template uses
+<code class="docutils literal notranslate"><span class="pre">data.table</span></code> as the default value for <code class="docutils literal notranslate"><span class="pre">output.table</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.data.ColumnFromExpression.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ColumnFromExpression.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ColumnFromExpression.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a class instance from a saved dictionary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.ColumnFromExpression.from_dict_0_2_dev5">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict_0_2_dev5</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ColumnFromExpression.from_dict_0_2_dev5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ColumnFromExpression.from_dict_0_2_dev5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converter to read saved data from 0.2.dev5 or earlier. Automatically invoked by
+<code class="docutils literal notranslate"><span class="pre">from_dict()</span></code> as needed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.ColumnFromExpression.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ColumnFromExpression.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ColumnFromExpression.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the template, registering a column of derived data with Orca. Requires values
+to be set for <code class="docutils literal notranslate"><span class="pre">data.table</span></code>, <code class="docutils literal notranslate"><span class="pre">data.expression</span></code>, and <code class="docutils literal notranslate"><span class="pre">output.column_name</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.ColumnFromExpression.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ColumnFromExpression.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ColumnFromExpression.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="urbansim_templates.data.ExpressionSettings">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.data.</code><code class="sig-name descname">ExpressionSettings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">expression</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/column_from_expression.html#ExpressionSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.ExpressionSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores custom parameters used by the
+<a class="reference internal" href="#urbansim_templates.data.ColumnFromExpression" title="urbansim_templates.data.ColumnFromExpression"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ColumnFromExpression</span></code></a> template. Parameters can be
+passed to the constructor or set as attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of Orca table the expression will be evaluated on. Required before running
+then template.</p></li>
+<li><p><strong>expression</strong> (<em>str</em><em>, </em><em>optional</em>) – String describing operations on existing columns of the table, for example
+“a/log(b+c)”. Required before running. Supports arithmetic and math functions
+including sqrt, abs, log, log1p, exp, and expm1 – see Pandas <code class="docutils literal notranslate"><span class="pre">df.eval()</span></code>
+documentation for further details.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="data-output-api">
+<h2>Data output API<a class="headerlink" href="#data-output-api" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="urbansim_templates.data.SaveTable">
+<em class="property">class </em><code class="sig-prename descclassname">urbansim_templates.data.</code><code class="sig-name descname">SaveTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">table</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">columns</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">filters</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">output_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">extra_settings</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">tags</span><span class="o">=</span><span class="default_value">[]</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/save_table.html#SaveTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.SaveTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Template for saving Orca tables to local CSV or HDF5 files. Parameters can be passed
+to the constructor or set as attributes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>table</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the Orca table. Must be provided before running the step.</p></li>
+<li><p><strong>columns</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Names of columns to include. <code class="docutils literal notranslate"><span class="pre">None</span></code> will return all columns. Indexes will
+always be included.</p></li>
+<li><p><strong>filters</strong> (<em>str</em><em> or </em><em>list of str</em><em>, </em><em>optional</em>) – Filters to apply to the data before saving. Will be passed to
+<code class="docutils literal notranslate"><span class="pre">pd.DataFrame.query()</span></code>.</p></li>
+<li><p><strong>output_type</strong> (<em>'csv'</em><em> or </em><em>'hdf'</em><em>, </em><em>optional</em>) – Type of file to be created. Must be provided before running the step.</p></li>
+<li><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Local file path to save the data to, either absolute or relative to the
+ModelManager config directory. Please provide a Unix-style path (this will work
+on any platform, but a Windows-style path won’t, and they’re hard to normalize
+automatically). For dynamic file names, you can include the characters “%RUN%”,
+“%ITER%”, or “%TS%”. These will be replaced by the run id, the model iteration
+value, or a timestamp when the output file is created.</p></li>
+<li><p><strong>extra_settings</strong> (<em>dict</em><em>, </em><em>optional</em>) – Additional arguments to pass to <code class="docutils literal notranslate"><span class="pre">pd.to_csv()</span></code> or <code class="docutils literal notranslate"><span class="pre">pd.to_hdf()</span></code>. For example,
+you could automatically compress csv data using {‘compression’: ‘gzip’}, or
+specify a custom table name for an hdf store using {‘key’: ‘table-name’}. See
+Pandas documentation for additional settings.</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model step.</p></li>
+<li><p><strong>tags</strong> (<em>list of str</em><em>, </em><em>optional</em>) – Tags, passed to ModelManager.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="urbansim_templates.data.SaveTable.from_dict">
+<em class="property">classmethod </em><code class="sig-name descname">from_dict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/save_table.html#SaveTable.from_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.SaveTable.from_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an object instance from a saved dictionary representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>d</strong> (<em>dict</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Table</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.SaveTable.get_dynamic_filepath">
+<code class="sig-name descname">get_dynamic_filepath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/save_table.html#SaveTable.get_dynamic_filepath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.SaveTable.get_dynamic_filepath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Substitute run id, model iteration, and/or timestamp into the filename.</p>
+<p>For the run id and model iteration, we look for Orca injectables named <code class="docutils literal notranslate"><span class="pre">run_id</span></code>
+and <code class="docutils literal notranslate"><span class="pre">iter_var</span></code>, respectively. If none is found, we use <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<p>The timestamp is UTC, formatted as <code class="docutils literal notranslate"><span class="pre">YYYYMMDD-HHMMSS</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.SaveTable.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/save_table.html#SaveTable.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.SaveTable.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a table to disk.</p>
+<p>Saving a table to an HDF store requires providing a <code class="docutils literal notranslate"><span class="pre">key</span></code> that will be used to
+identify the table in the store. We’ll use the Orca table name, unless you
+provide a different <code class="docutils literal notranslate"><span class="pre">key</span></code> in the <code class="docutils literal notranslate"><span class="pre">extra_settings</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="urbansim_templates.data.SaveTable.to_dict">
+<code class="sig-name descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/urbansim_templates/data/save_table.html#SaveTable.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#urbansim_templates.data.SaveTable.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dictionary representation of the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utilities.html" class="btn btn-neutral float-right" title="Shared utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="model-steps.html" class="btn btn-neutral float-left" title="Model step template APIs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

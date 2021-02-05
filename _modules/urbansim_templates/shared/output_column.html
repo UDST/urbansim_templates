@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.shared.output_column &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-templates.html">Data management templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.shared.output_column</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.shared.output_column</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">orca</span>
+
+<span class="kn">from</span> <span class="nn">urbansim_templates</span> <span class="kn">import</span> <span class="n">__version__</span>
+
+
+<div class="viewcode-block" id="OutputColumnSettings"><a class="viewcode-back" href="../../../utilities.html#urbansim_templates.shared.OutputColumnSettings">[docs]</a><span class="k">class</span> <span class="nc">OutputColumnSettings</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Stores standard parameters used by templates that generate or modify columns. </span>
+<span class="sd">    Parameters can be passed to the constructor or set as attributes.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    column_name : str, optional</span>
+<span class="sd">        Name of the Orca column to be created or modified. Generally required before</span>
+<span class="sd">        running a configured template.</span>
+<span class="sd">    </span>
+<span class="sd">    table : str, optional</span>
+<span class="sd">        Name of Orca table the column will be associated with. Generally required before</span>
+<span class="sd">        running the configured template.</span>
+<span class="sd">    </span>
+<span class="sd">    data_type : str, optional</span>
+<span class="sd">        Python type or ``numpy.dtype`` to case the column&#39;s values to.</span>
+<span class="sd">    </span>
+<span class="sd">    missing_values : str or numeric, optional</span>
+<span class="sd">        Value to use for rows that would otherwise be missing.</span>
+<span class="sd">    </span>
+<span class="sd">    cache : bool, default False</span>
+<span class="sd">        Whether to cache column values after they are calculated</span>
+<span class="sd">    </span>
+<span class="sd">    cache_scope : &#39;step&#39;, &#39;iteration&#39;, or &#39;forever&#39;, default &#39;forever&#39;</span>
+<span class="sd">        How long to cache column values for (ignored if ``cache`` is False).</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TO DO: say something about Orca defaults and about core vs. computed columns.</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">column_name</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">missing_values</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cache</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">cache_scope</span> <span class="o">=</span> <span class="s1">&#39;forever&#39;</span><span class="p">):</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">column_name</span> <span class="o">=</span> <span class="n">column_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">missing_values</span> <span class="o">=</span> <span class="n">missing_values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="n">cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_scope</span> <span class="o">=</span> <span class="n">cache_scope</span>
+        
+        <span class="c1"># automatic attributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelmanager_version</span> <span class="o">=</span> <span class="n">__version__</span>
+    
+    
+<div class="viewcode-block" id="OutputColumnSettings.from_dict"><a class="viewcode-back" href="../../../utilities.html#urbansim_templates.shared.OutputColumnSettings.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a class instance from a saved dictionary representation.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        obj : OutputColumnSettings</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">column_name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;column_name&#39;</span><span class="p">],</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">],</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;data_type&#39;</span><span class="p">],</span>
+            <span class="n">missing_values</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;missing_values&#39;</span><span class="p">],</span>
+            <span class="n">cache</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;cache&#39;</span><span class="p">],</span>
+            <span class="n">cache_scope</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;cache_scope&#39;</span><span class="p">])</span></div>
+    
+    
+<div class="viewcode-block" id="OutputColumnSettings.to_dict"><a class="viewcode-back" href="../../../utilities.html#urbansim_templates.shared.OutputColumnSettings.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dictionary representation of the object.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;column_name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">column_name</span><span class="p">,</span>
+            <span class="s1">&#39;table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">,</span>
+            <span class="s1">&#39;data_type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">,</span>
+            <span class="s1">&#39;missing_values&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_values</span><span class="p">,</span>
+            <span class="s1">&#39;cache&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span>
+            <span class="s1">&#39;cache_scope&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_scope</span><span class="p">,</span>
+            <span class="s1">&#39;modelmanager_version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelmanager_version</span><span class="p">}</span></div></div>
+
+
+<span class="c1">######################################</span>
+<span class="c1">######################################</span>
+
+
+<div class="viewcode-block" id="register_column"><a class="viewcode-back" href="../../../utilities.html#urbansim_templates.shared.register_column">[docs]</a><span class="k">def</span> <span class="nf">register_column</span><span class="p">(</span><span class="n">build_column</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a callable as an Orca column.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    build_column : callable</span>
+<span class="sd">        Callable should return a ``pd.Series``. </span>
+<span class="sd">    </span>
+<span class="sd">    settings : ColumnOutputSettings</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@orca</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">table</span><span class="p">,</span> 
+                 <span class="n">column_name</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">column_name</span><span class="p">,</span> 
+                 <span class="n">cache</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">cache</span><span class="p">,</span> 
+                 <span class="n">cache_scope</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">cache_scope</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">orca_column</span><span class="p">():</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">build_column</span><span class="p">()</span>
+        
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">missing_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">missing_values</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">data_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">series</span></div>
+    
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

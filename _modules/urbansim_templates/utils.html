@@ -1,0 +1,826 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>urbansim_templates.utils &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> UrbanSim Templates
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modelmanager.html">ModelManager API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data-templates.html">Data management templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../utilities.html">Shared utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development guide</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UrbanSim Templates</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>urbansim_templates.utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for urbansim_templates.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">orca</span>
+<span class="kn">from</span> <span class="nn">urbansim.models.util</span> <span class="kn">import</span> <span class="p">(</span><span class="n">apply_filter_query</span><span class="p">,</span> <span class="n">columns_in_filters</span><span class="p">,</span> 
+        <span class="n">columns_in_formula</span><span class="p">)</span>
+
+
+<span class="c1">################################</span>
+<span class="c1">## SPEC AND FORMAT MANAGEMENT ##</span>
+<span class="c1">################################</span>
+
+<div class="viewcode-block" id="validate_template"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.validate_template">[docs]</a><span class="k">def</span> <span class="nf">validate_template</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks whether a template class meets the basic expectations for working with </span>
+<span class="sd">    ModelManager, to aid in development and testing.</span>
+<span class="sd">    </span>
+<span class="sd">    Looks for &#39;to_dict&#39;, &#39;from_dict&#39;, and &#39;run&#39; methods, and &#39;name&#39;, &#39;tags&#39;, &#39;template&#39;,</span>
+<span class="sd">    and &#39;template_version&#39; attributes. Checks that an object can be instantiated without </span>
+<span class="sd">    arguments, plus some additional behaviors. See documentation for a full description </span>
+<span class="sd">    of ModelManager specs and guidelines.</span>
+<span class="sd">    </span>
+<span class="sd">    There are many behaviors this does NOT check, because we don&#39;t know what particular</span>
+<span class="sd">    parameters are expected and valid for a given template. For example, saving a </span>
+<span class="sd">    configured model step and reloading it should produce an equivalent object, but this</span>
+<span class="sd">    needs to be checked in template-specific unit tests.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cls : class</span>
+<span class="sd">        Template class.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error instantiating object without arguments&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;to_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;from_dict&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expecting a &#39;</span><span class="si">{}</span><span class="s2">&#39; method&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error running &#39;to_dict()&#39;&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="s1">&#39;template&#39;</span><span class="p">,</span> <span class="s1">&#39;template_version&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expecting a &#39;</span><span class="si">{}</span><span class="s2">&#39; key in dict representation&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;template&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">m</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expecting &#39;template&#39; value in dict to match the class name&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error instantiating object with &#39;from_dict()&#39; method&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    
+    <span class="c1"># TO DO - check supplemental objects? (but nothing there with unconfigured steps)</span>
+    
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1">#####################################</span>
+<span class="c1">## REPLACEMENT FOR ORCA BROADCASTS ##</span>
+<span class="c1">#####################################</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">These utilities provide functionality for merging tables using implicit join keys instead </span>
+<span class="sd">of Orca broadcasts. See Github issue #78 for discussion of the rationale.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="validate_table"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.validate_table">[docs]</a><span class="k">def</span> <span class="nf">validate_table</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">reciprocal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check some basic expectations about an Orca table:</span>
+<span class="sd">    </span>
+<span class="sd">    - Confirm that it includes a unique, named index column (a.k.a. primary key) or set </span>
+<span class="sd">      of columns (multi-index, a.k.a. composite key). If not, raise a ValueError.</span>
+<span class="sd">    </span>
+<span class="sd">    - Confirm that none of the other columns in the table share names with the index(es). </span>
+<span class="sd">      If they do, raise a ValueError.</span>
+<span class="sd">    </span>
+<span class="sd">    - If the table contains columns whose names match the index columns of other tables </span>
+<span class="sd">      registered with Orca, check whether they make sense as join keys. This prints a </span>
+<span class="sd">      status message with the number of presumptive foreign-key values that are found in </span>
+<span class="sd">      the primary/composite key, for evaluation by the user. </span>
+<span class="sd">    </span>
+<span class="sd">    - Perform the same check for columns in _other_ tables whose names match the index </span>
+<span class="sd">      column(s) of _this_ table.</span>
+<span class="sd">      </span>
+<span class="sd">    - It doesn&#39;t currently compare indexes to indexes. (Maybe it should?)</span>
+<span class="sd">      </span>
+<span class="sd">    Running this will trigger loading all registered Orca tables, which may take a while. </span>
+<span class="sd">    Stand-alone columns will not be loaded unless their names match an index column. </span>
+<span class="sd">    </span>
+<span class="sd">    Doesn&#39;t currently incorporate ``orca_test`` validation, but it might be added.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : str</span>
+<span class="sd">        Name of Orca table to validate.</span>
+<span class="sd">    </span>
+<span class="sd">    reciprocal : bool, default True</span>
+<span class="sd">        Whether to also check how columns of other tables align with this one&#39;s index. </span>
+<span class="sd">        If False, only check this table&#39;s columns against other tables&#39; indexes. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># There are a couple of reasons we&#39;re not using the orca_test library here:</span>
+    <span class="c1"># (a) orca_test doesn&#39;t currently support MultiIndexes, and (b) the primary-key/</span>
+    <span class="c1"># foreign-key comparisons aren&#39;t asserting anything, just printing status </span>
+    <span class="c1"># messages. We should update orca_test to support both, probably.</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">orca</span><span class="o">.</span><span class="n">is_table</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Table not registered with Orca: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">))</span>
+    
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+    
+    <span class="c1"># Check index has a name</span>
+    <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index column has no name&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Check for unique column names</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index names and column names overlap: &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+    
+    <span class="c1"># Check for unique index values</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">):</span>    
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Index not unique&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Compare columns to indexes of other tables, and vice versa</span>
+    <span class="n">combinations</span> <span class="o">=</span> <span class="p">[(</span><span class="n">table</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">orca</span><span class="o">.</span><span class="n">list_tables</span><span class="p">()</span> <span class="k">if</span> <span class="n">table</span> <span class="o">!=</span> <span class="n">t</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">reciprocal</span><span class="p">:</span>
+        <span class="n">combinations</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">t</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">orca</span><span class="o">.</span><span class="n">list_tables</span><span class="p">()</span> <span class="k">if</span> <span class="n">table</span> <span class="o">!=</span> <span class="n">t</span><span class="p">]</span>
+    
+    <span class="k">for</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">:</span>
+        <span class="n">col_names</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">columns</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">t2</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+        
+        <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">col_names</span><span class="p">):</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+            
+            <span class="c1"># Easier to compare multi-column values to multi-column index if we </span>
+            <span class="c1"># turn the values into an index as well</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">vals</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">vals_in_idx</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">vals</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+            
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">idx_str</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx_str</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">idx</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&#39;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&#39;: </span><span class="si">{}</span><span class="s2"> of </span><span class="si">{}</span><span class="s2"> unique values are found in &#39;</span><span class="si">{}</span><span class="s2">.</span><span class="si">{}</span><span class="s2">&#39; (</span><span class="si">{}</span><span class="s2">%)&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t1</span><span class="p">,</span> <span class="n">idx_str</span><span class="p">,</span> 
+                            <span class="n">vals_in_idx</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">),</span> 
+                            <span class="n">t2</span><span class="p">,</span> <span class="n">idx_str</span><span class="p">,</span> 
+                            <span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">vals_in_idx</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">vals</span><span class="p">))))</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="validate_all_tables"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.validate_all_tables">[docs]</a><span class="k">def</span> <span class="nf">validate_all_tables</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate all tables registered with Orca. See ``validate_table()`` above.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">orca</span><span class="o">.</span><span class="n">list_tables</span><span class="p">():</span>
+        <span class="n">validate_table</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">reciprocal</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="merge_tables"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.merge_tables">[docs]</a><span class="k">def</span> <span class="nf">merge_tables</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merge two or more tables into a single DataFrame. </span>
+<span class="sd">    </span>
+<span class="sd">    All the data will eventually be merged onto the first table in the list. In each </span>
+<span class="sd">    merge stage, we&#39;ll refer to the right-hand table as the &quot;source&quot; and the left-hand </span>
+<span class="sd">    one as the &quot;target&quot;. </span>
+<span class="sd">    </span>
+<span class="sd">    Tables are merged using ModelManager schema rules: The source table must have a </span>
+<span class="sd">    unique index, and the target table must have a column with a matching name, which </span>
+<span class="sd">    will be used as the join key. Multi-indexes are fine, but all of the index columns </span>
+<span class="sd">    need to be present in the target table.</span>
+<span class="sd">    </span>
+<span class="sd">    The last table in the list is the initial source. The algorithm searches backward</span>
+<span class="sd">    through the list for a table that qualifies as a target. The source table is left-</span>
+<span class="sd">    joined onto the target, and then the algorithm continues with the second-to-last </span>
+<span class="sd">    table as the new source. </span>
+<span class="sd">    </span>
+<span class="sd">    Example 1: Tables A and B share join keys. Tables B and C share join keys. Merging </span>
+<span class="sd">    [A, B, C] will left-join C onto B, and then left-join the result onto A. </span>
+<span class="sd">    </span>
+<span class="sd">    Example 2: Tables A and B share join keys. Tables A and C also share join keys, but </span>
+<span class="sd">    tables B and C don&#39;t. Merging [A, B, C] will left-join C onto A, and then left-join </span>
+<span class="sd">    B onto the result of the first join.</span>
+<span class="sd">    </span>
+<span class="sd">    If you provide a list of ``columns``, the output table will be limited to columns in </span>
+<span class="sd">    this list. The index(es) of the left-most table will always be retained, but it&#39;s a </span>
+<span class="sd">    good practice to list them anyway. Column names not found will be ignored.</span>
+
+<span class="sd">    If two tables contain columns with identical names (other than join keys), they can&#39;t  </span>
+<span class="sd">    be automatically merged. If the columns are just incidental and not needed in the </span>
+<span class="sd">    final output, you can perform the merge by providing a ``columns`` list that excludes </span>
+<span class="sd">    them.</span>
+<span class="sd">    </span>
+<span class="sd">    A note about data types: They will be retained, but if NaN values need to be added </span>
+<span class="sd">    (e.g. if some identifiers from the target table aren&#39;t found in the source table), </span>
+<span class="sd">    data may need to be cast to a type that allows missing values. For better control </span>
+<span class="sd">    over this, see ``urbansim_templates.data.ColumnFromBroadcast()``.</span>
+<span class="sd">        </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tables : list of str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame</span>
+<span class="sd">        Two or more tables to merge. Types can be mixed and matched.</span>
+<span class="sd">    </span>
+<span class="sd">    columns : list of str, optional</span>
+<span class="sd">        Names of columns to retain in the final output.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># last table becomes the source</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">get_df</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">columns</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        
+        <span class="c1"># search for target table</span>
+        <span class="n">target_position</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_cols</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">]))):</span>
+                <span class="n">target_position</span> <span class="o">=</span> <span class="n">i</span>
+                <span class="n">target_columns</span> <span class="o">=</span> <span class="n">columns</span> <span class="o">+</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">get_df</span><span class="p">(</span><span class="n">tables</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">target_columns</span><span class="p">)</span>
+                <span class="k">break</span>
+        
+        <span class="k">if</span> <span class="n">target_position</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Could not find a target to merge table </span><span class="si">{}</span><span class="s2"> onto&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="c1"># merge source onto target</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>  <span class="c1"># pandas 0.23+ for on=keys</span>
+        
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">tables</span><span class="p">[</span><span class="n">target_position</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+
+    <span class="c1"># drop final merge keys if not needed</span>
+    <span class="n">merged</span> <span class="o">=</span> <span class="n">trim_cols</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">merged</span></div>
+    
+
+
+<span class="c1">###############################</span>
+<span class="c1">## TEMPLATE HELPER FUNCTIONS ##</span>
+<span class="c1">###############################</span>
+
+<div class="viewcode-block" id="get_df"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.get_df">[docs]</a><span class="k">def</span> <span class="nf">get_df</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a table as a ``pd.DataFrame``. Input can be an Orca table name, </span>
+<span class="sd">    ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or ``pd.DataFrame``.</span>
+<span class="sd">    </span>
+<span class="sd">    Optionally, columns can be limited to those that appear in a list of names. The list </span>
+<span class="sd">    may contain duplicates or columns not in the table. Index(es) will always be</span>
+<span class="sd">    retained, but it&#39;s a good practice to list them anyway.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame</span>
+<span class="sd">    columns : list of str, optional</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> 
+                           <span class="n">orca</span><span class="o">.</span><span class="n">DataFrameWrapper</span><span class="p">,</span> 
+                           <span class="n">orca</span><span class="o">.</span><span class="n">TableFuncWrapper</span><span class="p">,</span> 
+                           <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Table has unsupported type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)))</span>
+    
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">trim_cols</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Orca requires column list to be unique and existing, or None</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+    
+    <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="all_cols"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.all_cols">[docs]</a><span class="k">def</span> <span class="nf">all_cols</span><span class="p">(</span><span class="n">table</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a list of all column names in a table, including index(es). Input can be an </span>
+<span class="sd">    Orca table name, ``orca.DataFrameWrapper``, ``orca.TableFuncWrapper``, or </span>
+<span class="sd">    ``pd.DataFrame``.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : str, orca.DataFrameWrapper, orca.TableFuncWrapper, or pd.DataFrame</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of str</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> 
+                           <span class="n">orca</span><span class="o">.</span><span class="n">DataFrameWrapper</span><span class="p">,</span> 
+                           <span class="n">orca</span><span class="o">.</span><span class="n">TableFuncWrapper</span><span class="p">,</span> 
+                           <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Table has unsupported type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">table</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="cols_in_expression"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.cols_in_expression">[docs]</a><span class="k">def</span> <span class="nf">cols_in_expression</span><span class="p">(</span><span class="n">expression</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all possible column names from a ``df.eval()``-style expression. </span>
+<span class="sd">    </span>
+<span class="sd">    This is achieved using regex to identify tokens in the expression that begin with a</span>
+<span class="sd">    letter and contain any number of alphanumerics or underscores, but do not end with an</span>
+<span class="sd">    opening parenthesis. This excludes function names, but would not exclude constants</span>
+<span class="sd">    (e.g. &quot;pi&quot;), which are semantically indistinguishable from column names.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    expression : str</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    cols : list of str</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;[a-zA-Z_][a-zA-Z0-9_]*(?!\()&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="trim_cols"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.trim_cols">[docs]</a><span class="k">def</span> <span class="nf">trim_cols</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Limit a DataFrame to columns that appear in a list of names. List may contain </span>
+<span class="sd">    duplicates or names not in the DataFrame. Index(es) of the DataFrame will always be </span>
+<span class="sd">    retained, but it&#39;s a good practice to list them anyway. If ``columns`` is None, all </span>
+<span class="sd">    columns are retained. Returns the original DataFrame, not a copy. </span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">    columns : list of str, optional</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span>
+    
+    <span class="n">cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>  <span class="c1"># unique, existing columns</span>
+    <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">cols</span><span class="p">)]</span></div>
+    
+
+<div class="viewcode-block" id="to_list"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.to_list">[docs]</a><span class="k">def</span> <span class="nf">to_list</span><span class="p">(</span><span class="n">items</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    In many places we accept either a single string or a list of strings. This function</span>
+<span class="sd">    normalizes None -&gt; [None], str -&gt; [str], and leaves lists unchanged.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items : str, list, or None</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">items</span><span class="p">]</span>
+    
+    <span class="k">return</span> <span class="n">items</span></div>
+
+
+<div class="viewcode-block" id="update_name"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.update_name">[docs]</a><span class="k">def</span> <span class="nf">update_name</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a name for a configured model step, based on its template class and the </span>
+<span class="sd">    current timestamp. But if a custom name has already been provided, return that </span>
+<span class="sd">    instead. (A name is judged to be custom if it does not contain the class type.)</span>
+<span class="sd">            </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    template : str</span>
+<span class="sd">        Template class name.</span>
+<span class="sd">    </span>
+<span class="sd">    name : str, optional</span>
+<span class="sd">        Existing name for the configured model step.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    str</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">template</span> <span class="ow">in</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">template</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">dt</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="get_data"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.get_data">[docs]</a><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">fallback_tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">extra_columns</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate a ``pd.DataFrame`` for model estimation or simulation. Automatically loads </span>
+<span class="sd">    tables from Orca, merges them, and removes columns not referenced in a model </span>
+<span class="sd">    expression or data filter. Additional columns can be requested.</span>
+<span class="sd">    </span>
+<span class="sd">    If filters are provided, the output will include only rows that match the filter</span>
+<span class="sd">    criteria. </span>
+<span class="sd">    </span>
+<span class="sd">    See ``urbansim_templates.utils.merge_tables()`` for a detailed description of how </span>
+<span class="sd">    the merges are performed.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tables : str or list of str</span>
+<span class="sd">        Orca table(s) to draw data from.</span>
+<span class="sd">    </span>
+<span class="sd">    fallback_tables : str or list of str, optional</span>
+<span class="sd">        Table(s) to use if first parameter evaluates to `None`. (This option will be </span>
+<span class="sd">        removed shortly when estimation and simulation settings are separated.)</span>
+<span class="sd">    </span>
+<span class="sd">    filters : str or list of str, optional</span>
+<span class="sd">        Filter(s) to apply to the merged data, using `pd.DataFrame.query()`.</span>
+<span class="sd">    </span>
+<span class="sd">    model_expression : str, optional</span>
+<span class="sd">        Model expression that will be evaluated using the output data. Only used to drop </span>
+<span class="sd">        non-relevant columns. PyLogit format is not yet supported.</span>
+<span class="sd">    </span>
+<span class="sd">    extra_columns : str or list of str, optional</span>
+<span class="sd">        Columns to include, in addition to any in the model expression and filters. (If </span>
+<span class="sd">        this and the model_expression are both None, all columns will be included.)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">tables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tables</span> <span class="o">=</span> <span class="n">fallback_tables</span>
+    
+    <span class="n">colnames</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># this will get all columns</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">model_expression</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">extra_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">colnames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">columns_in_formula</span><span class="p">(</span><span class="n">model_expression</span><span class="p">)</span> <span class="o">+</span> \
+                            <span class="n">columns_in_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span> <span class="o">+</span> <span class="n">to_list</span><span class="p">(</span><span class="n">extra_columns</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">get_df</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">colnames</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">merge_tables</span><span class="p">(</span><span class="n">tables</span><span class="p">,</span> <span class="n">colnames</span><span class="p">)</span>
+    
+    <span class="n">df</span> <span class="o">=</span> <span class="n">apply_filter_query</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filters</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+    
+    
+<div class="viewcode-block" id="update_column"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.update_column">[docs]</a><span class="k">def</span> <span class="nf">update_column</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fallback_table</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fallback_column</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update an Orca column. If it doesn&#39;t exist yet, add it to the wrapped DataFrame. </span>
+<span class="sd">    Values will be aligned using the indexes if possible.</span>
+<span class="sd">    </span>
+<span class="sd">    Data types: If the column already exists, new values will be cast to match the </span>
+<span class="sd">    existing data type. If the column is new, it will retain the data type of the </span>
+<span class="sd">    pd.Series that&#39;s passed to this function -- unless it doesn&#39;t fully align with the </span>
+<span class="sd">    table&#39;s index, in which case it may be cast to allow missing values (e.g. from int </span>
+<span class="sd">    to float).</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    table : str or list of str</span>
+<span class="sd">        Name of Orca table to update. If list, the first element will be used.</span>
+<span class="sd">    </span>
+<span class="sd">    column : str</span>
+<span class="sd">        Name of existing column to update, or new column to create. Cannot be an index.</span>
+<span class="sd">        </span>
+<span class="sd">    data : pd.Series</span>
+<span class="sd">        Column of data to update or add. </span>
+<span class="sd">        </span>
+<span class="sd">    fallback_table : str or list of str</span>
+<span class="sd">        Name of Orca table to use if ``table`` evaluates to None.</span>
+<span class="sd">    </span>
+<span class="sd">    fallback_column : str</span>
+<span class="sd">        Name of Orca column to use if ``column`` evaluates to None.</span>
+<span class="sd">        </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">fallback_table</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">table</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">column</span> <span class="o">=</span> <span class="n">fallback_column</span>
+    
+    <span class="n">dfw</span> <span class="o">=</span> <span class="n">orca</span><span class="o">.</span><span class="n">get_table</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dfw</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">dfw</span><span class="o">.</span><span class="n">update_col</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>  <span class="c1"># adds column</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dfw</span><span class="o">.</span><span class="n">update_col_from_series</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># updates existing column</span></div>
+    
+
+<span class="c1">########################</span>
+<span class="c1">## VERSION MANAGEMENT ##</span>
+<span class="c1">########################</span>
+
+<div class="viewcode-block" id="parse_version"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.parse_version">[docs]</a><span class="k">def</span> <span class="nf">parse_version</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses a version string into its component parts. String is expected to follow the </span>
+<span class="sd">    pattern &quot;0.1.1.dev0&quot;, which would be parsed into (0, 1, 1, 0). The first two </span>
+<span class="sd">    components are required. The third is set to 0 if missing, and the fourth to None.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    v : str</span>
+<span class="sd">        Version string using syntax described above.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple with format (int, int, int, int or None)</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">v4</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;dev&#39;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+        <span class="n">v4</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;dev&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;dev&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># 0.1.dev0 -&gt; 0.1.</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># 0.1. -&gt; 0.1</span>
+        
+    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    
+    <span class="n">v3</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="n">v3</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="n">v2</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">v1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">v3</span><span class="p">,</span> <span class="n">v4</span><span class="p">)</span></div>
+    
+
+<div class="viewcode-block" id="version_greater_or_equal"><a class="viewcode-back" href="../../utilities.html#urbansim_templates.utils.version_greater_or_equal">[docs]</a><span class="k">def</span> <span class="nf">version_greater_or_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tests whether version string &#39;a&#39; is greater than or equal to version string &#39;b&#39;.</span>
+<span class="sd">    Version syntax should follow the pattern described for `version_parse()`. </span>
+<span class="sd">    </span>
+<span class="sd">    Note that &#39;dev&#39; versions are pre-releases, so &#39;0.2&#39; &lt; &#39;0.2.1.dev5&#39; &lt; &#39;0.2.1&#39;.</span>
+<span class="sd">        </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : str</span>
+<span class="sd">        First version string, formatted as described in `version_parse()`. </span>
+<span class="sd">    b : str</span>
+<span class="sd">        Second version string, formatted as described in `version_parse()`. </span>
+<span class="sd">    </span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    boolean</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">parse_version</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">elif</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+            
+        <span class="k">elif</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            
+            <span class="k">elif</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+                
+                <span class="k">elif</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+                
+                <span class="k">elif</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+    
+    <span class="k">return</span> <span class="kc">False</span></div>
+    
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, UDST
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
