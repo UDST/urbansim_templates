@@ -1,6 +1,5 @@
 [![Build Status](https://travis-ci.org/UDST/urbansim_templates.svg?branch=master)](https://travis-ci.org/UDST/urbansim_templates)
 [![Coverage Status](https://coveralls.io/repos/github/UDST/urbansim_templates/badge.svg?branch=master)](https://coveralls.io/github/UDST/urbansim_templates?branch=master)
-[![Docs Status](https://readthedocs.org/projects/urbansim_templates/badge/?version=latest)](https://docs.udst.org/projects/urbansim-templates/en/latest)
 
 # UrbanSim Templates
 
