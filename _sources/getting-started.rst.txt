@@ -99,7 +99,7 @@ The default file location is a ``configs`` folder located in the current working
         In [2]: import urbansim_templates
                 print(urbansim_templates.__version__)
         
-        Out[2]: '0.2.dev0'
+        Out[2]: '0.2'
 
 
 Creating a model step
@@ -125,7 +125,7 @@ This sets up ``m`` as an instance of the OLS regression template. The ``tables``
     import orca
     import pandas as pd
     
-    url = "https://www.dropbox.com/s/vxg5pdfzxrh6osz/buildings-demo.csv?dl=1"
+    url = "https://raw.githubusercontent.com/UDST/urbansim_templates/dev/examples/data/buildings-demo.csv"
     df = pd.read_csv(url).dropna()
     orca.add_table('buildings', df)
 
