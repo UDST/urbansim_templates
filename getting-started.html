@@ -183,24 +183,18 @@
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>UrbanSim Templates is tested with Python versions 2.7, 3.5, 3.6, and 3.7.</p>
-<p>As of Feb. 2019, there is an installation problem in Python 3.7 when using Pip (because of an issue with Orca’s PyTables dependency). Conda should work.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>It can be helpful to set up a dedicated Python environment for each project you work on. This lets you use a stable and replicable set of libraries that won’t be affected by other projects. Here are some good <a class="reference external" href="https://gist.github.com/smmaurer/f3a4f424a4aa877fb73e1cb2567bd89d">environment settings</a> for UrbanSim Templates projects.</p>
-</div>
+<p>UrbanSim Templates is currently tested with Python versions 3.6, 3.7, 3.8, and 3.9.</p>
 <div class="section" id="production-releases">
 <h3>Production releases<a class="headerlink" href="#production-releases" title="Permalink to this headline">¶</a></h3>
-<p>UrbanSim Templates can be installed using the Pip or Conda package managers. With Conda, you (currently) need to install UrbanSim separately; Pip will handle this automatically.</p>
+<p>UrbanSim Templates can be installed using the Pip or Conda package managers.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">urbansim_templates</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="n">urbansim_templates</span> <span class="o">--</span><span class="n">channel</span> <span class="n">conda</span><span class="o">-</span><span class="n">forge</span>
-<span class="n">conda</span> <span class="n">install</span> <span class="n">urbansim</span> <span class="o">--</span><span class="n">channel</span> <span class="n">udst</span>
 </pre></div>
 </div>
 <p>Dependencies include <a class="reference external" href="http://numpy.org">NumPy</a>, <a class="reference external" href="http://pandas.pydata.org">Pandas</a>, and <a class="reference external" href="http://statsmodels.org">Statsmodels</a>, plus two other UDST libraries: <a class="reference external" href="http://udst.github.io/orca">Orca</a> and <a class="reference external" href="http://github.com/udst/choicemodels">ChoiceModels</a>. These will be included automatically when you install UrbanSim Templates.</p>
-<p>Certain less-commonly-used templates require additional packages: currently, <a class="reference external" href="https://github.com/timothyb0912/pylogit">PyLogit</a> and <a class="reference external" href="http://scikit-learn.org">Scikit-learn</a>. You’ll need to install these manually to use the associated templates.</p>
+<p>Certain less-commonly-used templates require additional packages: currently, <a class="reference external" href="https://github.com/timothyb0912/pylogit">PyLogit</a> and <a class="reference external" href="http://scikit-learn.org">Scikit-learn</a>. You’ll need to install these separately to use the associated templates.</p>
 <p>When new production releases of UrbanSim Templates come out, you can upgrade like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">urbansim_templates</span> <span class="o">--</span><span class="n">upgrade</span>
 </pre></div>
