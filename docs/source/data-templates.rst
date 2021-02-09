@@ -75,23 +75,12 @@ Unlike the templates, Orca relies on user-specified "`broadcast <http://udst.git
 Data loading API
 ----------------
 
-.. currentmodule:: urbansim_templates.data
-
-.. autosummary::
-    LoadTable
-
 .. autoclass:: urbansim_templates.data.LoadTable
    :members:
 
 
 Column creation API
 -------------------
-
-.. currentmodule:: urbansim_templates.data
-
-.. autosummary::
-    ColumnFromExpression
-    ExpressionSettings
 
 .. autoclass:: urbansim_templates.data.ColumnFromExpression
    :members:
@@ -102,12 +91,5 @@ Column creation API
 Data output API
 ---------------
 
-.. currentmodule:: urbansim_templates.data
-
-.. autosummary::
-    SaveTable
-
 .. autoclass:: urbansim_templates.data.SaveTable
    :members:
-
-

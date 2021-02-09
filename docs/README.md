@@ -1,19 +1,35 @@
-## Documentation
+This folder generates the UrbanSim Templates online documentation, hosted at https://udst.github.io/urbansim_templates/.
 
-Documentation is generated using [Sphinx](http://sphinx-doc.org) and hosted with Github Pages at http://udst.github.io/urbansim_templates. 
+### How it works
 
-We maintain multiple versions of the documentation, for developer releases and production releases. For example, `/docs/_source_latest/` has documentation source files for the most recent developer release, and `/docs/_source_stable/` has source files for the most recent production release. 
+HTML files are generated using [Sphinx](http://sphinx-doc.org) and hosted with GitHub Pages from the `gh-pages` branch of the repository. The online documentation is rendered and updated **manually**. 
 
-Sphinx reads from the source files, plus the docstrings in the code, and renders html files to `/docs/latest/` and `/docs/stable/`. The Github Pages settings are [online](https://github.com/UDST/urbansim_templates/settings). 
+### Editing the documentation
 
-For now we're building the docs manually, which gives us maximum control:
+The files in `docs/source`, along with docstrings in the source code, determine what appears in the rendered documentation. Here's a [good tutorial](https://pythonhosted.org/an_example_pypi_project/sphinx.html) for Sphinx.
+
+### Previewing changes locally
+
+Install the copy of UrbanSim Templates that the documentation is meant to reflect. Install the documentation tools.
 
 ```
+pip install . 
+pip install sphinx sphinx_rtd_theme
+```
+
+Build the documentation. There should be status messages and warnings, but no errors.
+
+```
+cd docs
 sphinx-build -b html source build
 ```
 
-Building the docs requires the python libraries `sphinx`, `numpydoc`, and `sphinx_rtd_theme`, plus the baseline requirements for `urbansim_templates`. You should rebuild the docs for each release. Rendered files won't appear online until they're merged into the master branch, but you can preview them locally. 
+The HTML files will show up in `docs/build/`. 
 
-When you build the docs, docstrings are drawn from whatever version of the library is loaded by `import urbansim_templates`, not necessarily the copy that you're building the docs within -- so watch out for this when updating older versions.
+### Uploading changes
 
-See more discussion of docs in [PR #81](https://github.com/UDST/urbansim_templates/pull/81) and [Issue #83](https://github.com/UDST/urbansim_templates/issues/83)
+Clone a second copy of the repository and check out the `gh-pages` branch. Copy over the updated HTML files, commit them, and push the changes to GitHub.
+
+### Discussion
+
+There are various discussions about documentation in the issue threads. [Issue #120](https://github.com/UDST/urbansim_templates/issues/120) is a good starting point.
