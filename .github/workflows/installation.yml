@@ -6,7 +6,7 @@ name: Installation
 # background to catch dependency updates that break UrbanSim Templates.
 
 on:
-  push:  # TURN OFF
+  # push:
   # pull_request:
   workflow_dispatch:
   schedule:
