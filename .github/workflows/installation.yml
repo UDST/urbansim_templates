@@ -32,6 +32,7 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Run tests
       run: |
+        cd tests
         coverage run --source urbansim_templates --module pytest --verbose
 
   build-conda:
@@ -56,4 +57,5 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Run tests
       run: |
+        cd tests
         coverage run --source urbansim_templates --module pytest --verbose
