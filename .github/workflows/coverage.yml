@@ -28,6 +28,6 @@ jobs:
         coverage run --source urbansim_templates --module pytest --verbose
     - name: Upload to Coveralls
       run: |
-        coveralls
+        coveralls --service=github
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

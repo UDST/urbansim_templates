@@ -28,12 +28,6 @@ jobs:
     - name: Install UrbanSim Templates
       run: |
         pip install urbansim_templates
-        pip install -r requirements-extras.txt
-        pip install -r requirements-dev.txt
-    - name: Run tests
-      run: |
-        cd tests
-        coverage run --source urbansim_templates --module pytest --verbose
 
   build-conda:
     runs-on: ${{ matrix.os }}
@@ -53,9 +47,3 @@ jobs:
     - name: Install UrbanSim Templates
       run: |
         conda install urbansim_templates --channel conda-forge
-        pip install -r requirements-extras.txt
-        pip install -r requirements-dev.txt
-    - name: Run tests
-      run: |
-        cd tests
-        coverage run --source urbansim_templates --module pytest --verbose
