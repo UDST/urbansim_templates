@@ -26,6 +26,7 @@ jobs:
       run: |
         cd tests
         coverage run --source urbansim_templates --module pytest --verbose
+        coverage report --show-missing
     - name: Upload to Coveralls
       run: |
         coveralls --service=github
