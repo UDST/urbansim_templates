@@ -26,4 +26,4 @@ jobs:
     - name: Run tests
       run: |
         cd tests
-        coverage run --source urbansim_templates --module pytest --verbose
+        pytest *.py -s
