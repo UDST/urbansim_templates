@@ -1,6 +1,6 @@
 # UrbanSim Templates change log
 
-### 0.1.4 (2020-02-12)
+### 0.1.4 (2020-02-16)
 
 - adds a `residuals` attribute to fitted `OLSRegressionStep` models, for diagnostics
 
