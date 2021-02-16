@@ -143,7 +143,9 @@ def test_simulation_unconstrained(m):
     
     obs = orca.get_table('obs').to_frame()
     assert sum(obs.choice == -1) == 0
-    assert obs.loc[:24, 'choice'].equals(m.choices)
+    pd.testing.assert_series_equal(obs.loc[:24, 'choice'], m.choices,
+                                   check_dtype=False, check_names=False)
+    # assert obs.loc[:24, 'choice'].equals(m.choices)
     
     
 def test_simulation_single_occupancy(m):
