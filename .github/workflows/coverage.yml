@@ -4,7 +4,7 @@ name: Coverage
 # unit tests) and posts headline metrics to the PR thread.
 
 on:
-  push:  # REMOVE
+  # push:
   pull_request:
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
         pip install .
         pip install -r requirements-extras.txt
         pip install -r requirements-dev.txt
-    - name: Run tests
+    - name: Generate coverage report
       run: |
         cd tests
         coverage run --source urbansim_templates --module pytest --verbose
