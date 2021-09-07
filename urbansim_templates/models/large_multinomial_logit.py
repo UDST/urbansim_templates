@@ -169,7 +169,7 @@ class LargeMultinomialLogitStep(TemplateStep):
                  alt_filters=None, alt_sample_size=None, out_choosers=None,
                  out_alternatives=None, out_column=None, out_chooser_filters=None,
                  out_alt_filters=None, constrained_choices=False, alt_capacity=None,
-                 chooser_size=None, max_iter=None, name=None, tags=[]):
+                 chooser_size=None, max_iter=None, mct_intx_ops=None, name=None, tags=[]):
 
         self._listeners = []
 
@@ -194,6 +194,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.alt_capacity = alt_capacity
         self.chooser_size = chooser_size
         self.max_iter = max_iter
+        self.mct_intx_ops = mct_intx_ops
 
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None
@@ -204,6 +205,8 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.mergedchoicetable = None
         self.probabilities = None
         self.choices = None
+
+
 
     def bind_to(self, callback):
         self._listeners.append(callback)
@@ -239,7 +242,8 @@ class LargeMultinomialLogitStep(TemplateStep):
                   out_column=d['out_column'], out_chooser_filters=d['out_chooser_filters'],
                   out_alt_filters=d['out_alt_filters'],
                   constrained_choices=d['constrained_choices'], alt_capacity=d['alt_capacity'],
-                  chooser_size=d['chooser_size'], max_iter=d['max_iter'], name=d['name'],
+                  chooser_size=d['chooser_size'], max_iter=d['max_iter'],
+                  mct_intx_ops=d['mct_intx_ops'], name=d['name'],
                   tags=d['tags'])
 
         # Load model fit data
@@ -283,6 +287,7 @@ class LargeMultinomialLogitStep(TemplateStep):
             'alt_capacity': self.alt_capacity,
             'chooser_size': self.chooser_size,
             'max_iter': self.max_iter,
+            'mct_intx_ops': self.mct_intx_ops,
             'summary_table': self.summary_table,
             'fitted_parameters': self.fitted_parameters,
         }
@@ -443,6 +448,90 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.__max_iter = value
         self.send_to_listeners('max_iter', value)
 
+    @property
+    def mct_intx_ops(self):
+        return self.__mct_intx_ops
+
+    @mct_intx_ops.setter
+    def mct_intx_ops(self, value):
+        self.__mct_intx_ops = value
+        self.send_to_listeners('mct_intx_ops', value)
+
+    def perform_mct_intx_ops(self, mct, nan_handling='zero'):
+        """
+        Method to dynamically update a MergedChoiceTable object according to
+        a pre-defined set of operations specified in the model .yaml config.
+        Operations are performed sequentially as follows: 1) Pandas merges
+        with other Orca tables; 2) Pandas group-by aggregations; 3) rename
+        existing columns; 4) create new columns via Pandas `eval()`.
+
+        Parameters
+        ----------
+        mct : choicemodels.tools.MergedChoiceTable
+        nan_handling : str
+            Either 'zero' or 'drop', where the former will replace all NaN's
+            and None's with 0 integers and the latter will drop all rows with
+            any NaN or Null values.
+
+        Returns
+        -------
+        MergedChoiceTable
+        """
+
+        intx_ops = self.mct_intx_ops
+        mct_df = mct.to_frame()
+        og_mct_index = mct_df.index.names
+        mct_df.reset_index(inplace=True)
+        mct_df.index.name = 'mct_index'
+
+        # merges
+        intx_df = mct_df.copy()
+        for merge in intx_ops['successive_merges']:
+            left = intx_df[merge.get('mct_cols', intx_df.columns)]
+            right = get_data(
+                merge['right_table'],
+                extra_columns=merge.get('right_cols', None))
+            intx_df = pd.merge(
+                left, right,
+                how=merge.get('how', 'inner'),
+                on=merge.get('on_cols', None),
+                left_on=merge.get('left_on', None),
+                right_on=merge.get('right_on', None),
+                left_index=merge.get('left_index', False),
+                right_index=merge.get('right_index', False),
+                suffixes=merge.get('suffixes', ('_x', '_y')))
+
+        # aggs
+        aggs = intx_ops.get('aggregations', False)
+        if aggs:
+            intx_df = intx_df.groupby('mct_index').agg(aggs)
+
+        # rename cols
+        if intx_ops.get('rename_cols', False):
+            intx_df = intx_df.rename(
+                columns=intx_ops['rename_cols'])
+
+        # update mct
+        mct_df = pd.merge(mct_df, intx_df, on='mct_index')
+
+        # create new cols from expressions
+        for new_col, expr in intx_ops.get('eval_ops', {}):
+            mct_df[new_col] = mct_df.eval(expr)
+
+        # restore original mct index
+        mct_df.set_index(og_mct_index, inplace=True)
+
+        # handle NaNs and Nones
+        if mct_df.isna.any():
+            if nan_handling == 'zero':
+                print("Replacing MCT None's and NaN's with 0")
+                mct_df = mct_df.fillna(0)
+            elif nan_handling == 'drop':
+                print("Dropping rows with None's/NaN's from MCT")
+                mct_df = mct_df.dropna(axis=0)
+
+        return MergedChoiceTable.from_df(mct_df)
+
     def fit(self, mct=None):
         """
         Fit the model; save and report results. This uses the ChoiceModels estimation 
@@ -597,72 +686,32 @@ class LargeMultinomialLogitStep(TemplateStep):
         alternatives = alternatives[list(alt_cols)]
 
         # Callables for iterative choices
-        def mct(obs, alts, mct_intx_ops=None):
+        def mct(obs, alts, intx_ops=None):
 
             this_mct = MergedChoiceTable(
                 obs, alts, sample_size=self.alt_sample_size,
                 interaction_terms=interaction_terms)
 
-            if mct_intx_ops:
-                mct_df = this_mct.to_frame()
-                og_mct_index = mct_df.index.names
-                mct_df.reset_index(inplace=True)
-                mct_df.index.name = 'mct_index'
-
-                # merges
-                intx_df = mct_df.copy()
-                for merge in mct_intx_ops['successive_merges']:
-                    left = intx_df[merge.get('mct_cols', intx_df.columns)]
-                    right = get_data(
-                        merge['right_table'],
-                        extra_columns=merge.get('right_cols', None))
-                    intx_df = pd.merge(
-                        left, right,
-                        how=merge.get('how', 'inner'),
-                        on=merge.get('on_cols', None),
-                        left_on=merge.get('left_on', None),
-                        right_on=merge.get('right_on', None),
-                        left_index=merge.get('left_index', False),
-                        right_index=merge.get('right_index', False),
-                        suffixes=merge.get('suffixes', ('_x', '_y')))
-
-                # aggs
-                aggs = mct_intx_ops.get('aggregations', False)
-                if aggs:
-                    intx_df = intx_df.groupby('mct_index').agg(aggs)
-
-                # rename cols
-                if mct_intx_ops.get('rename_cols', False):
-                    intx_df = intx_df.rename(
-                        columns=mct_intx_ops['rename_cols'])
-
-                # update mct
-                mct_df = pd.merge(mct_df, intx_df, on='mct_index')
-
-                # create new cols from expressions
-                for new_col, expr in mct_intx_ops.get('eval_ops', {}):
-                    mct_df[new_col] = mct_df.eval(expr)
-
-                mct_df.set_index(og_mct_index, inplace=True)
-                if mct_df.isna.any():
-                    print("Replacing Nones and NaNs with 0")
-                    mct_df = mct_df.fillna(0)
-                this_mct = MergedChoiceTable.from_df(mct_df)
+            if intx_ops:
+                this_mct = self.perform_mct_intx_ops(this_mct)
 
             return this_mct
 
         def probs(mct):
             return self.model.probabilities(mct)
 
-        if (self.constrained_choices == True):
+        if self.constrained_choices is True:
             choices = iterative_lottery_choices(
                 observations, alternatives,
-                mct_callable=mct, probs_callable=probs,
+                mct_callable=mct,
+                probs_callable=probs,
                 alt_capacity=self.alt_capacity, chooser_size=self.chooser_size,
-                max_iter=self.max_iter, chooser_batch_size=chooser_batch_size)
+                max_iter=self.max_iter, chooser_batch_size=chooser_batch_size,
+                mct_intx_ops=self.mct_intx_ops)
 
         else:
-            choicetable = mct(observations, alternatives)
+            choicetable = mct(
+                observations, alternatives, intx_ops=self.mct_intx_ops)
             probabilities = probs(choicetable)
             choices = monte_carlo_choices(probabilities)
 
