@@ -243,7 +243,7 @@ class LargeMultinomialLogitStep(TemplateStep):
                   out_alt_filters=d['out_alt_filters'],
                   constrained_choices=d['constrained_choices'], alt_capacity=d['alt_capacity'],
                   chooser_size=d['chooser_size'], max_iter=d['max_iter'],
-                  mct_intx_ops=d['mct_intx_ops'], name=d['name'],
+                  mct_intx_ops=d.get('mct_intx_ops', None), name=d['name'],
                   tags=d['tags'])
 
         # Load model fit data
@@ -486,20 +486,20 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         # merges
         intx_df = mct_df.copy()
-        for merge in intx_ops['successive_merges']:
-            left = intx_df[merge.get('mct_cols', intx_df.columns)]
+        for merge, merge_args in intx_ops.get('successive_merges', {}).items():
+            left = intx_df[merge_args.get('mct_cols', intx_df.columns)]
             right = get_data(
-                merge['right_table'],
-                extra_columns=merge.get('right_cols', None))
+                merge_args['right_table'],
+                extra_columns=merge_args.get('right_cols', None))
             intx_df = pd.merge(
                 left, right,
-                how=merge.get('how', 'inner'),
-                on=merge.get('on_cols', None),
-                left_on=merge.get('left_on', None),
-                right_on=merge.get('right_on', None),
-                left_index=merge.get('left_index', False),
-                right_index=merge.get('right_index', False),
-                suffixes=merge.get('suffixes', ('_x', '_y')))
+                how=merge_args.get('how', 'inner'),
+                on=merge_args.get('on_cols', None),
+                left_on=merge_args.get('left_on', None),
+                right_on=merge_args.get('right_on', None),
+                left_index=merge_args.get('left_index', False),
+                right_index=merge_args.get('right_index', False),
+                suffixes=merge_args.get('suffixes', ('_x', '_y')))
 
         # aggs
         aggs = intx_ops.get('aggregations', False)
@@ -515,7 +515,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         mct_df = pd.merge(mct_df, intx_df, on='mct_index')
 
         # create new cols from expressions
-        for new_col, expr in intx_ops.get('eval_ops', {}):
+        for new_col, expr in intx_ops.get('eval_ops', {}).items():
             mct_df[new_col] = mct_df.eval(expr)
 
         # restore original mct index
