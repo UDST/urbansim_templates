@@ -487,17 +487,37 @@ class LargeMultinomialLogitStep(TemplateStep):
         # merges
         intx_df = mct_df.copy()
         for merge, merge_args in intx_ops.get('successive_merges', {}).items():
-            left = intx_df[merge_args.get('mct_cols', intx_df.columns)]
+
+            # make sure mct index is preserved during merge
+            left_cols = merge_args.get('mct_cols', intx_df.columns)
+            left_idx = merge_args.get('left_index', False)
+
+            if intx_df.index.name == mct_df.index.name:
+                if not left_idx:
+                    intx_df.reset_index(inplace=True)
+                    if mct_df.index.name not in left_cols:
+                        left_cols += [mct_df.index.name]
+            elif mct_df.index.name in intx_df.columns:
+                if mct_df.index.name not in left_cols:
+                    left_cols += [mct_df.index.name]
+            else:
+                raise KeyError(
+                    'Column {0} must be preserved in intx ops!'.format(
+                        mct_df.index.name))
+
+            left = intx_df[left_cols]
+
             right = get_data(
                 merge_args['right_table'],
                 extra_columns=merge_args.get('right_cols', None))
+
             intx_df = pd.merge(
                 left, right,
                 how=merge_args.get('how', 'inner'),
                 on=merge_args.get('on_cols', None),
                 left_on=merge_args.get('left_on', None),
                 right_on=merge_args.get('right_on', None),
-                left_index=merge_args.get('left_index', False),
+                left_index=left_idx,
                 right_index=merge_args.get('right_index', False),
                 suffixes=merge_args.get('suffixes', ('_x', '_y')))
 
@@ -515,14 +535,16 @@ class LargeMultinomialLogitStep(TemplateStep):
         mct_df = pd.merge(mct_df, intx_df, on='mct_index')
 
         # create new cols from expressions
-        for new_col, expr in intx_ops.get('eval_ops', {}).items():
-            mct_df[new_col] = mct_df.eval(expr)
+        for new_col, eval_attrs in intx_ops.get('eval_ops', {}).items():
+            expr = eval_attrs['expr']
+            engine = eval_attrs.get('engine', 'numexpr')
+            mct_df[new_col] = mct_df.eval(expr, engine=engine)
 
         # restore original mct index
         mct_df.set_index(og_mct_index, inplace=True)
 
         # handle NaNs and Nones
-        if mct_df.isna.any():
+        if mct_df.isna().values.any():
             if nan_handling == 'zero':
                 print("Replacing MCT None's and NaN's with 0")
                 mct_df = mct_df.fillna(0)
