@@ -486,7 +486,7 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         # merges
         intx_df = mct_df.copy()
-        for merge, merge_args in intx_ops.get('successive_merges', {}).items():
+        for merge_args in intx_ops.get('successive_merges', []):
 
             # make sure mct index is preserved during merge
             left_cols = merge_args.get('mct_cols', intx_df.columns)
@@ -535,9 +535,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         mct_df = pd.merge(mct_df, intx_df, on='mct_index')
 
         # create new cols from expressions
-        for new_col, eval_attrs in intx_ops.get('eval_ops', {}).items():
-            expr = eval_attrs['expr']
-            engine = eval_attrs.get('engine', 'numexpr')
+        for eval_op in intx_ops.get('sequential_eval_ops', []):
+            new_col = eval_op['name']
+            expr = eval_op['expr']
+            engine = eval_op.get('engine', 'numexpr')
             mct_df[new_col] = mct_df.eval(expr, engine=engine)
 
         # restore original mct index
