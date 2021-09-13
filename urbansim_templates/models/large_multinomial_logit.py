@@ -666,16 +666,25 @@ class LargeMultinomialLogitStep(TemplateStep):
         self.choices = None
 
         if interaction_terms is not None:
-            uniq_intx_idx_names = set(
-                [idx for intx in interaction_terms for idx in intx.index.names])
+            uniq_intx_idx_names = set([
+                idx for intx in interaction_terms for idx in intx.index.names])
             obs_extra_cols = to_list(self.chooser_size) + \
                 list(uniq_intx_idx_names)
             alts_extra_cols = to_list(
                 self.alt_capacity) + list(uniq_intx_idx_names)
 
         else:
-            obs_extra_cols = self.chooser_size
-            alts_extra_cols = self.alt_capacity
+            obs_extra_cols = to_list(self.chooser_size)
+            alts_extra_cols = to_list(self.alt_capacity)
+
+        # get any necessary extra columns from the mct intx operations spec
+        if self.mct_intx_ops:
+            intx_extra_obs_cols = self.mct_intx_ops.get('extra_obs_cols', [])
+            intx_extra_obs_cols = to_list(intx_extra_obs_cols)
+            obs_extra_cols += intx_extra_obs_cols
+            intx_extra_alts_cols = self.mct_intx_ops.get('extra_alts_cols', [])
+            intx_extra_alts_cols = to_list(intx_extra_alts_cols)
+            alts_extra_cols += intx_extra_alts_cols
 
         observations = get_data(tables=self.out_choosers,
                                 fallback_tables=self.choosers,
@@ -717,6 +726,7 @@ class LargeMultinomialLogitStep(TemplateStep):
 
             if intx_ops:
                 this_mct = self.perform_mct_intx_ops(this_mct)
+                this_mct.sample_size = self.alt_sample_size
 
             return this_mct
 
