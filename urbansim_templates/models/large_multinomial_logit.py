@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 import orca
-from urbansim.models.util import columns_in_formula, apply_filter_query
+from urbansim.models.util import columns_in_formula, apply_filter_query, columns_in_filters
 from choicemodels.tools import MergedChoiceTable
 import pandas as pd
 
@@ -603,6 +603,10 @@ class LargeMultinomialLogitStep(TemplateStep):
             alternatives = get_data(tables=self.alternatives,
                                     filters=self.alt_filters,
                                     model_expression=self.model_expression)
+
+            # Remove filter columns before merging, in case column names overlap
+            observations.drop(columns_in_filters(self.chooser_filters), axis = 1, inplace = True)
+            alternatives.drop(columns_in_filters(self.alt_filters), axis = 1, inplace = True)
 
             mct = MergedChoiceTable(observations=observations,
                                     alternatives=alternatives,
