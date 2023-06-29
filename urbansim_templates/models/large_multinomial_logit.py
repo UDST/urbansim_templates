@@ -23,8 +23,8 @@ def check_choicemodels_version():
 @modelmanager.template
 class LargeMultinomialLogitStep(TemplateStep):
     """
-    Class for building standard multinomial logit model steps where alternatives are 
-    interchangeable and all have the same model expression. Supports random sampling of 
+    Class for building standard multinomial logit model steps where alternatives are
+    interchangeable and all have the same model expression. Supports random sampling of
     alternatives.
 
     Estimation and simulation are performed using ChoiceModels.
@@ -36,7 +36,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         primary one. Any additional tables need to have merge relationships ("broadcasts")
         specified so that they can be merged unambiguously onto the first table. The index
         of the primary table should be a unique ID. In this template, the 'choosers' and
-        'alternatives' parameters replace the 'tables' parameter. Both are required for 
+        'alternatives' parameters replace the 'tables' parameter. Both are required for
         fitting a model, but do not have to be provided when the object is created.
         Reserved column names: 'chosen'.
 
@@ -45,7 +45,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         primary one. Any additional tables need to have merge relationships ("broadcasts")
         specified so that they can be merged unambiguously onto the first table. The index
         of the primary table should be a unique ID. In this template, the 'choosers' and
-        'alternatives' parameters replace the 'tables' parameter. Both are required for 
+        'alternatives' parameters replace the 'tables' parameter. Both are required for
         fitting a model, but do not have to be provided when the object is created.
         Reserved column names: 'chosen'.
 
@@ -62,66 +62,66 @@ class LargeMultinomialLogitStep(TemplateStep):
         when the object is created. Not required for simulation.
 
     chooser_filters : str or list of str, optional
-        Filters to apply to the chooser data before fitting the model. These are passed to 
-        `pd.DataFrame.query()`. Filters are applied after any additional tables are merged 
+        Filters to apply to the chooser data before fitting the model. These are passed to
+        `pd.DataFrame.query()`. Filters are applied after any additional tables are merged
         onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
 
     chooser_sample_size : int, optional
-        Number of choosers to sample, for faster model fitting. Sampling is random and may 
+        Number of choosers to sample, for faster model fitting. Sampling is random and may
         vary between model runs.
 
     alt_filters : str or list of str, optional
-        Filters to apply to the alternatives data before fitting the model. These are 
-        passed to `pd.DataFrame.query()`. Filters are applied after any additional tables 
+        Filters to apply to the alternatives data before fitting the model. These are
+        passed to `pd.DataFrame.query()`. Filters are applied after any additional tables
         are merged onto the primary one. Replaces the `fit_filters` argument in UrbanSim.
         Choosers whose chosen alternative is removed by these filters will not be included
         in the model estimation.
 
     alt_sample_size : int, optional
-        Numer of alternatives to sample for each choice scenario. For now, only random 
+        Numer of alternatives to sample for each choice scenario. For now, only random
         sampling is supported. If this parameter is not provided, we will use a sample
         size of one less than the total number of alternatives. (ChoiceModels codebase
         currently requires sampling.) The same sample size is used for estimation and
         prediction.
 
     out_choosers : str or list of str, optional
-        Name(s) of Orca tables to draw choice scenario data from, for simulation. If not 
-        provided, the `choosers` parameter will be used. Same guidance applies. Reserved 
+        Name(s) of Orca tables to draw choice scenario data from, for simulation. If not
+        provided, the `choosers` parameter will be used. Same guidance applies. Reserved
         column names: 'chosen', 'join_index', 'observation_id'.
 
     out_alternatives : str or list of str, optional
-        Name(s) of Orca tables containing data about alternatives, for simulation. If not 
-        provided, the `alternatives` parameter will be used. Same guidance applies. 
+        Name(s) of Orca tables containing data about alternatives, for simulation. If not
+        provided, the `alternatives` parameter will be used. Same guidance applies.
         Reserved column names: 'chosen', 'join_index', 'observation_id'.
 
     out_column : str, optional
         Name of the column to write simulated choices to. If it does not already exist
-        in the primary `out_choosers` table, it will be created. If not provided, the 
-        `choice_column` will be used. If the column already exists, choices will be cast 
-        to match its data type. If the column is generated on the fly, it will be given 
-        the same data type as the index of the alternatives table. Replaces the 
-        `out_fname` argument in UrbanSim. 
+        in the primary `out_choosers` table, it will be created. If not provided, the
+        `choice_column` will be used. If the column already exists, choices will be cast
+        to match its data type. If the column is generated on the fly, it will be given
+        the same data type as the index of the alternatives table. Replaces the
+        `out_fname` argument in UrbanSim.
 
     out_chooser_filters : str or list of str, optional
-        Filters to apply to the chooser data before simulation. If not provided, no 
+        Filters to apply to the chooser data before simulation. If not provided, no
         filters will be applied. Replaces the `predict_filters` argument in UrbanSim.
 
     out_alt_filters : str or list of str, optional
-        Filters to apply to the alternatives data before simulation. If not provided, no 
+        Filters to apply to the alternatives data before simulation. If not provided, no
         filters will be applied. Replaces the `predict_filters` argument in UrbanSim.
 
     constrained_choices : bool, optional
-        "True" means alternatives have limited capacity. "False" (default) means that 
-        alternatives can accommodate an unlimited number of choosers. 
+        "True" means alternatives have limited capacity. "False" (default) means that
+        alternatives can accommodate an unlimited number of choosers.
 
     alt_capacity : str, optional
         Name of a column in the out_alternatives table that expresses the capacity of
         alternatives. If not provided and constrained_choices is True, each alternative
-        is interpreted as accommodating a single chooser. 
+        is interpreted as accommodating a single chooser.
 
     chooser_size : str, optional
         Name of a column in the out_choosers table that expresses the size of choosers.
-        Choosers might have varying sizes if the alternative capacities are amounts 
+        Choosers might have varying sizes if the alternative capacities are amounts
         rather than counts -- e.g. square footage. Chooser sizes must be in the same units
         as alternative capacities. If not provided and constrained_choices is True, each
         chooser has a size of 1.
@@ -143,12 +143,12 @@ class LargeMultinomialLogitStep(TemplateStep):
     be treated as read-only.
 
     choices : pd.Series
-        Available after the model step is run. List of chosen alternative id's, indexed 
-        with the chooser id. Does not persist when the model step is reloaded from 
+        Available after the model step is run. List of chosen alternative id's, indexed
+        with the chooser id. Does not persist when the model step is reloaded from
         storage.
 
     mergedchoicetable : choicemodels.tools.MergedChoiceTable
-        Table built for estimation or simulation. Does not persist when the model step is 
+        Table built for estimation or simulation. Does not persist when the model step is
         reloaded from storage. Not available if choices have capacity constraints,
         because multiple choice tables are generated iteratively.
 
@@ -156,10 +156,10 @@ class LargeMultinomialLogitStep(TemplateStep):
         Available after a model has been fit. Persists when reloaded from storage.
 
     probabilities : pd.Series
-        Available after the model step is run -- but not if choices have capacity 
-        constraints, which requires probabilities to be calculated multiple times. 
-        Provides list of probabilities corresponding to the sampled alternatives, indexed 
-        with the chooser and alternative id's. Does not persist when the model step is 
+        Available after the model step is run -- but not if choices have capacity
+        constraints, which requires probabilities to be calculated multiple times.
+        Provides list of probabilities corresponding to the sampled alternatives, indexed
+        with the chooser and alternative id's. Does not persist when the model step is
         reloaded from storage.
 
     """
@@ -489,7 +489,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         for merge_args in intx_ops.get('successive_merges', []):
 
             # make sure mct index is preserved during merge
-            left_cols = merge_args.get('mct_cols', intx_df.columns)
+            left_cols = merge_args.get('mct_cols', intx_df.columns.tolist())
             left_idx = merge_args.get('left_index', False)
 
             if intx_df.index.name == mct_df.index.name:
@@ -532,7 +532,10 @@ class LargeMultinomialLogitStep(TemplateStep):
                 columns=intx_ops['rename_cols'])
 
         # update mct
-        mct_df = pd.merge(mct_df, intx_df, on='mct_index')
+        mct_df = pd.merge(mct_df, intx_df, on='mct_index', suffixes=('', '_y'))
+
+        # Drop Duplicated Colums if any
+        mct_df.drop(mct_df.filter(regex='_y$').columns.tolist(),axis=1, inplace=True)
 
         # create new cols from expressions
         for eval_op in intx_ops.get('sequential_eval_ops', []):
@@ -557,22 +560,22 @@ class LargeMultinomialLogitStep(TemplateStep):
 
     def fit(self, mct=None):
         """
-        Fit the model; save and report results. This uses the ChoiceModels estimation 
+        Fit the model; save and report results. This uses the ChoiceModels estimation
         engine (originally from UrbanSim MNL).
 
         The `fit()` method can be run as many times as desired. Results will not be saved
         with Orca or ModelManager until the `register()` method is run.
 
-        After sampling alternatives for each chooser, the merged choice table is saved to 
+        After sampling alternatives for each chooser, the merged choice table is saved to
         the class object for diagnostic use (`mergedchoicetable` with type
         choicemodels.tools.MergedChoiceTable).
 
         Parameters
         ----------
         mct : choicemodels.tools.MergedChoiceTable
-            This parameter is a temporary backdoor allowing us to pass in a more 
-            complicated choice table than can be generated within the template, for 
-            example including sampling weights or interaction terms. 
+            This parameter is a temporary backdoor allowing us to pass in a more
+            complicated choice table than can be generated within the template, for
+            example including sampling weights or interaction terms.
 
         Returns
         -------
@@ -628,27 +631,27 @@ class LargeMultinomialLogitStep(TemplateStep):
         """
         Run the model step: simulate choices and use them to update an Orca column.
 
-        The simulated choices are saved to the class object for diagnostics. If choices 
-        are unconstrained, the choice table and the probabilities of sampled alternatives 
+        The simulated choices are saved to the class object for diagnostics. If choices
+        are unconstrained, the choice table and the probabilities of sampled alternatives
         are saved as well.
 
         Parameters
         ----------
         chooser_batch_size : int
-            This parameter gets passed to 
+            This parameter gets passed to
             choicemodels.tools.simulation.iterative_lottery_choices and is a temporary
             workaround for dealing with memory issues that arise from generating massive
             merged choice tables for simulations that involve large numbers of choosers,
             large numbers of alternatives, and large numbers of predictors. It allows the
-            user to specify a batch size for simulating choices one chunk at a time. 
+            user to specify a batch size for simulating choices one chunk at a time.
 
         interaction_terms : pandas.Series, pandas.DataFrame, or list of either, optional
-            Additional column(s) of interaction terms whose values depend on the 
-            combination of observation and alternative, to be merged onto the final data 
-            table. If passed as a Series or DataFrame, it should include a two-level 
-            MultiIndex. One level's name and values should match an index or column from 
-            the observations table, and the other should match an index or column from the 
-            alternatives table. 
+            Additional column(s) of interaction terms whose values depend on the
+            combination of observation and alternative, to be merged onto the final data
+            table. If passed as a Series or DataFrame, it should include a two-level
+            MultiIndex. One level's name and values should match an index or column from
+            the observations table, and the other should match an index or column from the
+            alternatives table.
 
         Returns
         -------
