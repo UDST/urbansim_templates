@@ -219,9 +219,9 @@ class SegmentedLargeMultinomialLogitStep(TemplateStep):
 
         """
         if (param in ['chooser_filters', 'alt_filters']) & (len(self.submodels) > 0):
-            print("Warning: Changing '{}' can affect the model segmentation. Changes " +
-                  "have been saved to 'defaults' but not to the submodels. To " +
-                  "regenerate them using the new defaults, run 'build_submodels()'."\
+            print(("Warning: Changing '{}' can affect the model segmentation. Changes " +
+                   "have been saved to 'defaults' but not to the submodels. To " +
+                   "regenerate them using the new defaults, run 'build_submodels()'.")
                   .format(param))
             return
 

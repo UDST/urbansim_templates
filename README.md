@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/UDST/urbansim_templates.svg?branch=master)](https://travis-ci.org/UDST/urbansim_templates)
-[![Coverage Status](https://coveralls.io/repos/github/UDST/urbansim_templates/badge.svg?branch=master)](https://coveralls.io/github/UDST/urbansim_templates?branch=master)
+[![CI](https://github.com/UDST/urbansim_templates/actions/workflows/ci.yml/badge.svg)](https://github.com/UDST/urbansim_templates/actions/workflows/ci.yml)
 
 # UrbanSim Templates
 

@@ -2,6 +2,14 @@
 
 ## 0.2 (not yet released)
 
+- requires Python 3.10 or later, with NumPy 1.21, Pandas 1.5, Orca 1.8, UrbanSim 3.2,
+  and Statsmodels 0.13 as the tested minimum versions
+- replaces a private Pandas function used to build long-format small-MNL tables, which
+  was removed in Pandas 3
+- moves package metadata to `pyproject.toml` and replaces the Travis CI configuration
+  with a GitHub Actions workflow that tests the minimum and current dependency
+  versions, checks code quality, and validates the built distributions
+
 #### 0.2.dev9 (2020-05-15)
 
 - fixes a bug in `BinaryLogitStep` simulation where the output is not updated correctly

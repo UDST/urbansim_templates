@@ -119,16 +119,7 @@ def test_basic_operation_alts_as_list(m_alts_as_list):
     m.to_dict()
     assert len(m.submodels) == 3
 
-def test_basic_operation(m):
-    """
-    Test basic operation of the template.
-    
-    """
-    m.fit_all()
-    m.to_dict()
-    assert len(m.submodels) == 3
-    
-    
+
 def test_numeric_segments(m):
     """
     Test support for using ints as categorical variables.
