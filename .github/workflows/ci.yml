@@ -56,10 +56,10 @@ jobs:
 
       # The published ChoiceModels release (0.2.2) imports PyLogit at module
       # load and cannot be imported on Python 3.10 or later. Install the
-      # development branch until ChoiceModels 0.3 is published, then remove
-      # this step.
-      - name: Install ChoiceModels development branch
-        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@dev"
+      # development commit from UDST/choicemodels#82 until ChoiceModels 0.3
+      # is published, then remove this step.
+      - name: Install ChoiceModels development commit
+        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
 
       - name: Show dependency versions
         run: python -c "import numpy, pandas, orca, urbansim, choicemodels; print('numpy', numpy.__version__); print('pandas', pandas.__version__); print('orca', orca.__version__); print('urbansim', urbansim.__version__); print('choicemodels', choicemodels.__version__)"
@@ -113,7 +113,7 @@ jobs:
       - name: Install and import wheel
         run: |
           python -m pip install dist/*.whl
-          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@dev"
+          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
           python -m pip check
           cd /tmp
           python -c "import urbansim_templates; print(urbansim_templates.__version__)"
