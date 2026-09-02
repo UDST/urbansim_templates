@@ -1,6 +1,11 @@
 # UrbanSim Templates change log
 
-## 0.2 (not yet released)
+## 0.3.0
+
+- stores small-MNL specifications and fitted coefficients in YAML instead of
+  pickling complete estimator objects
+- adds a restricted converter for trusted historical PyLogit model pickles;
+  conversion does not require PyLogit and leaves source files unchanged
 
 #### 0.2.dev9 (2020-05-15)
 

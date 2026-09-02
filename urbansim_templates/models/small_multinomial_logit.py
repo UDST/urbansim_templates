@@ -1,13 +1,11 @@
 from __future__ import print_function
 
 from collections import OrderedDict
-import os
-import pickle
 
 import numpy as np
 import pandas as pd
 
-from choicemodels import MultinomialLogit
+from choicemodels import MultinomialLogit, MultinomialLogitResults
 import orca
 
 from urbansim_templates import modelmanager
@@ -19,8 +17,8 @@ from urbansim_templates.utils import get_data, update_column
 class SmallMultinomialLogitStep(TemplateStep):
     """
     A class for building multinomial logit model steps where the number of alternatives is
-    "small". Estimation is handled by PyLogit via the ChoiceModels API. Simulation is 
-    handled by PyLogit (probabilities) and ChoiceModels (simulation draws). 
+    "small". Estimation and probability prediction are handled by ChoiceModels using
+    the flexible MNL specification introduced by PyLogit.
     
     Multinomial logit models can involve a range of different specification and estimation
     mechanics. For now these are separated into two templates. What's the difference?
@@ -29,7 +27,7 @@ class SmallMultinomialLogitStep(TemplateStep):
     - data is in a single table (choosers)
     - each alternative can have a different model expression
     - all the alternatives are available to all choosers
-    - estimation and simulation use the PyLogit engine (via ChoiceModels)
+    - estimation and simulation use ChoiceModels' flexible MNL engine
     
     "Large" MNL:
     - data is in two tables (choosers and alternatives)
@@ -67,7 +65,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         when the object is created.
         
     initial_coefs : list of numerics, optional
-        Starting values for the parameter estimation algorithm, passed to PyLogit. Length 
+        Starting values for the parameter estimation algorithm. Length
         must be equal to the number of parameters being estimated. If this is not 
         provided, zeros will be used.
         
@@ -116,6 +114,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         # Placeholders for model fit data, filled in by fit() or from_dict()
         self.summary_table = None 
         self.model = None
+        self.fitted_parameter_names = None
 
     
     @classmethod
@@ -156,11 +155,44 @@ class SmallMultinomialLogitStep(TemplateStep):
             pass
                 
         obj.summary_table = d['summary_table']
+
+        fitted_parameters = d.get('fitted_parameters')
+        if fitted_parameters is not None:
+            if d.get('model_storage_version') != 1:
+                raise ValueError('Unsupported small-MNL model storage version')
+            obj.model = MultinomialLogitResults(
+                model_expression=obj.model_expression,
+                model_labels=obj.model_labels,
+                fitted_parameters=fitted_parameters,
+                estimation_engine='PyLogit',
+                observation_id_col='_obs_id',
+                alternative_id_col='_alt_id')
+            obj.fitted_parameter_names = d.get('fitted_parameter_names')
+            if (obj.fitted_parameter_names is not None and
+                    len(obj.fitted_parameter_names) != len(fitted_parameters)):
+                raise ValueError(
+                    'fitted_parameter_names and fitted_parameters must have '
+                    'the same length')
+            if obj.model_labels is not None and obj.fitted_parameter_names is not None:
+                expected_names = []
+                for value in obj.model_labels.values():
+                    expected_names.extend([value] if isinstance(value, str) else value)
+                if expected_names != obj.fitted_parameter_names:
+                    raise ValueError(
+                        'fitted_parameter_names do not match model_labels')
         
         if 'supplemental_objects' in d:
             for item in filter(None, d['supplemental_objects']):
                 if (item['name'] == 'model-object'):
-                    obj.model = item['content']
+                    legacy_model = item['content']
+                    obj.model = MultinomialLogitResults(
+                        model_expression=obj.model_expression,
+                        model_labels=obj.model_labels,
+                        fitted_parameters=legacy_model.params.tolist(),
+                        estimation_engine='PyLogit',
+                        observation_id_col='_obs_id',
+                        alternative_id_col='_alt_id')
+                    obj.fitted_parameter_names = legacy_model.params.index.tolist()
         
         return obj
 
@@ -198,18 +230,12 @@ class SmallMultinomialLogitStep(TemplateStep):
             'model_labels': None,
             'choice_column': self.choice_column,
             'initial_coefs': self.initial_coefs,
-            'summary_table': self.summary_table
+            'summary_table': self.summary_table,
+            'model_storage_version': 1,
+            'fitted_parameters': (None if self.model is None else
+                                  list(self.model.fitted_parameters)),
+            'fitted_parameter_names': self.fitted_parameter_names
         })
-        
-        # Add supplemental objects
-        objects = []
-        if self.model is not None:
-            objects.append({'name': 'model-object',
-                            'content': self.model,
-                            'content_type': 'pickle',
-                            'required': True})
-
-        d.update({'supplemental_objects': objects})
         
         return d
     
@@ -304,7 +330,7 @@ class SmallMultinomialLogitStep(TemplateStep):
     
     def fit(self):
         """
-        Fit the model; save and report results. This uses PyLogit via ChoiceModels.
+        Fit the model; save and report results using ChoiceModels.
         
         The `fit()` method can be run as many times as desired. Results will not be saved 
         with Orca or ModelManager until the `register()` method is run. 
@@ -338,8 +364,8 @@ class SmallMultinomialLogitStep(TemplateStep):
         self.summary_table = str(results.report_fit())
         print(self.summary_table)
 
-        # We need the PyLogit fitted model object for prediction, so save it directly
-        self.model = results.get_raw_results()
+        self.model = results
+        self.fitted_parameter_names = results.get_raw_results().params.index.tolist()
 
 
     def run(self):
@@ -349,8 +375,8 @@ class SmallMultinomialLogitStep(TemplateStep):
         Alternatives that appear in the estimation data but not in the model expression
         will not be available for simulation.
         
-        Predicted probabilities come from PyLogit. Monte Carlo simulation of choices is
-        performed directly. (This functionality will move to ChoiceModels.)
+        Predicted probabilities come from ChoiceModels. Monte Carlo simulation of choices
+        is performed directly.
         
         The predicted probabilities and simulated choices are saved to the class object 
         for interactive use (`probabilities` with type pd.DataFrame, and `choices` with 
@@ -373,7 +399,7 @@ class SmallMultinomialLogitStep(TemplateStep):
         
         # Get predictions from underlying model - this is an ndarray with the same length
         # as the long-format df, representing choice probability for each alternative
-        probs = self.model.predict(long_df)
+        probs = self.model.probabilities(long_df).to_numpy()
         
         # Generate choices by adapting an approach from UrbanSim MNL
         # https://github.com/UDST/choicemodels/blob/master/choicemodels/mnl.py#L578-L583
