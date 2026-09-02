@@ -1,0 +1,61 @@
+modelmanager_version: 0.2.dev9
+
+saved_object:
+    choice_column: tenure
+    filters: null
+    initial_coefs:
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+    model_expression: null
+    model_expression_keys:
+    - intercept
+    - income
+    - hhsize
+    model_expression_values:
+    -   - 1
+        - 2
+    -   - 1
+    -   - 2
+    model_label_keys:
+    - intercept
+    - income
+    - hhsize
+    model_label_values:
+    -   - ASC 1
+        - ASC 2
+    -   - inc x 1
+    -   - hh x 2
+    model_labels: null
+    name: tenure-small-mnl
+    out_column: null
+    out_filters: null
+    out_tables: null
+    out_transform: null
+    summary_table: "                     Multinomial Logit Model Regression Results\
+        \                    \n===================================================================================\n\
+        Dep. Variable:                     _chosen   No. Observations:           \
+        \       400\nModel:             Multinomial Logit Model   Df Residuals:  \
+        \                    396\nMethod:                                MLE   Df\
+        \ Model:                            4\nDate:                     Wed, 02 Sep\
+        \ 2026   Pseudo R-squ.:                   0.040\nTime:                   \
+        \          14:40:36   Pseudo R-bar-squ.:               0.022\nAIC:       \
+        \                        427.176   Log-Likelihood:               -209.588\n\
+        BIC:                               443.142   LL-Null:                    \
+        \  -218.341\n==============================================================================\n\
+        \                 coef    std err          z      P>|z|      [0.025      0.975]\n\
+        ------------------------------------------------------------------------------\n\
+        ASC 1       2.706e-05   3.44e+06   7.86e-12      1.000   -6.75e+06    6.75e+06\n\
+        ASC 2         -0.0003   3.44e+06  -7.47e-11      1.000   -6.75e+06    6.75e+06\n\
+        inc x 1        0.0029      0.005      0.584      0.559      -0.007       0.013\n\
+        hh x 2        -0.0006      0.069     -0.009      0.993      -0.137       0.136\n\
+        =============================================================================="
+    supplemental_objects:
+    -   content_type: pickle
+        name: model-object
+        required: true
+    tables: households
+    tags: []
+    template: SmallMultinomialLogitStep
+    template_version: 0.2.dev9

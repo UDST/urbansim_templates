@@ -35,7 +35,7 @@ UrbanSim Templates can be installed using the Pip or Conda package managers.
 
 Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus two other UDST libraries: `Orca <http://udst.github.io/orca>`__ and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
 
-Certain less-commonly-used templates require additional packages: currently, `PyLogit <https://github.com/timothyb0912/pylogit>`__ and `Scikit-learn <http://scikit-learn.org>`__. You'll need to install these separately to use the associated templates. 
+Certain less-commonly-used templates require additional packages, including `Scikit-learn <http://scikit-learn.org>`__. Install these separately when using the associated templates.
 
 When new production releases of UrbanSim Templates come out, you can upgrade like this:
 
