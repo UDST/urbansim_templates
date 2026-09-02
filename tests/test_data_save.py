@@ -27,8 +27,10 @@ def data():
     Create a data table.
     
     """
-    d1 = {'building_id': np.arange(10),
-          'price': (1e6*np.random.random(10)).astype(int)}
+    # Explicit 64-bit integers so the CSV round trip compares equal on platforms where
+    # NumPy's default integer is 32-bit
+    d1 = {'building_id': np.arange(10, dtype='int64'),
+          'price': (1e6*np.random.random(10)).astype('int64')}
     
     df = pd.DataFrame(d1).set_index('building_id')
     
