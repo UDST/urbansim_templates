@@ -16,7 +16,7 @@ permissions:
 jobs:
   tests:
     name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -25,6 +25,7 @@ jobs:
           # Lower support boundary: oldest Python plus the minimum
           # supported versions of the direct dependencies
           - name: Python 3.10 + minimum deps
+            os: ubuntu-latest
             python-version: "3.10"
             pip-args: -c requirements-min.txt
           # Forward boundary: newest Python plus current versions of all
@@ -35,6 +36,15 @@ jobs:
           # release is published, at which point the branch install should
           # be removed.
           - name: Python 3.12 + latest deps
+            os: ubuntu-latest
+            python-version: "3.12"
+            pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
+          - name: Python 3.12 + latest deps (macOS)
+            os: macos-latest
+            python-version: "3.12"
+            pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
+          - name: Python 3.12 + latest deps (Windows)
+            os: windows-latest
             python-version: "3.12"
             pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
 

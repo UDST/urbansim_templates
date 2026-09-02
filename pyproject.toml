@@ -32,10 +32,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# Templates that depend on packages outside the core dependency set.
-extras = [
-    "scikit-learn>=1.0",
-]
 test = [
     "pytest>=8",
     "pytest-cov>=5",
