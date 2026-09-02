@@ -289,9 +289,8 @@ class SmallMultinomialLogitStep(TemplateStep):
         alts = self._get_alts()
         
         # Long df is cartesian product of alts and obs
-        obs_prod, alts_prod = pd.core.reshape.util.cartesian_product([obs, alts])
-
-        long_df = pd.DataFrame({'_obs_id': obs_prod, '_alt_id': alts_prod})
+        long_df = pd.MultiIndex.from_product(
+            [obs, alts], names=['_obs_id', '_alt_id']).to_frame(index=False)
         long_df = long_df.merge(df, left_on='_obs_id', right_index=True)
         
         if (task == 'fit'):

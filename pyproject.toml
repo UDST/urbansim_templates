@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urbansim_templates"
+dynamic = ["version"]
+description = "UrbanSim extension for managing model steps"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "BSD-3-Clause"
+authors = [
+    {name = "UrbanSim Inc.", email = "info@urbansim.com"},
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "choicemodels>=0.2.2",
+    "numpy>=1.21",
+    "orca>=1.8",
+    "pandas>=1.5,<4",
+    "patsy>=0.5",
+    "statsmodels>=0.13",
+    "urbansim>=3.2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8",
+    "pytest-cov>=5",
+]
+docs = [
+    "sphinx>=7",
+    "sphinx-rtd-theme>=2",
+]
+dev = [
+    "build>=1.2",
+    "ruff>=0.12",
+    "twine>=6",
+]
+
+[project.urls]
+Documentation = "https://udst.github.io/urbansim_templates/"
+Repository = "https://github.com/UDST/urbansim_templates"
+Issues = "https://github.com/UDST/urbansim_templates/issues"
+
+[tool.setuptools]
+include-package-data = false
+
+[tool.setuptools.dynamic]
+version = {attr = "urbansim_templates.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["urbansim_templates", "urbansim_templates.*"]
+
+[tool.coverage.run]
+source = ["urbansim_templates"]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E9", "F"]
+# Several templates evaluate user-supplied expressions (for example output
+# transforms such as "np.exp") against names imported into the module
+# namespace, so unused-import checks cannot be applied mechanically.
+ignore = ["F401"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = ["F403"]

@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Lower support boundary: oldest Python plus the minimum
+          # supported versions of the direct dependencies
+          - name: Python 3.10 + minimum deps
+            os: ubuntu-latest
+            python-version: "3.10"
+            pip-args: -c requirements-min.txt
+          # Forward boundary: newest Python plus current versions of all
+          # dependencies. The published UrbanSim 3.2 release requires NumPy
+          # 1.24 or earlier, so this cell installs UrbanSim from its main
+          # branch, which supports NumPy 1.26 and Pandas 2. The cell moves
+          # to Python 3.14, NumPy 2, and Pandas 3 once the next UrbanSim
+          # release is published, at which point the branch install should
+          # be removed.
+          - name: Python 3.12 + latest deps
+            os: ubuntu-latest
+            python-version: "3.12"
+            pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
+          - name: Python 3.12 + latest deps (macOS)
+            os: macos-latest
+            python-version: "3.12"
+            pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
+          - name: Python 3.12 + latest deps (Windows)
+            os: windows-latest
+            python-version: "3.12"
+            pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-min.txt
+
+      - name: Install package and test dependencies
+        run: python -m pip install ".[test]" ${{ matrix.pip-args }}
+
+      # The published ChoiceModels release (0.2.2) imports PyLogit at module
+      # load and cannot be imported on Python 3.10 or later. Install the
+      # development commit from UDST/choicemodels#82 until ChoiceModels 0.3
+      # is published, then remove this step.
+      - name: Install ChoiceModels development commit
+        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
+
+      - name: Show dependency versions
+        run: python -c "import numpy, pandas, orca, urbansim, choicemodels; print('numpy', numpy.__version__); print('pandas', pandas.__version__); print('orca', orca.__version__); print('urbansim', urbansim.__version__); print('choicemodels', choicemodels.__version__)"
+
+      - name: Run tests
+        run: python -m pytest --cov
+        working-directory: tests
+
+  quality:
+    name: Code quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install ruff
+        run: python -m pip install ruff
+
+      - name: Check source
+        run: ruff check urbansim_templates tests
+
+  build:
+    name: Package build and install
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.12"
+
+      - name: Build distributions
+        run: |
+          python -m pip install build twine
+          python -m build
+          python -m twine check --strict dist/*
+
+      - name: Install and import wheel
+        run: |
+          python -m pip install dist/*.whl
+          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
+          python -m pip check
+          cd /tmp
+          python -c "import urbansim_templates; print(urbansim_templates.__version__)"

@@ -92,7 +92,7 @@ def test_get_df_unsupported_type(df):
     
     """
     try:
-        df_out = utils.get_df([df])
+        utils.get_df([df])
     except ValueError as e:
         print(e)
         return
@@ -140,7 +140,7 @@ def test_all_cols_unsupported_type(df):
     
     """
     try:
-        cols = utils.all_cols([df])
+        utils.all_cols([df])
     except ValueError as e:
         print(e)
         return
