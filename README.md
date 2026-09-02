@@ -18,9 +18,10 @@ models from declarative settings rather than custom code.
 **Architecture:** UrbanSim Templates is a portable Python layer over Orca,
 UrbanSim, and ChoiceModels. Each template encapsulates the data preparation,
 estimation, and simulation logic for one kind of model step, and persists its
-settings and estimated parameters in portable configuration files. Those files,
-rather than pickled Python objects, are the interface through which model steps
-are reloaded, shared, and executed by other compatible engines.
+settings in portable configuration files. The project's direction is for those
+files, rather than pickled Python objects, to carry all estimated model state,
+so that model steps can be reloaded, shared, and executed by other compatible
+engines.
 
 The project maintains and develops:
 
