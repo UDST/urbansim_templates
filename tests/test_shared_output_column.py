@@ -82,11 +82,13 @@ def test_casting_data_type(orca_session):
     
     """
     series1 = pd.Series([4.0, 5.0, 6.0], index=[1,2,3])
-    series2 = pd.Series([4, 5, 6], index=[1,2,3])
-    
+    # Same dtype spec as the cast below, so the comparison holds on platforms where
+    # NumPy's default integer is 32-bit
+    series2 = pd.Series([4, 5, 6], index=[1,2,3], dtype='int')
+
     def build_column():
         return series1
-    
+
     settings = OutputColumnSettings(column_name='col', table='tab', data_type='int')
     register_column(build_column, settings)
     
