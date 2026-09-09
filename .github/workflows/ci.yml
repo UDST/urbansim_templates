@@ -28,24 +28,23 @@ jobs:
             os: ubuntu-latest
             python-version: "3.10"
             pip-args: -c requirements-min.txt
-          # Forward boundary: newest Python plus current versions of all
-          # dependencies. The published UrbanSim 3.2 release requires NumPy
-          # 1.24 or earlier, so this cell installs UrbanSim from its main
-          # branch, which supports NumPy 1.26 and Pandas 2. The cell moves
-          # to Python 3.14, NumPy 2, and Pandas 3 once the next UrbanSim
-          # release is published, at which point the branch install should
-          # be removed.
-          - name: Python 3.12 + latest deps
+          # Forward boundary: newest supported Python plus current versions
+          # of all dependencies, on each operating system. The published
+          # UrbanSim 3.2 release does not run under NumPy 2, so these cells
+          # install UrbanSim from its main branch, which supports NumPy 2 and
+          # Pandas 3. Remove the branch install once the next UrbanSim
+          # release is published.
+          - name: Python 3.14 + latest deps
             os: ubuntu-latest
-            python-version: "3.12"
+            python-version: "3.14"
             pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
-          - name: Python 3.12 + latest deps (macOS)
+          - name: Python 3.14 + latest deps (macOS)
             os: macos-latest
-            python-version: "3.12"
+            python-version: "3.14"
             pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
-          - name: Python 3.12 + latest deps (Windows)
+          - name: Python 3.14 + latest deps (Windows)
             os: windows-latest
-            python-version: "3.12"
+            python-version: "3.14"
             pip-args: '"urbansim @ git+https://github.com/UDST/urbansim@main"'
 
     steps:
@@ -66,16 +65,19 @@ jobs:
 
       # The published ChoiceModels release (0.2.2) imports PyLogit at module
       # load and cannot be imported on Python 3.10 or later. Install the
-      # development commit from UDST/choicemodels#82 until ChoiceModels 0.3
-      # is published, then remove this step.
-      - name: Install ChoiceModels development commit
-        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
+      # development version from the dev branch (pinned to the UDST/choicemodels#82
+      # squash commit) until ChoiceModels 0.3 is published, then remove this step.
+      - name: Install ChoiceModels development version
+        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
 
       - name: Show dependency versions
         run: python -c "import numpy, pandas, orca, urbansim, choicemodels; print('numpy', numpy.__version__); print('pandas', pandas.__version__); print('orca', orca.__version__); print('urbansim', urbansim.__version__); print('choicemodels', choicemodels.__version__)"
 
+      # The tests use paths relative to the tests directory. The package is
+      # named explicitly so that coverage measures the installed package
+      # rather than the test modules.
       - name: Run tests
-        run: python -m pytest --cov
+        run: python -m pytest --cov=urbansim_templates --cov-report=term-missing
         working-directory: tests
 
   quality:
@@ -90,7 +92,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
           cache: pip
           cache-dependency-path: pyproject.toml
 
@@ -112,7 +114,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Build distributions
         run: |
@@ -120,10 +122,36 @@ jobs:
           python -m build
           python -m twine check --strict dist/*
 
+      # Temporary ChoiceModels install as in the test jobs
       - name: Install and import wheel
         run: |
           python -m pip install dist/*.whl
-          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@9c182e6ccc5115bb2d9a5335cc8b4fae715b9dab"
+          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
           python -m pip check
           cd /tmp
           python -c "import urbansim_templates; print(urbansim_templates.__version__)"
+
+  docs:
+    name: Documentation build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # autodoc imports the package, which needs an importable ChoiceModels
+      - name: Install package and documentation tools
+        run: |
+          python -m pip install ".[docs]" "urbansim @ git+https://github.com/UDST/urbansim@main"
+          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
+
+      - name: Build documentation (warnings are errors)
+        run: python -m sphinx -E -W --keep-going -b html docs/source docs/build/html

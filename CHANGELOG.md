@@ -8,7 +8,10 @@
   was removed in Pandas 3
 - moves package metadata to `pyproject.toml` and replaces the Travis CI configuration
   with a GitHub Actions workflow that tests the minimum and current dependency
-  versions, checks code quality, and validates the built distributions
+  versions, checks code quality, validates the built distributions, and builds the
+  documentation
+- fixes an invalid escape sequence in `utils.cols_in_expression()` that raised a
+  SyntaxWarning on Python 3.12 and later
 
 #### 0.2.dev9 (2020-05-15)
 

@@ -19,6 +19,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 dependencies = [
@@ -37,7 +39,7 @@ test = [
     "pytest-cov>=5",
 ]
 docs = [
-    "sphinx>=7",
+    "sphinx>=7.2",
     "sphinx-rtd-theme>=2",
 ]
 dev = [
@@ -60,18 +62,12 @@ version = {attr = "urbansim_templates.__version__"}
 [tool.setuptools.packages.find]
 include = ["urbansim_templates", "urbansim_templates.*"]
 
-[tool.coverage.run]
-source = ["urbansim_templates"]
-
-[tool.coverage.report]
-show_missing = true
-
 [tool.ruff]
 line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E9", "F"]
+select = ["E9", "F", "W605"]
 # Several templates evaluate user-supplied expressions (for example output
 # transforms such as "np.exp") against names imported into the module
 # namespace, so unused-import checks cannot be applied mechanically.

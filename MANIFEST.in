@@ -2,4 +2,5 @@
 
 include CHANGELOG.md
 include LICENSE.txt
-include requirements-extras.txt
+recursive-include tests *.py *.ini *.md
+prune tests/.pytest_cache
