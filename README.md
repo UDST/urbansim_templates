@@ -7,7 +7,7 @@ UrbanSim Templates is a Python library that provides building blocks for Orca-ba
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the [Orca](https://udst.github.io/orca) task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
-## Project scope
+### Project scope
 
 **Status:** Active
 
