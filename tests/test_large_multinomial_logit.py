@@ -181,6 +181,34 @@ def test_simulation_constrained(m):
     assert all(~obs.choice.isin([-1]))
 
 
+@pytest.fixture
+def interaction_terms(data):
+    """
+    Build a table of interaction terms covering every combination of observation and 
+    alternative, indexed by the two tables' id columns.
+    
+    """
+    obs = orca.get_table('obs').to_frame()
+    alts = orca.get_table('alts').to_frame()
+    
+    idx = pd.MultiIndex.from_product([obs.index, alts.index], names=['oid', 'aid'])
+    return pd.DataFrame({'intx': np.random.random(len(idx))}, index=idx)
+
+
+def test_simulation_interaction_terms(m, interaction_terms):
+    """
+    Test that interaction terms can be passed to run() as a list of tables, as a single 
+    DataFrame, or as a single Series (#109).
+    
+    """
+    for intx in [[interaction_terms], interaction_terms, interaction_terms['intx']]:
+        m.run(interaction_terms=intx)
+        
+        mct = m.mergedchoicetable.to_frame()
+        assert 'intx' in mct.columns
+        assert len(mct) == len(m.choices) * m.alt_sample_size
+
+
 def test_simulation_no_valid_choosers(m):
     """
     If there are no valid choosers after applying filters, simulation should exit.
