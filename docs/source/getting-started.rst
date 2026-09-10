@@ -8,7 +8,7 @@ UrbanSim Templates is a Python library that provides building blocks for Orca-ba
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
-UrbanSim Templates is `hosted on Github <https://github.com/udst/urbansim_templates>`__ with a BSD 3-Clause open source license. The code repository includes some material not found in this documentation: a `change log <https://github.com/UDST/urbansim_templates/blob/master/CHANGELOG.md>`__, a `contributor's guide <http://>`__, and instructions for `running the tests <https://github.com/UDST/urbansim_templates/blob/master/tests/README.md>`__, `updating the documentation <http://>`__, and `creating a new release <http://>`__.
+UrbanSim Templates is `hosted on Github <https://github.com/udst/urbansim_templates>`__ with a BSD 3-Clause open source license. The code repository includes some material not found in this documentation: a `change log <https://github.com/UDST/urbansim_templates/blob/dev/CHANGELOG.md>`__, a `contributor's guide <https://github.com/UDST/urbansim_templates/blob/dev/CONTRIBUTING.md>`__, and instructions for `running the tests <https://github.com/UDST/urbansim_templates/blob/dev/tests/README.md>`__, `updating the documentation <https://github.com/UDST/urbansim_templates/blob/dev/docs/README.md>`__, and `creating a new release <https://github.com/UDST/urbansim_templates/blob/dev/CONTRIBUTING.md>`__.
 
 Another useful resource is the `issues <https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue>`__ and `pull requests <https://github.com/UDST/urbansim_templates/pulls?q=is%3Apr>`__ on Github, which include detailed feature proposals and other discussions.
 
@@ -18,17 +18,12 @@ UrbanSim Templates was created in 2018 by Sam Maurer (maurer@urbansim.com), who 
 Installation
 ------------
 
-UrbanSim Templates is tested with Python versions 2.7, 3.5, 3.6, and 3.7. 
-
-As of Feb. 2019, there is an installation problem in Python 3.7 when using Pip (because of an issue with Orca's PyTables dependency). Conda should work.
-
-.. note::
-    It can be helpful to set up a dedicated Python environment for each project you work on. This lets you use a stable and replicable set of libraries that won't be affected by other projects. Here are some good `environment settings <https://gist.github.com/smmaurer/f3a4f424a4aa877fb73e1cb2567bd89d>`__ for UrbanSim Templates projects.
+UrbanSim Templates requires Python 3.10 or later, and is tested on Linux, macOS, and Windows.
     
 Production releases
 ~~~~~~~~~~~~~~~~~~~
 
-UrbanSim Templates can be installed using the Pip or Conda package managers. With Conda, you (currently) need to install UrbanSim separately; Pip will handle this automatically.
+UrbanSim Templates can be installed using the Pip or Conda package managers.
 
 .. code-block:: python
 
@@ -37,11 +32,10 @@ UrbanSim Templates can be installed using the Pip or Conda package managers. Wit
 .. code-block:: python
 
     conda install urbansim_templates --channel conda-forge
-    conda install urbansim --channel udst
 
-Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus two other UDST libraries: `Orca <http://udst.github.io/orca>`__ and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
+Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus three other UDST libraries: `Orca <http://udst.github.io/orca>`__, `UrbanSim <http://github.com/udst/urbansim>`__, and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
 
-Certain less-commonly-used templates require additional packages: currently, `PyLogit <https://github.com/timothyb0912/pylogit>`__ and `Scikit-learn <http://scikit-learn.org>`__. You'll need to install these manually to use the associated templates. 
+The small multinomial logit template currently also requires `PyLogit <https://github.com/timothyb0912/pylogit>`__, whose current release does not import on Python 3.10 or later; this dependency is in the process of being removed.
 
 When new production releases of UrbanSim Templates come out, you can upgrade like this:
 
@@ -61,8 +55,8 @@ Developer pre-releases of UrbanSim Templates can be installed using the Github U
 
 .. code-block:: python
 
-    pip install git+git://github.com/udst/choicemodels.git
-    pip install git+git://github.com/udst/urbansim_templates.git
+    pip install git+https://github.com/udst/choicemodels.git
+    pip install git+https://github.com/udst/urbansim_templates.git
 
 You can use the same command to upgrade.
 
@@ -70,13 +64,13 @@ You can use the same command to upgrade.
 Cloning the repository
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If you'll be modifying the code, you can install UrbanSim Templates by cloning the Github repository:
+If you'll be modifying the code, you can install UrbanSim Templates by cloning the Github repository. The dev branch contains the latest developer release.
 
 .. code-block:: python
 
     git clone https://github.com/udst/urbansim_templates.git
     cd urbansim_templates
-    python setup.py develop
+    pip install -e .
 
 Update it with ``git pull``.
 
@@ -105,7 +99,7 @@ The default file location is a ``configs`` folder located in the current working
         In [2]: import urbansim_templates
                 print(urbansim_templates.__version__)
         
-        Out[2]: '0.2.dev0'
+        Out[2]: '0.2'
 
 
 Creating a model step
@@ -131,7 +125,7 @@ This sets up ``m`` as an instance of the OLS regression template. The ``tables``
     import orca
     import pandas as pd
     
-    url = "https://www.dropbox.com/s/vxg5pdfzxrh6osz/buildings-demo.csv?dl=1"
+    url = "https://raw.githubusercontent.com/UDST/urbansim_templates/dev/examples/data/buildings-demo.csv"
     df = pd.read_csv(url).dropna()
     orca.add_table('buildings', df)
 

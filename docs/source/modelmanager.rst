@@ -25,5 +25,6 @@ them directly, but they could be useful for debugging or for extending ModelMana
 functionality.
 
 .. automodule:: urbansim_templates.modelmanager
+   :no-index:
    :members: template, build_step, save_step_to_disk, load_supplemental_object, 
              save_supplemental_object, remove_supplemental_object, get_config_dir

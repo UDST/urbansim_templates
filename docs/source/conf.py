@@ -17,11 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
-
-# go up two levels from /docs/source to the package root
-sys.path.insert(0, os.path.abspath('../..'))
+# import os
+# import sys
+# sys.path.insert(0, os.path.abspath('../..'))
 
 import sphinx_rtd_theme
 
@@ -37,6 +35,7 @@ import sphinx_rtd_theme
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode']
 
@@ -54,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'UrbanSim Templates'
-copyright = '2019, UDST'
+copyright = '2021, UDST'
 author = 'UDST'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -73,7 +72,7 @@ version = release = urbansim_templates.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

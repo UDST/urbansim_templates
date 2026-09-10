@@ -12,9 +12,8 @@ from urbansim_templates.utils import get_data
 @modelmanager.template
 class SaveTable():
     """
-    Class for saving Orca tables to local CSV or HDF5 files.
-    
-    All the parameters can also be set as properties after creating the class instance.
+    Template for saving Orca tables to local CSV or HDF5 files. Parameters can be passed
+    to the constructor or set as attributes.
     
     Parameters
     ----------

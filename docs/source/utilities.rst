@@ -1,18 +1,50 @@
-Utilities API
-=============
+Shared utilities
+================
 
 The utilities are mainly helper functions for templates. 
 
 
-Spec validation
----------------
+General template tools API
+--------------------------
+
+.. automodule:: urbansim_templates.shared
+   :members: CoreTemplateSettings
+
+
+Column output tools API
+-----------------------
+
+.. automodule:: urbansim_templates.shared
+   :no-index:
+   :members: OutputColumnSettings, register_column
+
+
+Table schemas and merging API
+-----------------------------
 
 .. automodule:: urbansim_templates.utils
+   :members: validate_table, validate_all_tables, merge_tables
+
+
+Other helper functions API
+--------------------------
+
+.. automodule:: urbansim_templates.utils
+   :no-index:
+   :members: all_cols, cols_in_expression, get_data, get_df, trim_cols, to_list, update_column, update_name
+
+
+Spec validation API
+-------------------
+
+.. automodule:: urbansim_templates.utils
+   :no-index:
    :members: validate_template
 
 
-Template helper functions
--------------------------
+Version management API
+----------------------
 
 .. automodule:: urbansim_templates.utils
-   :members: get_data, update_column, update_name, to_list
+   :no-index:
+   :members: parse_version, version_greater_or_equal

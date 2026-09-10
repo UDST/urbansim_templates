@@ -1,11 +1,66 @@
 # UrbanSim Templates change log
 
-## 0.2 (not yet released)
+## 0.3 (not yet released)
+
+#### 0.3.dev0 (2026-09-09)
+
+- requires Python 3.10 or later, with NumPy 1.21, Pandas 1.5, Orca 1.8, UrbanSim 3.2,
+  and Statsmodels 0.13 as the tested minimum versions
+- replaces a private Pandas function used to build long-format small-MNL tables, which
+  was removed in Pandas 3
+- moves package metadata to `pyproject.toml` and replaces the Travis CI configuration
+  with a GitHub Actions workflow that tests the minimum and current dependency
+  versions, checks code quality, validates the built distributions, and builds the
+  documentation
+- fixes an invalid escape sequence in `utils.cols_in_expression()` that raised a
+  SyntaxWarning on Python 3.12 and later
+- adds an `mct_intx_ops` setting to `LargeMultinomialLogitStep` for interaction-term
+  operations (merges, aggregations, renames, and `eval()` expressions) performed on the
+  merged choice table after alternatives are sampled during simulation; requires the
+  matching support in ChoiceModels (#126, merged in 2021 without a version bump)
+
+
+## 0.2 (development releases only)
+
+#### 0.2.dev9 (2020-05-15)
+
+- fixes a bug in `BinaryLogitStep` simulation where the output is not updated correctly
+- adds a `resid` attribute to fitted `OLSRegressionStep` models, for diagnostics
+
+#### 0.2.dev8 (2020-04-17)
+
+- allows segmented large MNL models to be estimated with a `MergedChoiceTable` that's passed in by the user (rather than generated automatically), thus achieving parity with the non-segmented model class
+
+#### 0.2.dev7 (2019-07-15)
+
+- fixes a bug with the `out_transform` parameter for `OLSRegressionStep`
+
+#### 0.2.dev6 (2019-04-04)
+
+- introduces classes for storing common settings: `shared.CoreTemplateSettings`, `shared.OutputColumnSettings`
+- adds new shared functions: `shared.register_column()`, `utils.cols_in_expression()`
+- modifies `ColumnFromExpression` template to divide its parameters into three groups
+
+#### 0.2.dev5 (2019-03-29)
+
+- adds new template: `data.ColumnFromExpression`
+
+#### 0.2.dev4 (2019-03-26)
+
+- adds new data management utilities: `utils.validate_table()`, `utils.validate_all_tables()`, `utils.merge_tables()`
+- updates `utils.get_data()` to use the new merge tool
+- updates `BinaryLogitStep` and `OLSRegressionStep` to use the shared to use `utils.get_data()`, removing any reliance on Orca broadcasts
+- raises the `pandas` requirement to 0.23
+
+#### 0.2.dev3 (2019-03-21)
+
+- adds an `mct` argment to `SegmentedLargeMultinomialLogitStep.fit_all()`
+- adds an `interaction_terms` argument to `SegmentedLargeMultinomialLogitStep.run_all()`
 
 #### 0.2.dev2 (2019-03-04)
 
-- adds template for saving data: `urbansim_templates.data.SaveTable()`
-- renames `TableFromDisk()` to `urbansim_templates.data.LoadTable()`
+- adds template for saving data: `data.SaveTable()`
+- renames `io.TableFromDisk()` to `data.LoadTable()`
 
 #### 0.2.dev1 (2019-02-27)
 
@@ -13,8 +68,13 @@
 
 #### 0.2.dev0 (2019-02-19)
 
-- adds first data i/o template: `urbansim_templates.io.TableFromDisk()`
+- adds first data i/o template: `io.TableFromDisk()`
 - adds support for `autorun` template property
+
+
+## 0.1.3 (2019-07-15)
+
+- patch to incorporate the `out_transform` bug fix for `OLSRegressionStep`, from 0.2.dev7
 
 
 ## 0.1.2 (2019-02-28)
