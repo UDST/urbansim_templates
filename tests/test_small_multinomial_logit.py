@@ -40,8 +40,16 @@ def test_template_validity():
 def test_small_mnl(orca_session):
     """
     Test that the code runs, and that the model_expression is always available.
-    
+
     """
+    # This template estimates through the PyLogit-format engine in ChoiceModels, which
+    # requires PyLogit until UDST/choicemodels#79 is resolved. PyLogit's current release
+    # does not import on Python 3.10 or later.
+    try:
+        import pylogit  # noqa: F401
+    except ImportError:
+        pytest.skip('PyLogit is not importable in this environment')
+
     modelmanager.initialize()
 
     m = SmallMultinomialLogitStep()

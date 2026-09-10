@@ -1,7 +1,7 @@
 Development guide
 =================
 
-Below are some strategies we've come up with for the templates. Technical contribution guidelines are in the `Github repo <http://github.com/UDST/urbansim_templates/blob/master/CONTRIBUTING.md>`__.
+Below are some strategies we've come up with for the templates. Technical contribution guidelines are in the `Github repo <http://github.com/UDST/urbansim_templates/blob/dev/CONTRIBUTING.md>`__.
 
 
 Design patterns for templates
