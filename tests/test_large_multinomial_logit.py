@@ -311,6 +311,9 @@ def test_mct_intx_ops_aggregation(m, zones):
     assert len(df_out) == len(df_in)
     assert df_out.index.names == df_in.index.names
     assert set(df_out.columns) == set(df_in.columns) | {'zone_val_max'}
+
+
+@pytest.fixture
 def interaction_terms(data):
     """
     Build a table of interaction terms covering every combination of observation and 
