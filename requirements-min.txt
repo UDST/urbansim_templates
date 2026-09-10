@@ -1,0 +1,19 @@
+# Pip constraints pinning the oldest supported versions of the direct
+# dependencies (the floors declared in pyproject.toml). Used by the
+# minimum-dependencies CI job:
+#
+#   pip install ".[test]" -c requirements-min.txt
+#
+# numpy must be constrained alongside pandas 1.5: pandas 1.5 predates
+# NumPy 2 and declares no upper bound, so without this constraint the
+# resolver pairs it with NumPy 2.x and pandas fails to import. tables is
+# an Orca dependency and is pinned so the lower-bound environment stays
+# reproducible.
+
+numpy == 1.21.*
+orca == 1.8
+pandas == 1.5.*
+patsy == 0.5.*
+statsmodels == 0.13.*
+tables == 3.8.*
+urbansim == 3.2

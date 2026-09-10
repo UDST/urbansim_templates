@@ -1,6 +1,26 @@
 # UrbanSim Templates change log
 
-## 0.2 (not yet released)
+## 0.3 (not yet released)
+
+#### 0.3.dev0 (2026-09-09)
+
+- requires Python 3.10 or later, with NumPy 1.21, Pandas 1.5, Orca 1.8, UrbanSim 3.2,
+  and Statsmodels 0.13 as the tested minimum versions
+- replaces a private Pandas function used to build long-format small-MNL tables, which
+  was removed in Pandas 3
+- moves package metadata to `pyproject.toml` and replaces the Travis CI configuration
+  with a GitHub Actions workflow that tests the minimum and current dependency
+  versions, checks code quality, validates the built distributions, and builds the
+  documentation
+- fixes an invalid escape sequence in `utils.cols_in_expression()` that raised a
+  SyntaxWarning on Python 3.12 and later
+- adds an `mct_intx_ops` setting to `LargeMultinomialLogitStep` for interaction-term
+  operations (merges, aggregations, renames, and `eval()` expressions) performed on the
+  merged choice table after alternatives are sampled during simulation; requires the
+  matching support in ChoiceModels (#126, merged in 2021 without a version bump)
+
+
+## 0.2 (development releases only)
 
 #### 0.2.dev9 (2020-05-15)
 
