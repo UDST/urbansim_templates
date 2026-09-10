@@ -96,6 +96,54 @@ def m(data):
     return m
 
 
+def test_estimation_shared_filter_column(data):
+    """
+    Test that a filter column with the same name in both tables doesn't break estimation 
+    (#128). MergedChoiceTable rejects overlapping column names, so columns that are only 
+    needed for filtering have to be dropped before the merge, as run() already does.
+    
+    """
+    obs = orca.get_table('obs').to_frame()
+    obs['flag'] = 1
+    orca.add_table('obs', obs)
+    
+    alts = orca.get_table('alts').to_frame()
+    alts['flag'] = 1
+    orca.add_table('alts', alts)
+    
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.chooser_filters = 'flag == 1'
+    m.alt_filters = 'flag == 1'
+    m.alt_sample_size = 10
+    
+    m.fit()
+    assert 'flag' not in m.mergedchoicetable.to_frame().columns
+
+
+def test_estimation_filter_column_in_expression(data):
+    """
+    Test that a column used both as a filter and in the model expression is retained 
+    for estimation.
+    
+    """
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.chooser_filters = 'obsval > 0.1'
+    m.alt_sample_size = 10
+    
+    m.fit()
+    mct = m.mergedchoicetable.to_frame()
+    assert 'obsval' in mct.columns
+    assert (mct.obsval > 0.1).all()
+
+
 def test_property_persistence(m):
     """
     Test persistence of properties across registration, saving, and reloading.
