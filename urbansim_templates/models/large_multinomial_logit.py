@@ -678,7 +678,8 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         if interaction_terms is not None:
             uniq_intx_idx_names = set([
-                idx for intx in interaction_terms for idx in intx.index.names])
+                idx for intx in to_list(interaction_terms)
+                for idx in intx.index.names])
             obs_extra_cols = to_list(self.chooser_size) + \
                 list(uniq_intx_idx_names)
             alts_extra_cols = to_list(
