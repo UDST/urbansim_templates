@@ -96,6 +96,54 @@ def m(data):
     return m
 
 
+def test_estimation_shared_filter_column(data):
+    """
+    Test that a filter column with the same name in both tables doesn't break estimation 
+    (#128). MergedChoiceTable rejects overlapping column names, so columns that are only 
+    needed for filtering have to be dropped before the merge, as run() already does.
+    
+    """
+    obs = orca.get_table('obs').to_frame()
+    obs['flag'] = 1
+    orca.add_table('obs', obs)
+    
+    alts = orca.get_table('alts').to_frame()
+    alts['flag'] = 1
+    orca.add_table('alts', alts)
+    
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.chooser_filters = 'flag == 1'
+    m.alt_filters = 'flag == 1'
+    m.alt_sample_size = 10
+    
+    m.fit()
+    assert 'flag' not in m.mergedchoicetable.to_frame().columns
+
+
+def test_estimation_filter_column_in_expression(data):
+    """
+    Test that a column used both as a filter and in the model expression is retained 
+    for estimation.
+    
+    """
+    m = LargeMultinomialLogitStep()
+    m.choosers = 'obs'
+    m.alternatives = 'alts'
+    m.choice_column = 'choice'
+    m.model_expression = 'obsval + altval'
+    m.chooser_filters = 'obsval > 0.1'
+    m.alt_sample_size = 10
+    
+    m.fit()
+    mct = m.mergedchoicetable.to_frame()
+    assert 'obsval' in mct.columns
+    assert (mct.obsval > 0.1).all()
+
+
 def test_property_persistence(m):
     """
     Test persistence of properties across registration, saving, and reloading.
@@ -263,6 +311,31 @@ def test_mct_intx_ops_aggregation(m, zones):
     assert len(df_out) == len(df_in)
     assert df_out.index.names == df_in.index.names
     assert set(df_out.columns) == set(df_in.columns) | {'zone_val_max'}
+def interaction_terms(data):
+    """
+    Build a table of interaction terms covering every combination of observation and 
+    alternative, indexed by the two tables' id columns.
+    
+    """
+    obs = orca.get_table('obs').to_frame()
+    alts = orca.get_table('alts').to_frame()
+    
+    idx = pd.MultiIndex.from_product([obs.index, alts.index], names=['oid', 'aid'])
+    return pd.DataFrame({'intx': np.random.random(len(idx))}, index=idx)
+
+
+def test_simulation_interaction_terms(m, interaction_terms):
+    """
+    Test that interaction terms can be passed to run() as a list of tables, as a single 
+    DataFrame, or as a single Series (#109).
+    
+    """
+    for intx in [[interaction_terms], interaction_terms, interaction_terms['intx']]:
+        m.run(interaction_terms=intx)
+        
+        mct = m.mergedchoicetable.to_frame()
+        assert 'intx' in mct.columns
+        assert len(mct) == len(m.choices) * m.alt_sample_size
 
 
 def test_simulation_no_valid_choosers(m):

@@ -607,6 +607,17 @@ class LargeMultinomialLogitStep(TemplateStep):
                                     filters=self.alt_filters,
                                     model_expression=self.model_expression)
 
+            # Remove filter columns before merging, in case column names overlap
+            # between the tables: keep only the columns the model needs, as in run()
+            expr_cols = columns_in_formula(self.model_expression)
+
+            obs_cols = [c for c in observations.columns
+                        if c in expr_cols + to_list(self.choice_column)]
+            observations = observations[obs_cols]
+
+            alt_cols = [c for c in alternatives.columns if c in expr_cols]
+            alternatives = alternatives[alt_cols]
+
             mct = MergedChoiceTable(observations=observations,
                                     alternatives=alternatives,
                                     chosen_alternatives=self.choice_column,
@@ -670,7 +681,8 @@ class LargeMultinomialLogitStep(TemplateStep):
 
         if interaction_terms is not None:
             uniq_intx_idx_names = set([
-                idx for intx in interaction_terms for idx in intx.index.names])
+                idx for intx in to_list(interaction_terms)
+                for idx in intx.index.names])
             obs_extra_cols = to_list(self.chooser_size) + \
                 list(uniq_intx_idx_names)
             alts_extra_cols = to_list(
