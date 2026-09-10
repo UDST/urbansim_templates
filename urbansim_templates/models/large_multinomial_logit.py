@@ -481,7 +481,7 @@ class LargeMultinomialLogitStep(TemplateStep):
         intx_ops = self.mct_intx_ops
         mct_df = mct.to_frame()
         og_mct_index = mct_df.index.names
-        mct_df.reset_index(inplace=True)
+        mct_df = mct_df.reset_index()  # copy, so the caller's table isn't modified
         mct_df.index.name = 'mct_index'
 
         # merges
@@ -531,11 +531,11 @@ class LargeMultinomialLogitStep(TemplateStep):
             intx_df = intx_df.rename(
                 columns=intx_ops['rename_cols'])
 
-        # update mct
-        mct_df = pd.merge(mct_df, intx_df, on='mct_index', suffixes=('', '_y'))
-
-        # Drop Duplicated Colums if any
-        mct_df.drop(mct_df.filter(regex='_y$').columns.tolist(),axis=1, inplace=True)
+        # update mct, keeping the mct's version of any column that the operations
+        # carried along (e.g. merge keys, or all columns when mct_cols is not given)
+        dup_cols = [c for c in intx_df.columns if c in mct_df.columns]
+        mct_df = pd.merge(mct_df, intx_df.drop(columns=dup_cols), on='mct_index')
+        mct_df = mct_df.drop(columns='mct_index', errors='ignore')
 
         # create new cols from expressions
         for eval_op in intx_ops.get('sequential_eval_ops', []):

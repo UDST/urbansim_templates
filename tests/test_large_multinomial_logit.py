@@ -181,6 +181,90 @@ def test_simulation_constrained(m):
     assert all(~obs.choice.isin([-1]))
 
 
+@pytest.fixture
+def zones(data):
+    """
+    Add a 'zones' table and a zone id column on the alternatives, for testing merge 
+    operations on the choice table.
+    
+    """
+    alts = orca.get_table('alts').to_frame()
+    alts['zone_id'] = np.random.choice(np.arange(5), size=len(alts))
+    orca.add_table('alts', alts)
+    
+    zones = pd.DataFrame({'zone_id': np.arange(5),
+                          'zone_val': np.random.random(5),
+                          'coord_y': np.random.random(5)}).set_index('zone_id')
+    orca.add_table('zones', zones)
+
+
+def test_mct_intx_ops_merge(m, zones):
+    """
+    Test post-merge operations on the choice table: a merge that carries every choice 
+    table column along (no `mct_cols`), followed by an eval expression (#126, #130). 
+    
+    Columns that come back from the operations but already exist in the choice table are 
+    dropped in favor of the originals, without touching other columns -- including ones 
+    whose names happen to end in a merge suffix like '_y'.
+    
+    """
+    from choicemodels.tools import MergedChoiceTable
+    
+    obs = orca.get_table('obs').to_frame()
+    alts = orca.get_table('alts').to_frame()
+    mct = MergedChoiceTable(obs, alts, sample_size=10)
+    
+    m.mct_intx_ops = {
+        'successive_merges': [{
+            'right_table': 'zones',
+            'right_cols': ['zone_val', 'coord_y'],
+            'left_on': 'zone_id',
+            'right_index': True}],
+        'sequential_eval_ops': [{
+            'name': 'zone_val_x2', 'expr': 'zone_val * 2', 'engine': 'python'}]}
+    
+    df_in = mct.to_frame().copy()
+    df_out = m.perform_mct_intx_ops(mct).to_frame()
+    
+    assert mct.to_frame().equals(df_in)  # input table is not modified
+    assert len(df_out) == len(df_in)
+    assert df_out.index.names == df_in.index.names
+    assert set(df_out.columns) == set(df_in.columns) | {'zone_val', 'coord_y', 
+                                                        'zone_val_x2'}
+    assert (df_out.zone_val_x2 == df_out.zone_val * 2).all()
+
+
+def test_mct_intx_ops_aggregation(m, zones):
+    """
+    Test post-merge operations that specify `mct_cols` and aggregate the merged data 
+    back to one row per choice table entry, then rename the result.
+    
+    """
+    from choicemodels.tools import MergedChoiceTable
+    
+    obs = orca.get_table('obs').to_frame()
+    alts = orca.get_table('alts').to_frame()
+    mct = MergedChoiceTable(obs, alts, sample_size=10)
+    
+    m.mct_intx_ops = {
+        'successive_merges': [{
+            'right_table': 'zones',
+            'right_cols': ['zone_val'],
+            'mct_cols': ['zone_id'],
+            'left_on': 'zone_id',
+            'right_index': True}],
+        'aggregations': {'zone_val': 'max'},
+        'rename_cols': {'zone_val': 'zone_val_max'}}
+    
+    df_in = mct.to_frame().copy()
+    df_out = m.perform_mct_intx_ops(mct).to_frame()
+    
+    assert mct.to_frame().equals(df_in)  # input table is not modified
+    assert len(df_out) == len(df_in)
+    assert df_out.index.names == df_in.index.names
+    assert set(df_out.columns) == set(df_in.columns) | {'zone_val_max'}
+
+
 def test_simulation_no_valid_choosers(m):
     """
     If there are no valid choosers after applying filters, simulation should exit.
