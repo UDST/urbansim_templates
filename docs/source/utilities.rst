@@ -15,6 +15,7 @@ Column output tools API
 -----------------------
 
 .. automodule:: urbansim_templates.shared
+   :no-index:
    :members: OutputColumnSettings, register_column
 
 
@@ -29,6 +30,7 @@ Other helper functions API
 --------------------------
 
 .. automodule:: urbansim_templates.utils
+   :no-index:
    :members: all_cols, cols_in_expression, get_data, get_df, trim_cols, to_list, update_column, update_name
 
 
@@ -36,6 +38,7 @@ Spec validation API
 -------------------
 
 .. automodule:: urbansim_templates.utils
+   :no-index:
    :members: validate_template
 
 
@@ -43,4 +46,5 @@ Version management API
 ----------------------
 
 .. automodule:: urbansim_templates.utils
+   :no-index:
    :members: parse_version, version_greater_or_equal

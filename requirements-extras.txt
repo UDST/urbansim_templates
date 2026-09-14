@@ -1,3 +1,0 @@
-# additional requirements for less-used templates
-
-pylogit >= 0.2

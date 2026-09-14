@@ -8,7 +8,7 @@ UrbanSim Templates is a Python library that provides building blocks for Orca-ba
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions. The package was developed to make it easier to set up new simulation models — model step templates reduce the need for custom code and make settings more portable between models.
 
-UrbanSim Templates is `hosted on Github <https://github.com/udst/urbansim_templates>`__ with a BSD 3-Clause open source license. The code repository includes some material not found in this documentation: a `change log <https://github.com/UDST/urbansim_templates/blob/master/CHANGELOG.md>`__, a `contributor's guide <http://>`__, and instructions for `running the tests <https://github.com/UDST/urbansim_templates/blob/master/tests/README.md>`__, `updating the documentation <http://>`__, and `creating a new release <http://>`__.
+UrbanSim Templates is `hosted on Github <https://github.com/udst/urbansim_templates>`__ with a BSD 3-Clause open source license. The code repository includes some material not found in this documentation: a `change log <https://github.com/UDST/urbansim_templates/blob/dev/CHANGELOG.md>`__, a `contributor's guide <https://github.com/UDST/urbansim_templates/blob/dev/CONTRIBUTING.md>`__, and instructions for `running the tests <https://github.com/UDST/urbansim_templates/blob/dev/tests/README.md>`__, `updating the documentation <https://github.com/UDST/urbansim_templates/blob/dev/docs/README.md>`__, and `creating a new release <https://github.com/UDST/urbansim_templates/blob/dev/CONTRIBUTING.md>`__.
 
 Another useful resource is the `issues <https://github.com/UDST/urbansim_templates/issues?utf8=✓&q=is%3Aissue>`__ and `pull requests <https://github.com/UDST/urbansim_templates/pulls?q=is%3Apr>`__ on Github, which include detailed feature proposals and other discussions.
 
@@ -18,7 +18,7 @@ UrbanSim Templates was created in 2018 by Sam Maurer (maurer@urbansim.com), who 
 Installation
 ------------
 
-UrbanSim Templates is currently tested with Python versions 3.6, 3.7, 3.8, and 3.9. 
+UrbanSim Templates requires Python 3.10 or later, and is tested on Linux, macOS, and Windows.
     
 Production releases
 ~~~~~~~~~~~~~~~~~~~
@@ -33,9 +33,9 @@ UrbanSim Templates can be installed using the Pip or Conda package managers.
 
     conda install urbansim_templates --channel conda-forge
 
-Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus two other UDST libraries: `Orca <http://udst.github.io/orca>`__ and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
+Dependencies include `NumPy <http://numpy.org>`__, `Pandas <http://pandas.pydata.org>`__, and `Statsmodels <http://statsmodels.org>`__, plus three other UDST libraries: `Orca <http://udst.github.io/orca>`__, `UrbanSim <http://github.com/udst/urbansim>`__, and `ChoiceModels <http://github.com/udst/choicemodels>`__. These will be included automatically when you install UrbanSim Templates. 
 
-Certain less-commonly-used templates require additional packages, including `Scikit-learn <http://scikit-learn.org>`__. Install these separately when using the associated templates.
+The small multinomial logit template currently also requires `PyLogit <https://github.com/timothyb0912/pylogit>`__, whose current release does not import on Python 3.10 or later; this dependency is in the process of being removed.
 
 When new production releases of UrbanSim Templates come out, you can upgrade like this:
 
@@ -55,8 +55,8 @@ Developer pre-releases of UrbanSim Templates can be installed using the Github U
 
 .. code-block:: python
 
-    pip install git+git://github.com/udst/choicemodels.git
-    pip install git+git://github.com/udst/urbansim_templates.git
+    pip install git+https://github.com/udst/choicemodels.git
+    pip install git+https://github.com/udst/urbansim_templates.git
 
 You can use the same command to upgrade.
 
@@ -64,13 +64,13 @@ You can use the same command to upgrade.
 Cloning the repository
 ~~~~~~~~~~~~~~~~~~~~~~
 
-If you'll be modifying the code, you can install UrbanSim Templates by cloning the Github repository:
+If you'll be modifying the code, you can install UrbanSim Templates by cloning the Github repository. The dev branch contains the latest developer release.
 
 .. code-block:: python
 
     git clone https://github.com/udst/urbansim_templates.git
     cd urbansim_templates
-    python setup.py develop
+    pip install -e .
 
 Update it with ``git pull``.
 
