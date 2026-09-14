@@ -2,6 +2,21 @@
 
 ## 0.3 (not yet released)
 
+#### 0.3.dev1 (2026-09-14)
+
+- `SmallMultinomialLogitStep` now saves the fitted coefficients and their names in the
+  YAML configuration file, instead of pickling the complete estimator object; saved
+  models are restored as ChoiceModels results objects and no longer depend on the
+  package layout or the NumPy and Pandas versions used when they were fitted (#131)
+- adds `legacy_pylogit.convert_legacy_pylogit_config()` to migrate configurations
+  saved by earlier versions, which stored a pickled PyLogit estimator, without
+  installing PyLogit; the conversion writes new files and leaves the originals unchanged
+- requires ChoiceModels 0.3 or later, which no longer depends on PyLogit
+- includes the fixes from #109 (interaction terms passed to `run()` as a single table),
+  #128 (filter columns shared by choosers and alternatives in `fit()`), and #130
+  (`mct_intx_ops` when `mct_cols` is omitted, and user columns ending in `_y`), which were
+  merged without changelog entries
+
 #### 0.3.dev0 (2026-09-09)
 
 - requires Python 3.10 or later, with NumPy 1.21, Pandas 1.5, Orca 1.8, UrbanSim 3.2,

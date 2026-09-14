@@ -24,7 +24,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "choicemodels>=0.2.2",
+    "choicemodels>=0.3",
     "numpy>=1.21",
     "orca>=1.8",
     "pandas>=1.5,<4",

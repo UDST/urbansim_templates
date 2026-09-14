@@ -63,13 +63,6 @@ jobs:
       - name: Install package and test dependencies
         run: python -m pip install ".[test]" ${{ matrix.pip-args }}
 
-      # The published ChoiceModels release (0.2.2) imports PyLogit at module
-      # load and cannot be imported on Python 3.10 or later. Install the
-      # development version from the dev branch (pinned to the UDST/choicemodels#82
-      # squash commit) until ChoiceModels 0.3 is published, then remove this step.
-      - name: Install ChoiceModels development version
-        run: python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
-
       - name: Show dependency versions
         run: python -c "import numpy, pandas, orca, urbansim, choicemodels; print('numpy', numpy.__version__); print('pandas', pandas.__version__); print('orca', orca.__version__); print('urbansim', urbansim.__version__); print('choicemodels', choicemodels.__version__)"
 
@@ -122,11 +115,9 @@ jobs:
           python -m build
           python -m twine check --strict dist/*
 
-      # Temporary ChoiceModels install as in the test jobs
       - name: Install and import wheel
         run: |
           python -m pip install dist/*.whl
-          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
           python -m pip check
           cd /tmp
           python -c "import urbansim_templates; print(urbansim_templates.__version__)"
@@ -147,11 +138,9 @@ jobs:
           cache: pip
           cache-dependency-path: pyproject.toml
 
-      # autodoc imports the package, which needs an importable ChoiceModels
+      # autodoc imports the package, which needs the UrbanSim branch install as above
       - name: Install package and documentation tools
-        run: |
-          python -m pip install ".[docs]" "urbansim @ git+https://github.com/UDST/urbansim@main"
-          python -m pip install --no-deps "choicemodels @ git+https://github.com/UDST/choicemodels@d03f134"
+        run: python -m pip install ".[docs]" "urbansim @ git+https://github.com/UDST/urbansim@main"
 
       - name: Build documentation (warnings are errors)
         run: python -m sphinx -E -W --keep-going -b html docs/source docs/build/html

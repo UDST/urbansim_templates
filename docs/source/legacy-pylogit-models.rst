@@ -30,3 +30,10 @@ Pickle is not a safe interchange format. Convert only files from a trusted
 source. Review the converted coefficients and exercise the model in simulation
 before replacing the original configuration. An unexpected object type causes
 the conversion to stop rather than broadening what the unpickler accepts.
+
+
+API reference
+-------------
+
+.. automodule:: urbansim_templates.legacy_pylogit
+   :members: convert_legacy_pylogit_config, load_legacy_pylogit_model
