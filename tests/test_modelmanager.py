@@ -5,7 +5,7 @@ import orca
 import pytest
 
 from urbansim_templates import modelmanager, utils
-from urbansim_templates.data import LoadTable
+from urbansim_templates.data import ColumnFromExpression, LoadTable
 
 
 @pytest.fixture
@@ -67,6 +67,32 @@ def test_auto_name_survives_reload(orca_session, ticking_clock):
     
     modelmanager.remove_step(name)
     assert modelmanager.list_steps() == []
+
+
+def test_auto_name_with_meta_settings(orca_session, ticking_clock):
+    """
+    Same checks for a template that keeps its name in a settings object (step.meta).
+    
+    """
+    c = ColumnFromExpression()
+    c.meta.autorun = False
+    c.data.table = 'obs'
+    c.data.expression = 'a + b'
+    c.output.column_name = 'c'
+    assert c.meta.name is None
+    
+    modelmanager.register(c)
+    name = c.meta.name
+    assert name == 'ColumnFromExpression-20260101-120000'
+    
+    modelmanager.register(c)
+    assert c.meta.name == name
+    
+    modelmanager.initialize()
+    assert [s['name'] for s in modelmanager.list_steps()] == [name]
+    assert modelmanager.get_step(name).meta.name == name
+    
+    modelmanager.remove_step(name)
 
 
 def test_custom_name_kept(orca_session, ticking_clock):
