@@ -42,14 +42,6 @@ def test_small_mnl(orca_session):
     Test that the code runs, and that the model_expression is always available.
 
     """
-    # This template estimates through the PyLogit-format engine in ChoiceModels, which
-    # requires PyLogit until UDST/choicemodels#79 is resolved. PyLogit's current release
-    # does not import on Python 3.10 or later.
-    try:
-        import pylogit  # noqa: F401
-    except ImportError:
-        pytest.skip('PyLogit is not importable in this environment')
-
     modelmanager.initialize()
 
     m = SmallMultinomialLogitStep()
@@ -81,4 +73,26 @@ def test_small_mnl(orca_session):
     
     print(m.model_expression)
     
+    # The restored step predicts from the saved coefficients, without the estimator
+    assert m.model.get_raw_results() is None
+    assert len(m.model.fitted_parameters) == 6
+    assert len(m.fitted_parameter_names) == 6
+    m.out_column = 'simulated_choice_2'
+    m.run()
+    assert orca.get_table('households').to_frame()['simulated_choice_2'].isin([0, 1, 2]).all()
+    
     modelmanager.remove_step('small-mnl-test')
+
+
+def test_from_dict_checks_coefficient_count():
+    d = SmallMultinomialLogitStep(
+            model_expression=OrderedDict([('intercept', [1, 2]), ('a', [[0, 1, 2]])]),
+            choice_column='choice').to_dict()
+    d['fitted_parameters'] = [0.1, 0.2]  # spec implies three coefficients
+    
+    with pytest.raises(ValueError, match='number of coefficients'):
+        SmallMultinomialLogitStep.from_dict(d)
+    
+    d['fitted_parameters'] = [0.1, 0.2, 0.3]
+    m = SmallMultinomialLogitStep.from_dict(d)
+    assert m.model.fitted_parameters == [0.1, 0.2, 0.3]

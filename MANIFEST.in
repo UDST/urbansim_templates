@@ -3,4 +3,5 @@
 include CHANGELOG.md
 include LICENSE.txt
 recursive-include tests *.py *.ini *.md
+recursive-include tests/fixtures *.pkl *.yaml
 prune tests/.pytest_cache

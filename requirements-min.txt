@@ -10,6 +10,7 @@
 # an Orca dependency and is pinned so the lower-bound environment stays
 # reproducible.
 
+choicemodels == 0.3
 numpy == 1.21.*
 orca == 1.8
 pandas == 1.5.*
