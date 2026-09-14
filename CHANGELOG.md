@@ -2,6 +2,15 @@
 
 ## 0.3 (not yet released)
 
+#### 0.3.dev2 (2026-09-14)
+
+- fixes `modelmanager.register()` replacing an automatically generated step name (for
+  example `LoadTable-20260914-221006`) with a new timestamp: steps reloaded from disk by
+  `modelmanager.initialize()` could end up with a name that no longer matched their YAML
+  file, and a step registered right after fitting could get a different name from the
+  one just reported. A name is now generated only when the step has none; the `fit()`
+  methods still refresh automatically generated names
+
 #### 0.3.dev1 (2026-09-14)
 
 - `SmallMultinomialLogitStep` now saves the fitted coefficients and their names in the
