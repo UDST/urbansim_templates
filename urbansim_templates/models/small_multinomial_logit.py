@@ -167,6 +167,11 @@ class SmallMultinomialLogitStep(TemplateStep):
                 estimation_engine='PyLogit',
                 observation_id_col='_obs_id',
                 alternative_id_col='_alt_id')
+            if (obj.model_expression is not None and
+                    len(fitted_parameters) != obj._get_param_count()):
+                raise ValueError(
+                    'fitted_parameters do not match the number of coefficients in '
+                    'model_expression')
             obj.fitted_parameter_names = d.get('fitted_parameter_names')
             if (obj.fitted_parameter_names is not None and
                     len(obj.fitted_parameter_names) != len(fitted_parameters)):
@@ -180,19 +185,6 @@ class SmallMultinomialLogitStep(TemplateStep):
                 if expected_names != obj.fitted_parameter_names:
                     raise ValueError(
                         'fitted_parameter_names do not match model_labels')
-        
-        if 'supplemental_objects' in d:
-            for item in filter(None, d['supplemental_objects']):
-                if (item['name'] == 'model-object'):
-                    legacy_model = item['content']
-                    obj.model = MultinomialLogitResults(
-                        model_expression=obj.model_expression,
-                        model_labels=obj.model_labels,
-                        fitted_parameters=legacy_model.params.tolist(),
-                        estimation_engine='PyLogit',
-                        observation_id_col='_obs_id',
-                        alternative_id_col='_alt_id')
-                    obj.fitted_parameter_names = legacy_model.params.index.tolist()
         
         return obj
 

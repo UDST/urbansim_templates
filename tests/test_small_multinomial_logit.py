@@ -82,3 +82,17 @@ def test_small_mnl(orca_session):
     assert orca.get_table('households').to_frame()['simulated_choice_2'].isin([0, 1, 2]).all()
     
     modelmanager.remove_step('small-mnl-test')
+
+
+def test_from_dict_checks_coefficient_count():
+    d = SmallMultinomialLogitStep(
+            model_expression=OrderedDict([('intercept', [1, 2]), ('a', [[0, 1, 2]])]),
+            choice_column='choice').to_dict()
+    d['fitted_parameters'] = [0.1, 0.2]  # spec implies three coefficients
+    
+    with pytest.raises(ValueError, match='number of coefficients'):
+        SmallMultinomialLogitStep.from_dict(d)
+    
+    d['fitted_parameters'] = [0.1, 0.2, 0.3]
+    m = SmallMultinomialLogitStep.from_dict(d)
+    assert m.model.fitted_parameters == [0.1, 0.2, 0.3]

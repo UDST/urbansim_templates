@@ -1,7 +1,5 @@
 """Conversion of trusted historical PyLogit model pickles."""
 
-from __future__ import print_function
-
 import os
 import pickle
 
@@ -61,7 +59,7 @@ class RestrictedPyLogitUnpickler(pickle.Unpickler):
         if (module, name) not in _ALLOWED_GLOBALS:
             raise pickle.UnpicklingError(
                 "Unsupported object in legacy model: {}.{}".format(module, name))
-        return super(RestrictedPyLogitUnpickler, self).find_class(module, name)
+        return super().find_class(module, name)
 
 
 def load_legacy_pylogit_model(path):
@@ -123,7 +121,7 @@ def convert_legacy_pylogit_config(config_path, pickle_path=None,
         os.makedirs(output_dir)
     output_path = os.path.join(output_dir, os.path.basename(config_path))
     if os.path.exists(output_path):
-        raise IOError("Output already exists: {}".format(output_path))
+        raise FileExistsError("Output already exists: {}".format(output_path))
 
     yamlio.convert_to_yaml(document, output_path)
     return output_path

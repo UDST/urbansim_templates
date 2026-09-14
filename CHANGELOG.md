@@ -8,9 +8,12 @@
   YAML configuration file, instead of pickling the complete estimator object; saved
   models are restored as ChoiceModels results objects and no longer depend on the
   package layout or the NumPy and Pandas versions used when they were fitted (#131)
-- adds `legacy_pylogit.convert_legacy_pylogit_config()` to migrate configurations
-  saved by earlier versions, which stored a pickled PyLogit estimator, without
-  installing PyLogit; the conversion writes new files and leaves the originals unchanged
+- **small-MNL configurations saved by earlier versions must be converted before they
+  can be loaded**: they stored a pickled PyLogit estimator, which can no longer be
+  unpickled because PyLogit is not installed. `modelmanager.initialize()` now raises an
+  error pointing to `legacy_pylogit.convert_legacy_pylogit_config()`, which migrates a
+  saved configuration without installing PyLogit, writes new files, and leaves the
+  originals unchanged (see "Migrating saved PyLogit models" in the documentation)
 - requires ChoiceModels 0.3 or later, which no longer depends on PyLogit
 - includes the fixes from #109 (interaction terms passed to `run()` as a single table),
   #128 (filter columns shared by choosers and alternatives in `fit()`), and #130

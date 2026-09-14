@@ -77,7 +77,7 @@ def test_convert_writes_new_yaml_and_preserves_inputs(tmp_path):
     converted = yamlio.yaml_to_dict(str_or_buffer=output)
     saved = converted['saved_object']
 
-    assert output.endswith('converted/small-model.yaml')
+    assert Path(output) == tmp_path / 'converted' / 'small-model.yaml'
     assert saved['model_storage_version'] == 1
     assert saved['fitted_parameters'] == [0.25, -0.5, 1.75]
     assert saved['fitted_parameter_names'] == ['ASC 1', 'ASC 2', 'income']
@@ -85,7 +85,7 @@ def test_convert_writes_new_yaml_and_preserves_inputs(tmp_path):
     assert config_path.read_bytes() == original_yaml
     assert model_path.read_bytes() == original_pickle
 
-    with pytest.raises(IOError, match='Output already exists'):
+    with pytest.raises(FileExistsError, match='Output already exists'):
         convert_legacy_pylogit_config(str(config_path))
 
 
@@ -96,6 +96,14 @@ def test_rejects_unexpected_pickle_globals(tmp_path):
 
     with pytest.raises(pickle.UnpicklingError, match='Unsupported object'):
         load_legacy_pylogit_model(str(model_path))
+
+
+def test_unconverted_config_raises_with_pointer_to_converter():
+    # Without PyLogit installed, ModelManager cannot unpickle the estimator saved by
+    # earlier versions; the error should say how to convert the configuration
+    assert 'pylogit' not in sys.modules
+    with pytest.raises(ModuleNotFoundError, match='convert_legacy_pylogit_config'):
+        modelmanager.initialize(str(FIXTURES))
 
 
 def test_convert_genuine_pylogit_model_and_run(tmp_path):

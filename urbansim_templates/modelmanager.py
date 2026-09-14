@@ -129,7 +129,19 @@ def load_supplemental_object(step_name, name, content_type, required=True):
     """
     if (content_type == 'pickle'):
         with open(os.path.join(_disk_store, step_name+'-'+name+'.pkl'), 'rb') as f:
-            return pickle.load(f)
+            try:
+                return pickle.load(f)
+            except ModuleNotFoundError as e:
+                if e.name is not None and e.name.split('.')[0] == 'pylogit':
+                    raise ModuleNotFoundError(
+                        "The saved model step '{}' contains a pickled PyLogit estimator, "
+                        "which this version of UrbanSim Templates cannot load. Convert "
+                        "the saved configuration with "
+                        "urbansim_templates.legacy_pylogit.convert_legacy_pylogit_config() "
+                        "(see 'Migrating saved PyLogit models' in the documentation) and "
+                        "initialize ModelManager from the converted directory."
+                        .format(step_name), name='pylogit') from e
+                raise
     
 
 def register(step, save_to_disk=True):
