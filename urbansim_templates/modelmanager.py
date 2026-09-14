@@ -165,14 +165,20 @@ def register(step, save_to_disk=True):
     None
     
     """
-    # Currently supporting both step.name and step.meta.name
+    # Currently supporting both step.name and step.meta.name. A name is generated only
+    # if the step doesn't have one yet: update_name() would also replace an existing
+    # auto-generated name with a fresh timestamp, which is how fit() methods refresh
+    # the name, but here it would rename steps as they are reloaded from disk and
+    # leave them out of sync with their YAML files.
     if hasattr(step, 'meta'):
         # TO DO: move the name updating to CoreTemplateSettings?
-        step.meta.name = update_name(step.meta.template, step.meta.name)
+        if step.meta.name is None:
+            step.meta.name = update_name(step.meta.template)
         name = step.meta.name
     
     else:
-        step.name = update_name(step.template, step.name)
+        if step.name is None:
+            step.name = update_name(step.template)
         name = step.name
     
     if save_to_disk:
