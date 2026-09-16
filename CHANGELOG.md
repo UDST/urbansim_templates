@@ -1,41 +1,18 @@
 # UrbanSim Templates change log
 
-## 0.3 (not yet released)
+## 0.3rc1 (2026-09-16)
 
-#### 0.3.dev5 (2026-09-16)
+The first production release of UrbanSim Templates since 0.1.4 in February 2021. It
+modernizes the package for current Python and dependency versions, replaces the pickled
+PyLogit estimators in saved small-MNL models with portable parameter storage, and
+incorporates fixes contributed since 2020. It also includes the changes from the 0.2
+development releases of 2019 and 2020, listed below, which were never published as a
+production release.
 
-- fixes `utils.parse_version()` and `utils.version_greater_or_equal()` failing on version
-  strings with pre-release markers other than `dev`, such as `0.3rc1`, which made
-  ModelManager unable to load any saved step under a release-candidate version of the
-  package; both now follow the Python packaging standard for version strings, using the
-  `packaging` library (#57)
-
-#### 0.3.dev4 (2026-09-16)
-
-- releases are now built, verified, and published to PyPI by a GitHub Actions workflow
-  that runs when a release is published on GitHub, using Trusted Publishing with a
-  maintainer approval step; the contributor's guide describes the release process
-- `main` is now the integration branch; `dev` is retired
-
-#### 0.3.dev3 (2026-09-16)
-
-- requires UrbanSim 3.3 or later, the first UrbanSim release that runs on NumPy 2 and
-  Pandas 3; the NumPy, Pandas, Patsy, and Statsmodels floors are raised to match UrbanSim's
-  (NumPy 1.26, Pandas 2.2, Patsy 0.5.6, Statsmodels 0.14)
-- declares SciPy (1.10 or later) as a dependency; `BinaryLogitStep` imports it directly,
-  but it was previously installed only as a dependency of Statsmodels and UrbanSim
-
-#### 0.3.dev2 (2026-09-14)
-
-- fixes `modelmanager.register()` replacing an automatically generated step name (for
-  example `LoadTable-20260914-221006`) with a new timestamp: steps reloaded from disk by
-  `modelmanager.initialize()` could end up with a name that no longer matched their YAML
-  file, and a step registered right after fitting could get a different name from the
-  one just reported. A name is now generated only when the step has none; the `fit()`
-  methods still refresh automatically generated names
-
-#### 0.3.dev1 (2026-09-14)
-
+- supports Python 3.10 through 3.14, tested at the oldest and newest, with NumPy 1.26
+  through 2.x, Pandas 2.2 through 3.x, Patsy 0.5.6+, SciPy 1.10+, Statsmodels 0.14+,
+  Orca 1.8+, UrbanSim 3.3+, and ChoiceModels 0.3+; drops support for Python 3.9 and
+  earlier (#134, #136)
 - `SmallMultinomialLogitStep` now saves the fitted coefficients and their names in the
   YAML configuration file, instead of pickling the complete estimator object; saved
   models are restored as ChoiceModels results objects and no longer depend on the
@@ -45,29 +22,42 @@
   unpickled because PyLogit is not installed. `modelmanager.initialize()` now raises an
   error pointing to `legacy_pylogit.convert_legacy_pylogit_config()`, which migrates a
   saved configuration without installing PyLogit, writes new files, and leaves the
-  originals unchanged (see "Migrating saved PyLogit models" in the documentation)
-- requires ChoiceModels 0.3 or later, which no longer depends on PyLogit
-- includes the fixes from #109 (interaction terms passed to `run()` as a single table),
-  #128 (filter columns shared by choosers and alternatives in `fit()`), and #130
-  (`mct_intx_ops` when `mct_cols` is omitted, and user columns ending in `_y`), which were
-  merged without changelog entries
-
-#### 0.3.dev0 (2026-09-09)
-
-- requires Python 3.10 or later, with NumPy 1.21, Pandas 1.5, Orca 1.8, UrbanSim 3.2,
-  and Statsmodels 0.13 as the tested minimum versions
-- replaces a private Pandas function used to build long-format small-MNL tables, which
-  was removed in Pandas 3
-- moves package metadata to `pyproject.toml` and replaces the Travis CI configuration
-  with a GitHub Actions workflow that tests the minimum and current dependency
-  versions, checks code quality, validates the built distributions, and builds the
-  documentation
-- fixes an invalid escape sequence in `utils.cols_in_expression()` that raised a
-  SyntaxWarning on Python 3.12 and later
+  originals unchanged (see "Migrating saved PyLogit models" in the documentation) (#131)
 - adds an `mct_intx_ops` setting to `LargeMultinomialLogitStep` for interaction-term
   operations (merges, aggregations, renames, and `eval()` expressions) performed on the
-  merged choice table after alternatives are sampled during simulation; requires the
-  matching support in ChoiceModels (#126, merged in 2021 without a version bump)
+  merged choice table after alternatives are sampled during simulation (#126, merged in
+  2021 without a release); fixes these operations when `mct_cols` is omitted and when
+  user columns end in `_y` (#130)
+- fixes interaction terms passed to `LargeMultinomialLogitStep.run()` as a single table
+  (#109)
+- fixes `fit()` failing in the large MNL templates when a filter column is shared by the
+  choosers and alternatives tables (#128)
+- fixes `modelmanager.register()` replacing an automatically generated step name (for
+  example `LoadTable-20260914-221006`) with a new timestamp, which could leave steps
+  reloaded from disk with names that no longer matched their YAML files (#135)
+- fixes `utils.parse_version()` and `utils.version_greater_or_equal()` failing on version
+  strings with pre-release markers other than `dev`, such as `0.3rc1`, which made
+  ModelManager unable to load any saved step under a release-candidate version of the
+  package; both now follow the Python packaging standard for version strings, using the
+  `packaging` library (#139, closes #57)
+- replaces a private Pandas function used to build long-format small-MNL tables, which
+  was removed in Pandas 3, and fixes an invalid escape sequence in
+  `utils.cols_in_expression()` that raised a SyntaxWarning on Python 3.12 and later (#134)
+- declares SciPy and `packaging` as dependencies; `BinaryLogitStep` imports SciPy
+  directly, and the version helpers use `packaging`, but both were previously installed
+  only as dependencies of Statsmodels and UrbanSim (#136, #139)
+- moves package metadata to `pyproject.toml` and removes `setup.py`; ships the tests in
+  the source distribution (#134)
+- replaces the Travis CI configuration with GitHub Actions continuous integration that
+  tests the minimum and current dependency versions on Linux, macOS, and Windows, checks
+  code quality, validates the built distributions, and builds the documentation (#134);
+  releases are built, verified, and published to PyPI by a GitHub Actions workflow (#137)
+- documents the project's scope and status in the README (#133)
+- `main` is now the integration branch; `dev` is retired (#137)
+- thanks to Paul Waddell for the packaging, CI, and small-MNL storage work; to Max
+  Gardner for the interaction-term operations (#126) and the interaction-terms fix
+  (#109); to Juan Caicedo for the `mct_intx_ops` fixes (#130); and to Sol Tadeo for the
+  filter-column fix (#128)
 
 
 ## 0.2 (development releases only)
@@ -75,7 +65,7 @@
 #### 0.2.dev9 (2020-05-15)
 
 - fixes a bug in `BinaryLogitStep` simulation where the output is not updated correctly
-- adds a `resid` attribute to fitted `OLSRegressionStep` models, for diagnostics
+- adds a `residuals` attribute to fitted `OLSRegressionStep` models, for diagnostics
 
 #### 0.2.dev8 (2020-04-17)
 
@@ -120,6 +110,11 @@
 
 - adds first data i/o template: `io.TableFromDisk()`
 - adds support for `autorun` template property
+
+
+## 0.1.4 (2021-02-16)
+
+- patch to add a `residuals` attribute to fitted `OLSRegressionStep` models, from 0.2.dev9
 
 
 ## 0.1.3 (2019-07-15)
