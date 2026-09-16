@@ -49,12 +49,11 @@ When new production releases of UrbanSim Templates come out, you can upgrade lik
 Developer pre-releases
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Developer pre-releases of UrbanSim Templates can be installed using the Github URL. These versions sometimes require having a developer release of `ChoiceModels <http://github.com/udst/choicemodels>`__ as well. Information about the developer releases can be found in Github `pull requests <https://github.com/UDST/urbansim_templates/pulls?q=is%3Apr>`__.
+The latest developer version of UrbanSim Templates can be installed directly from the Github repository. Information about the changes since the last release can be found in the `change log <https://github.com/UDST/urbansim_templates/blob/dev/CHANGELOG.md>`__ and the merged `pull requests <https://github.com/UDST/urbansim_templates/pulls?q=is%3Apr>`__.
 
 .. code-block:: python
 
-    pip install git+https://github.com/udst/choicemodels.git
-    pip install git+https://github.com/udst/urbansim_templates.git
+    pip install git+https://github.com/UDST/urbansim_templates.git
 
 You can use the same command to upgrade.
 
