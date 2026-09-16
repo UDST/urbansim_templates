@@ -2,6 +2,12 @@
 
 ## 0.3 (not yet released)
 
+#### 0.3.dev3 (2026-09-16)
+
+- requires UrbanSim 3.3 or later, the first UrbanSim release that runs on NumPy 2 and
+  Pandas 3; the NumPy, Pandas, and Statsmodels floors are raised to match UrbanSim's
+  (NumPy 1.26, Pandas 2.2, Statsmodels 0.14)
+
 #### 0.3.dev2 (2026-09-14)
 
 - fixes `modelmanager.register()` replacing an automatically generated step name (for

@@ -10,7 +10,7 @@ UrbanSim Templates provides building blocks for Orca-based simulation models. It
 
 The library contains templates for common types of model steps, plus a tool called ModelManager that runs as an extension to the `Orca <https://udst.github.io/orca>`__ task orchestrator. ModelManager can register template-based model steps with the orchestrator, save them to disk, and automatically reload them for future sessions.
 
-v0.3.dev2, released September 14, 2026
+v0.3.dev3, released September 16, 2026
 
 
 Contents
