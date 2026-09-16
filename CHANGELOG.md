@@ -5,8 +5,10 @@
 #### 0.3.dev3 (2026-09-16)
 
 - requires UrbanSim 3.3 or later, the first UrbanSim release that runs on NumPy 2 and
-  Pandas 3; the NumPy, Pandas, and Statsmodels floors are raised to match UrbanSim's
-  (NumPy 1.26, Pandas 2.2, Statsmodels 0.14)
+  Pandas 3; the NumPy, Pandas, Patsy, and Statsmodels floors are raised to match UrbanSim's
+  (NumPy 1.26, Pandas 2.2, Patsy 0.5.6, Statsmodels 0.14)
+- declares SciPy (1.10 or later) as a dependency; `BinaryLogitStep` imports it directly,
+  but it was previously installed only as a dependency of Statsmodels and UrbanSim
 
 #### 0.3.dev2 (2026-09-14)
 

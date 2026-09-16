@@ -4,16 +4,17 @@
 #
 #   pip install ".[test]" -c requirements-min.txt
 #
-# The NumPy, Pandas, and Statsmodels floors match those of UrbanSim 3.3,
-# which is the oldest UrbanSim release that runs on current versions of
-# those libraries. tables is an Orca dependency and is pinned so the
-# lower-bound environment stays reproducible.
+# The NumPy, Pandas, Patsy, SciPy, and Statsmodels floors are those
+# declared by UrbanSim 3.3, the minimum supported UrbanSim. tables is an
+# Orca dependency and is pinned so the lower-bound environment stays
+# reproducible.
 
 choicemodels == 0.3
 numpy == 1.26.*
 orca == 1.8
 pandas == 2.2.*
-patsy == 0.5.*
+patsy == 0.5.6
+scipy == 1.10.*
 statsmodels == 0.14.*
 tables == 3.8.*
 urbansim == 3.3

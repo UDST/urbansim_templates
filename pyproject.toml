@@ -28,7 +28,8 @@ dependencies = [
     "numpy>=1.26",
     "orca>=1.8",
     "pandas>=2.2,<4",
-    "patsy>=0.5",
+    "patsy>=0.5.6",
+    "scipy>=1.10",
     "statsmodels>=0.14",
     "urbansim>=3.3",
 ]
