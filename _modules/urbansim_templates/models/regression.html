@@ -1,175 +1,100 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>urbansim_templates.models.regression &mdash; UrbanSim Templates 0.2.dev9 documentation</title>
-  
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>urbansim_templates.models.regression &mdash; UrbanSim Templates 0.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
 
   
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-
-    
-
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=b489f392"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="../../../index.html" class="icon icon-home"> UrbanSim Templates
           
-
-          
+          <a href="../../../index.html" class="icon icon-home">
+            UrbanSim Templates
           </a>
-
-          
-            
-            
-              <div class="version">
-                0.2.dev9
-              </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../modelmanager.html">ModelManager API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../model-steps.html">Model step template APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../legacy-pylogit-models.html">Migrating saved PyLogit models</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data-templates.html">Data management templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../utilities.html">Shared utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development guide</a></li>
 </ul>
 
-            
-          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">UrbanSim Templates</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>urbansim_templates.models.regression</li>
-    
-    
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">urbansim_templates.models.regression</li>
       <li class="wy-breadcrumbs-aside">
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   <h1>Source code for urbansim_templates.models.regression</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">print_function</span>
 
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt</span>
 
-<span class="kn">import</span> <span class="nn">orca</span>
-<span class="kn">from</span> <span class="nn">urbansim.models</span> <span class="kn">import</span> <span class="n">RegressionModel</span>
-<span class="kn">from</span> <span class="nn">urbansim.utils</span> <span class="kn">import</span> <span class="n">yamlio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">orca</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urbansim.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegressionModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">urbansim.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">yamlio</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">modelmanager</span>
-<span class="kn">from</span> <span class="nn">..utils</span> <span class="kn">import</span> <span class="n">get_data</span><span class="p">,</span> <span class="n">update_column</span>
-<span class="kn">from</span> <span class="nn">.shared</span> <span class="kn">import</span> <span class="n">TemplateStep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">modelmanager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_data</span><span class="p">,</span> <span class="n">update_column</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.shared</span><span class="w"> </span><span class="kn">import</span> <span class="n">TemplateStep</span>
 
 
-<div class="viewcode-block" id="OLSRegressionStep"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep">[docs]</a><span class="nd">@modelmanager</span><span class="o">.</span><span class="n">template</span>
-<span class="k">class</span> <span class="nc">OLSRegressionStep</span><span class="p">(</span><span class="n">TemplateStep</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="OLSRegressionStep">
+<a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep">[docs]</a>
+<span class="nd">@modelmanager</span><span class="o">.</span><span class="n">template</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OLSRegressionStep</span><span class="p">(</span><span class="n">TemplateStep</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    A class for building OLS (ordinary least squares) regression model steps. This extends </span>
 <span class="sd">    TemplateStep, where some common functionality is defined. Estimation and simulation</span>
 <span class="sd">    are handled by `urbansim.models.RegressionModel()`.</span>
@@ -193,7 +118,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    tables : str or list of str, optional</span>
 <span class="sd">        Name(s) of Orca tables to draw data from. The first table is the primary one. </span>
-<span class="sd">        Any additional tables need to have merge relationships (&quot;broadcasts&quot;) specified</span>
+<span class="sd">        Any additional tables need to have merge relationships ("broadcasts") specified</span>
 <span class="sd">        so that they can be merged unambiguously onto the first table. Among them, the </span>
 <span class="sd">        tables must contain all variables used in the model expression and filters. The</span>
 <span class="sd">        left-hand-side variable should be in the primary table. The `tables` parameter is </span>
@@ -227,8 +152,8 @@
 <span class="sd">        Element-wise transformation to apply to the predicted values, for example to</span>
 <span class="sd">        reverse a transformation of the left-hand-side variable in the model expression.</span>
 <span class="sd">        This should be provided as a string containing a function name. Supports anything</span>
-<span class="sd">        from NumPy or Python&#39;s built-in math library, for example &#39;np.exp&#39; or</span>
-<span class="sd">        &#39;math.floor&#39;. Replaces the `ytransform` argument in UrbanSim.</span>
+<span class="sd">        from NumPy or Python's built-in math library, for example 'np.exp' or</span>
+<span class="sd">        'math.floor'. Replaces the `ytransform` argument in UrbanSim.</span>
 <span class="sd">    </span>
 <span class="sd">    out_filters : str or list of str, optional</span>
 <span class="sd">        Filters to apply to the data before simulation. If not provided, no filters will</span>
@@ -241,8 +166,8 @@
 <span class="sd">    tags : list of str, optional</span>
 <span class="sd">        Tags, passed to ModelManager.</span>
 <span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_expression</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_tables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">out_column</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_transform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[]):</span>
         
         <span class="c1"># Parent class can initialize the standard parameters</span>
@@ -258,9 +183,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
 
     
-<div class="viewcode-block" id="OLSRegressionStep.from_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="OLSRegressionStep.from_dict">
+<a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create an object instance from a saved dictionary representation.</span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -271,47 +198,53 @@
 <span class="sd">        -------</span>
 <span class="sd">        OLSRegressionStep</span>
 <span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># Pass values from the dictionary to the __init__() method</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;tables&#39;</span><span class="p">],</span> <span class="n">model_expression</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;model_expression&#39;</span><span class="p">],</span> 
-                <span class="n">filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">],</span> <span class="n">out_tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_tables&#39;</span><span class="p">],</span> 
-                <span class="n">out_column</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_column&#39;</span><span class="p">],</span> <span class="n">out_transform</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_transform&#39;</span><span class="p">],</span>
-                <span class="n">out_filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;out_filters&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">tags</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">])</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'tables'</span><span class="p">],</span> <span class="n">model_expression</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'model_expression'</span><span class="p">],</span> 
+                <span class="n">filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'filters'</span><span class="p">],</span> <span class="n">out_tables</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'out_tables'</span><span class="p">],</span> 
+                <span class="n">out_column</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'out_column'</span><span class="p">],</span> <span class="n">out_transform</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'out_transform'</span><span class="p">],</span>
+                <span class="n">out_filters</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'out_filters'</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'name'</span><span class="p">],</span> <span class="n">tags</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">'tags'</span><span class="p">])</span>
 
-        <span class="n">obj</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;summary_table&#39;</span><span class="p">]</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">fitted_parameters</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;fitted_parameters&#39;</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">'summary_table'</span><span class="p">]</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">fitted_parameters</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">'fitted_parameters'</span><span class="p">]</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
         
         <span class="c1"># Unpack the urbansim.models.RegressionModel() sub-object and resuscitate it</span>
-        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">model_config</span> <span class="o">=</span> <span class="n">yamlio</span><span class="o">.</span><span class="n">convert_to_yaml</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">'model'</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model_config</span> <span class="o">=</span> <span class="n">yamlio</span><span class="o">.</span><span class="n">convert_to_yaml</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">'model'</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RegressionModel</span><span class="o">.</span><span class="n">from_yaml</span><span class="p">(</span><span class="n">model_config</span><span class="p">)</span>
         
         <span class="k">return</span> <span class="n">obj</span></div>
+
         
     
-<div class="viewcode-block" id="OLSRegressionStep.to_dict"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="OLSRegressionStep.to_dict">
+<a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Create a dictionary representation of the object.</span>
 <span class="sd">        </span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        dict</span>
 <span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">TemplateStep</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         
         <span class="c1"># Add parameters not in parent class</span>
         <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
-            <span class="s1">&#39;summary_table&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span><span class="p">,</span>
-            <span class="s1">&#39;fitted_parameters&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_parameters</span><span class="p">,</span>
-            <span class="s1">&#39;model&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="s1">'summary_table'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span><span class="p">,</span>
+            <span class="s1">'fitted_parameters'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted_parameters</span><span class="p">,</span>
+            <span class="s1">'model'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">})</span>
         <span class="k">return</span> <span class="n">d</span></div>
+
         
         
-<div class="viewcode-block" id="OLSRegressionStep.fit"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="OLSRegressionStep.fit">
+<a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Fit the model; save and report results.</span>
 <span class="sd">        </span>
 <span class="sd">        This currently uses the `RegressionModel` class from core UrbanSim. We save the </span>
@@ -322,7 +255,7 @@
 <span class="sd">        `m.model.model_fit.summary().as_latex()`. This may change in the future if we </span>
 <span class="sd">        refactor the template to use StatsModels directly.</span>
 <span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">RegressionModel</span><span class="p">(</span><span class="n">model_expression</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_expression</span><span class="p">,</span>
                 <span class="n">fit_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span> <span class="n">predict_filters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span><span class="p">,</span>
                 <span class="n">ytransform</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -337,16 +270,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">summary</span><span class="p">())</span>
         <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary_table</span><span class="p">)</span>
         
-        <span class="c1"># We don&#39;t strictly need to save the fitted parameters, because they are also</span>
+        <span class="c1"># We don't strictly need to save the fitted parameters, because they are also</span>
         <span class="c1"># contained in the urbansim.models.RegressionModel() sub-object. But maintaining</span>
         <span class="c1"># a parallel data structure to other templates will make it easier to refactor the</span>
         <span class="c1"># code later on to not rely on RegressionModel any more. </span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">fitted_parameters</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">residuals</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">resid</span></div>
+
         
-<div class="viewcode-block" id="OLSRegressionStep.run"><a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="OLSRegressionStep.run">
+<a class="viewcode-back" href="../../../model-steps.html#urbansim_templates.models.OLSRegressionStep.run">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Run the model step: calculate predicted values, transform them as specified, and </span>
 <span class="sd">        use them to update a column.</span>
 <span class="sd">        </span>
@@ -354,7 +290,7 @@
 <span class="sd">        diagnostic use (`predicted_values` with type pd.Series). The post-transformation </span>
 <span class="sd">        predicted values are written to Orca.</span>
 <span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_tables</span><span class="p">,</span>
                       <span class="n">fallback_tables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">,</span>
                       <span class="n">filters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_filters</span><span class="p">,</span>
@@ -371,47 +307,37 @@
 
         <span class="n">update_column</span><span class="p">(</span><span class="n">table</span> <span class="o">=</span> <span class="n">tabname</span><span class="p">,</span>
                       <span class="n">column</span> <span class="o">=</span> <span class="n">colname</span><span class="p">,</span>
-                      <span class="n">data</span> <span class="o">=</span> <span class="n">values</span><span class="p">)</span>        </div></div>
+                      <span class="n">data</span> <span class="o">=</span> <span class="n">values</span><span class="p">)</span>        </div>
+</div>
+
 
 </pre></div>
 
            </div>
-           
           </div>
           <footer>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &copy; Copyright 2021, UDST
-
-    </p>
+    <p>&#169; Copyright 2018-2026, UDST.</p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
