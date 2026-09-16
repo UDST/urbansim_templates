@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'UrbanSim Templates'
-copyright = '2021, UDST'
+copyright = '2018-2026, UDST'
 author = 'UDST'
 
 # The version info for the project you're documenting, acts as replacement for

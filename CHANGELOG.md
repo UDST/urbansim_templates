@@ -2,6 +2,13 @@
 
 ## 0.3 (not yet released)
 
+#### 0.3.dev4 (2026-09-16)
+
+- releases are now built, verified, and published to PyPI by a GitHub Actions workflow
+  that runs when a release is published on GitHub, using Trusted Publishing with a
+  maintainer approval step; the contributor's guide describes the release process
+- `main` is now the integration branch; `dev` is retired
+
 #### 0.3.dev3 (2026-09-16)
 
 - requires UrbanSim 3.3 or later, the first UrbanSim release that runs on NumPy 2 and
