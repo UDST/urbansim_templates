@@ -1,6 +1,6 @@
 # UrbanSim Templates change log
 
-## 0.3rc1 (2026-09-16)
+## 0.3 (2026-09-16)
 
 The first production release of UrbanSim Templates since 0.1.4 in February 2021. It
 modernizes the package for current Python and dependency versions, replaces the pickled
