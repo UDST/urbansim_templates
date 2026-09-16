@@ -7,11 +7,12 @@
 # The NumPy, Pandas, Patsy, SciPy, and Statsmodels floors are those
 # declared by UrbanSim 3.3, the minimum supported UrbanSim. tables is an
 # Orca dependency and is pinned so the lower-bound environment stays
-# reproducible.
+# reproducible. The packaging floor is the one declared by Statsmodels 0.14.
 
 choicemodels == 0.3
 numpy == 1.26.*
 orca == 1.8
+packaging == 21.3
 pandas == 2.2.*
 patsy == 0.5.6
 scipy == 1.10.*

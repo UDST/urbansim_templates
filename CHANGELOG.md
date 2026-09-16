@@ -2,6 +2,14 @@
 
 ## 0.3 (not yet released)
 
+#### 0.3.dev5 (2026-09-16)
+
+- fixes `utils.parse_version()` and `utils.version_greater_or_equal()` failing on version
+  strings with pre-release markers other than `dev`, such as `0.3rc1`, which made
+  ModelManager unable to load any saved step under a release-candidate version of the
+  package; both now follow the Python packaging standard for version strings, using the
+  `packaging` library (#57)
+
 #### 0.3.dev4 (2026-09-16)
 
 - releases are now built, verified, and published to PyPI by a GitHub Actions workflow
